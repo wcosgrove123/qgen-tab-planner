@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+
+# IDE / OS specific
+.idea/
+.vscode/
+*.DS_Store
+
+# Generated output files (optional, but recommended)
+# It's better to generate these from source files.
+*.xlsx
+*.docx

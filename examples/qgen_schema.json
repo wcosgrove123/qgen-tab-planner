@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qgen.local/schema/qgen_schema.json",
+  "title": "Q-Gen Survey Project",
+  "type": "object",
+  "required": [
+    "project",
+    "questions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "client": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "globals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default_base_verbiage": {
+          "type": "string",
+          "default": "Total (qualified respondents)"
+        },
+        "default_base_definition": {
+          "type": "string",
+          "default": ""
+        },
+        "default_banners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/bannerPoint"
+          }
+        },
+        "scale_buckets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "5pt": {
+              "$ref": "#/$defs/scaleBuckets"
+            },
+            "7pt": {
+              "$ref": "#/$defs/scaleBuckets"
+            },
+            "10pt": {
+              "$ref": "#/$defs/scaleBuckets"
+            }
+          }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/question"
+      }
+    }
+  },
+  "$defs": {
+    "bannerPoint": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "definition": {
+          "type": "string",
+          "description": "Base logic or filter; simple expression language, e.g., S3 in [18..34]"
+        },
+        "order": {
+          "type": "integer"
+        }
+      }
+    },
+    "scaleBuckets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "TB": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "T2B": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "B2B": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "BB": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "Mean": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "required": [
+        "code",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string"
+        },
+        "terminate": {
+          "type": "boolean",
+          "default": false
+        },
+        "exclusive": {
+          "type": "boolean",
+          "default": false
+        },
+        "anchor": {
+          "type": "boolean",
+          "default": false
+        },
+        "randomize_group": {
+          "type": "string",
+          "description": "Options with same token are shuffled as a block"
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "baseSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "verbiage": {
+          "type": "string"
+        },
+        "definition": {
+          "type": "string",
+          "description": "Expression language selection for base; e.g., 'S1 in [1]' or 'S3 between 18 and 60'"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "derivedRow": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "rule"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Row key, e.g., Q5_T2B"
+        },
+        "label": {
+          "type": "string",
+          "description": "Row label for export, e.g., 'Q5 T2B Summary'"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Computation rule, e.g., 'T2B by statement' or 'mean'"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "likertPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "single_statement",
+            "dual_statement",
+            "multi_statement"
+          ],
+          "description": "Matches Wil's 3 Likert categories"
+        },
+        "scale_points": {
+          "type": "integer",
+          "enum": [
+            5,
+            7,
+            10
+          ]
+        },
+        "scale_type": {
+          "type": "string",
+          "enum": [
+            "numeric",
+            "sentiment"
+          ]
+        },
+        "net_column_text": {
+          "type": "string",
+          "default": "Net: T2B, B2B"
+        },
+        "summary_rows_for_multi": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "TB",
+              "T2B",
+              "B2B",
+              "BB",
+              "Mean"
+            ]
+          },
+          "default": [
+            "T2B",
+            "B2B",
+            "TB",
+            "BB",
+            "Mean"
+          ]
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[SQq]\\d+[a-z]?(?:_[A-Za-z0-9]+)?$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "single",
+            "multi",
+            "numeric",
+            "open",
+            "grid_single",
+            "grid_multi",
+            "likert_single",
+            "likert_dual",
+            "likert_multi"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "special_verbiage": {
+          "type": "string",
+          "description": "Short handle for tab row"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "routing": {
+          "type": "string",
+          "description": "Skip/display logic, e.g., 'ASK IF S1==1'"
+        },
+        "piping": {
+          "type": "string"
+        },
+        "randomize": {
+          "type": "boolean",
+          "default": false
+        },
+        "base": {
+          "$ref": "#/$defs/baseSpec"
+        },
+        "banners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/bannerPoint"
+          }
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          }
+        },
+        "scale": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "points": {
+              "type": "integer",
+              "enum": [
+                5,
+                7,
+                10
+              ]
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 2
+            },
+            "buckets": {
+              "$ref": "#/$defs/scaleBuckets"
+            }
+          }
+        },
+        "statements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "For grids/likerts with multiple statements"
+        },
+        "likert": {
+          "$ref": "#/$defs/likertPolicy"
+        },
+        "exports": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tab_plan": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "nets_text": {
+                  "type": "string",
+                  "description": "What to print in the Nets column for the base row"
+                },
+                "additional_instructions": {
+                  "type": "string"
+                }
+              }
+            },
+            "questionnaire": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "show_option_codes": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "style_class": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "derived_rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/derivedRow"
+          }
+        },
+        "numeric": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "units": {
+              "type": "string"
+            },
+            "bands": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "label",
+                  "min",
+                  "max"
+                ],
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "min": {
+                    "type": "number"
+                  },
+                  "max": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "report_mean": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "single"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "options"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "multi"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "options"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "grid_single",
+                  "grid_multi",
+                  "likert_dual",
+                  "likert_multi"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "statements"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "likert_single",
+                  "likert_dual",
+                  "likert_multi"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "scale",
+              "likert"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "numeric"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "numeric"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

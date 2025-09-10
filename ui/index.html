@@ -1,0 +1,1454 @@
+<!doctype html>
+<html lang="en" data-theme="cue-light">
+<head>
+  <meta charset="utf-8" />
+  <title>Q-Gen -- Questionnaire & Tab Plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* =========================================
+      BRAND PALETTE (base, stable across themes)
+      ========================================= */
+    :root{
+      --brand-primary:   #212161;  /* deep navy */
+      --brand-secondary: #F2B800;  /* gold */
+      --brand-yellow:    #F4E412;
+      --brand-blue-1:    #3F6AB7;
+      --brand-blue-2:    #335899;
+
+      --brand-accent-1:  #A7B5DB;  /* soft periwinkle */
+      --brand-accent-2:  #8197D0;
+      --brand-accent-3:  #E3EAF7;  /* light panel */
+      --danger:          #C62828;
+    }
+
+    /* =========================
+      THEMES (tokens by role)
+      ========================= */
+
+    /* Cue Light (DEFAULT) */
+    :root[data-theme="cue-light"]{
+      --accent:       var(--brand-primary);
+      --accent-weak:  #3b3b7d;
+
+      --cta:          var(--brand-secondary);
+      --cta-text:     #1a1a1a;
+
+      /* layered surfaces (distant → near) */
+      --bg:           #EEF2FB;   /* canvas */
+      --surface-3:    #F1F4FB;   /* subtle elevation */
+      --surface-2:    #F6F8FD;   /* header / rail */
+      --surface-1:    #FFFFFF;   /* cards / inputs */
+
+      --fg:           #0F172A;
+      --muted:        #637189;
+      --line:         #D9E0EF;
+      --ring:         rgba(51,88,153,.35);
+      --shadow:       0 8px 24px rgba(15, 23, 42, .06);
+    }
+
+    /* Cue Dark (refined, cohesive) */
+    :root[data-theme="cue-dark"]{
+      --accent:       #A7B5DB;
+      --accent-weak:  #8ea1da;
+
+      --cta:          var(--brand-secondary);
+      --cta-text:     #101010;
+
+      --bg:           #0A0F24;   /* canvas */
+      --surface-3:    #101631;   /* distant */
+      --surface-2:    #131A35;   /* header / rail */
+      --surface-1:    #151F41;   /* cards / inputs */
+
+      --fg:           #E7ECFF;
+      --muted:        #A8B2CC;
+      --line:         rgba(231,236,255,.10);
+      --ring:         rgba(167,181,219,.45);
+      --shadow:       0 10px 28px rgba(0,0,0,.35);
+    }
+
+    /* Cue Gold (light neutrals; gold CTAs) */
+    :root[data-theme="cue-gold"]{
+      --accent:       var(--brand-primary);
+      --accent-weak:  #3b3b7d;
+
+      --cta:          var(--brand-secondary);
+      --cta-text:     #1a1a1a;
+
+      --bg:           #EEF2FB;
+      --surface-3:    #F1F4FB;
+      --surface-2:    #F6F8FD;
+      --surface-1:    #FFFFFF;
+
+      --fg:           #0F172A;
+      --muted:        #637189;
+      --line:         #D9E0EF;
+      --ring:         rgba(51,88,153,.35);
+      --shadow:       0 8px 24px rgba(15, 23, 42, .06);
+    }
+
+    /* =========================
+      GLOBAL / LAYOUT
+      ========================= */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    body{
+      margin:0;
+      font:14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--fg);
+      background:var(--bg);
+      display:flex;
+      flex-direction:column;
+    }
+
+    header{
+      background:var(--surface-2);
+      border-bottom:1px solid var(--line);
+      padding:12px 16px;
+      display:flex; align-items:center; gap:16px; flex-shrink:0;
+      box-shadow: var(--shadow);
+    }
+    header .logo{ font-size:20px; font-weight:700; }
+    header .project-inputs{ display:flex; gap:8px; align-items:center; }
+    header .project-inputs input{ padding:6px 10px; width:auto; }
+    header .actions{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+    /* top nav */
+    nav.app-nav{ background:var(--surface-2); border-bottom:1px solid var(--line); padding:6px 12px; display:flex; gap:8px; align-items:center; }
+    .nav-btn{ padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:var(--surface-1); cursor:pointer; color:var(--muted); }
+    .nav-btn.active{ color:var(--fg); box-shadow:0 0 0 2px var(--ring); }
+
+    /* grid */
+    .app-grid{
+      display:grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap:16px;
+      padding:16px;
+      flex-grow:1;
+      overflow:hidden;
+    }
+    .left-panel, .right-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; overflow-y:auto; overflow-x:hidden; }
+    .left-panel{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow: var(--shadow); }
+    .right-panel-content{ flex-grow:1; }
+
+    /* cards */
+    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:12px; box-shadow: var(--shadow); }
+    .card-header{ padding:10px 14px; border-bottom:1px solid var(--line); font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .card-content{ padding:14px; }
+
+    #editor-panel:empty::before{
+      content:"Select a question from the left to edit it, or add a new one.";
+      color:var(--muted);
+      background:var(--surface-1);
+      border:2px dashed var(--line);
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      height:100%; text-align:center; padding:20px;
+    }
+
+    /* forms */
+    input, select, textarea{ width:100%; max-width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-1); color:var(--fg); outline:none; transition: box-shadow .15s, border-color .15s, background .15s; }
+    input:focus, select:focus, textarea:focus{ box-shadow:0 0 0 3px var(--ring); border-color:transparent; }
+    textarea{ min-height:70px; }
+    button{ font-size:14px; padding:8px 12px; border-radius:10px; border:1px solid var(--line); background:var(--surface-1); color:var(--fg); cursor:pointer; transition: filter .12s, background .12s, border-color .12s; max-width:100%; }
+    button:hover{ filter:brightness(0.98); }
+    button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+    button.danger{ border-color:var(--danger); color:var(--danger); }
+    .actions button{ background:var(--cta); border-color:var(--cta); color:var(--cta-text); }
+    .actions button:hover{ filter:brightness(.95); }
+    body.gold-all button:not(.danger){ background:var(--cta) !important; border-color:var(--cta) !important; color:var(--cta-text) !important; }
+
+    /* question list */
+    .q-item{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-1); cursor:grab; transition: border-color .12s, background .12s, box-shadow .12s; }
+    .q-item + .q-item{ margin-top:8px; }
+    .q-item:hover{ border-color:var(--accent-weak); }
+    .q-item.active{ background:var(--surface-3); border-color:var(--accent-weak); box-shadow:0 0 0 1px var(--accent-weak) inset; }
+    .q-item .text{ color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .q-item .summary{ font-size:12px; color:var(--muted); margin-top:4px; }
+    .tag{ background: rgba(167,181,219,.25); color: var(--accent-weak); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+
+    /* tabs */
+    .editor-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--line); padding:0 14px; background:var(--surface-1); border-top-left-radius:12px; border-top-right-radius:12px; }
+    .tab{ padding:8px 12px; border:1px solid transparent; border-bottom:0; border-radius:8px 8px 0 0; cursor:pointer; color:var(--muted); }
+    .tab.active{ background:var(--surface-1); border-color:var(--line); color:var(--fg); }
+    .tab-content{ display:none; }
+    .tab-content.active{ display:block; }
+
+    /* layout helpers */
+    .row{ display:grid; grid-template-columns: 140px minmax(0, 1fr); gap:10px; margin:10px 0; align-items:start; }
+    .stack{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .muted{ color:var(--muted); }
+    .status-msg{ margin-left:auto; text-align:right; }
+    .ok{ color:#16a34a; font-size:12px; }
+    .error{ margin:16px; white-space:pre-wrap; color:#7f1d1d; background:#fef2f2; border:1px solid #fecaca; padding:10px; border-radius:8px; }
+
+    #generateXlsx{ background:var(--brand-secondary); border-color:var(--brand-secondary); color:#1e1e1e; }
+    #generateXlsx:hover{ filter:brightness(.95); }
+
+    .app-grid { grid-template-columns: 360px minmax(0, 1fr); }
+    .left-panel { flex: 0 0 360px; min-width: 0; overflow-x: hidden; }
+    #question-list { min-width: 0; overflow-x: hidden; }
+    .q-item { max-width: 100%; }
+    .left-panel > .stack > * { min-width: 0; }
+    @media (max-width: 1280px) { .app-grid { grid-template-columns: clamp(260px, 24vw, 360px) minmax(0, 1fr); } }
+
+    /* dashboard */
+    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
+    .project-card .meta{ color:var(--muted); font-size:12px; }
+    .pill{ padding:2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; }
+
+    /* preview */
+    .preview-wrap{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .qre-paper{ background:#ffffff; border:1px solid var(--line); border-radius:12px; padding:16px; max-height:70vh; overflow:auto; }
+    .qre-paper h3{ margin:12px 0 4px; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    /* versions */
+    .diff del{ background:#fde2e2; text-decoration:none; }
+    .diff ins{ background:#e2f7e2; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="logo">Q-Gen</div>
+    <div class="project-inputs">
+      <input id="projName" placeholder="Project Name" title="Project Name" />
+      <input id="projClient" placeholder="Client" title="Client" />
+      <input id="projVersion" placeholder="Version" title="Version" />
+    </div>
+    <div class="actions">
+      <label class="muted" for="themeSwitch">Theme</label>
+      <select id="themeSwitch" title="Theme">
+        <option value="cue-light">Cue Light</option>
+        <option value="cue-dark">Cue Dark</option>
+        <option value="cue-gold">Cue Gold</option>
+      </select>
+      <button id="importJson" class="cta">📥 Import</button>
+      <button id="downloadJson" class="cta">💾 Export</button>
+      <button id="generateDocx" class="cta">📝 QRE</button>
+      <button id="generateXlsx" class="cta">⚙️ Tab Plan</button>
+    </div>
+    <div id="status" class="status-msg"></div>
+  </header>
+
+  <!-- APP NAV (pages) -->
+  <nav class="app-nav">
+    <button class="nav-btn" data-route="#/dashboard">🏠 Dashboard</button>
+    <button class="nav-btn" data-route="#/editor">✏️ Editor</button>
+    <button class="nav-btn" data-route="#/library">📚 Library</button>
+    <button class="nav-btn" data-route="#/rules">🧩 Rules</button>
+    <button class="nav-btn" data-route="#/validator">✅ Validator</button>
+    <button class="nav-btn" data-route="#/preview">👀 Preview</button>
+    <button class="nav-btn" data-route="#/versions">🗂️ Versions</button>
+  </nav>
+
+  <!-- ROUTED VIEWS -->
+  <main id="view-root" style="flex:1; overflow:auto"></main>
+
+  <div id="serverError" class="error" style="display:none; margin:12px"></div>
+
+<script>
+/* --- guard: nuke any legacy globals if a stale file injected them --- */
+for (const k of ["ensureRules","renderEditorPanel","renderRules","renderEditor","renderPreview","renderDashboard"]) {
+  try { delete window[k]; } catch {}
+}
+
+/************* THEME *************/
+const THEME_KEY = "qgen_theme";
+const themeSel = document.getElementById("themeSwitch");
+function applyThemeName(name){
+  document.documentElement.setAttribute("data-theme", name);
+  document.body.classList.toggle("gold-all", name === "cue-gold");
+  localStorage.setItem(THEME_KEY, name);
+  themeSel.value = name;
+}
+(function initTheme(){ const saved = localStorage.getItem(THEME_KEY) || "cue-light"; applyThemeName(saved); themeSel.addEventListener("change", e => applyThemeName(e.target.value)); })();
+
+/************* STATE *************/
+const AUTOSAVE_KEY = "qgen_autosave_v3";
+const PROJECTS_KEY = "qgen_projects_v1"; // dashboard store
+const LIB_KEY = "qgen_library_v1";      // question library
+const SNAP_KEY = "qgen_snapshots_v1";   // versions per project (by id)
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+const state = {
+  project: { id: "proj-" + Math.random().toString(16).slice(2,10), name:"", client:"", version:"0.1.0", created_at:new Date().toISOString(), updated_at:new Date().toISOString(), notes:"" },
+  globals: {
+    default_base_verbiage: "Total (qualified respondents)",
+    default_base_definition: "",
+    default_banners: [],
+    scale_buckets: {
+      "5pt":{"TB":[5],"T2B":[4,5],"B2B":[1,2],"BB":[1],"Mean":true},
+      "7pt":{"TB":[7],"T2B":[6,7],"B2B":[1,2],"BB":[1],"Mean":true},
+      "10pt":{"TB":[10],"T2B":[9,10],"B2B":[1,2],"BB":[1],"Mean":true}
+    }
+  },
+  questions: []
+};
+const ui_state = { active_question_index: null, active_tab: 'main', route: location.hash || '#/dashboard' };
+
+/************* ROUTER *************/
+const routes = new Map();
+window.addEventListener('hashchange', () => { ui_state.route = location.hash || '#/dashboard'; renderRoute(); highlightNav(); });
+function highlightNav(){ const r = ui_state.route; $$('.nav-btn').forEach(btn=> btn.classList.toggle('active', btn.dataset.route===r)); }
+$$('.nav-btn').forEach(btn => btn.addEventListener('click', () => { location.hash = btn.dataset.route; }));
+
+/************* UTIL *************/
+function setStatus(msg, ok){ const el = $("#status"); el.innerHTML = msg? `<span class="${ok?'ok':''}">${msg}</span>`: ""; }
+function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;'}[m])); }
+
+/************* DASHBOARD *************/
+function getProjects(){ try{ return JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]'); } catch{return []} }
+function saveProjects(list){ localStorage.setItem(PROJECTS_KEY, JSON.stringify(list)); }
+function touchCurrentIntoProjects(){
+  const list = getProjects();
+  const idx = list.findIndex(p => p.id === state.project.id);
+  const entry = { id: state.project.id, name: state.project.name||'Untitled', client: state.project.client||'', version: state.project.version||'0.1.0', updated_at: new Date().toISOString(), favorite: !!(list[idx]?.favorite), status: list[idx]?.status||'Draft' };
+  if(idx>=0) list[idx] = entry; else list.unshift(entry);
+  saveProjects(list);
+  localStorage.setItem(`proj:${state.project.id}`, JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions }));
+}
+
+function renderDashboard(root){
+  const list = getProjects();
+  root.innerHTML = `
+    <section class="app-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <div class="stack">
+            <strong>Projects</strong>
+            <input id="dashSearch" placeholder="Search by name/client..." style="width:240px"/>
+            <select id="dashFilter"><option value="">All</option><option>Draft</option><option>Active</option><option>Archived</option></select>
+          </div>
+          <div class="stack">
+            <button id="dashNew" class="primary">+ New Project</button>
+            <button id="dashOpenCurrent">Open Current</button>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="grid" id="projGrid"></div>
+        </div>
+      </div>
+    </section>`;
+
+  const grid = $('#projGrid');
+  const draw = (rows)=>{
+    grid.innerHTML = rows.map(p=>`
+      <div class="card project-card">
+        <div class="card-content">
+          <div class="stack" style="justify-content:space-between;">
+            <div><strong>${escapeHTML(p.name)}</strong></div>
+            <button class="pill" data-fav="${p.id}">⭐ ${p.favorite? 'Fav' : 'Star'}</button>
+          </div>
+          <div class="meta">${escapeHTML(p.client||'–')} • v${escapeHTML(p.version||'')} • ${new Date(p.updated_at).toLocaleString()}</div>
+          <div class="stack" style="margin-top:10px; flex-wrap:wrap;">
+            <button data-open="${p.id}">Open</button>
+            <button data-dup="${p.id}">Duplicate</button>
+            <button data-exp="${p.id}">Export JSON</button>
+            <button data-genq="${p.id}">📝 QRE</button>
+            <button data-genx="${p.id}">⚙️ Tab</button>
+            <select data-status="${p.id}"><option ${p.status==='Draft'?'selected':''}>Draft</option><option ${p.status==='Active'?'selected':''}>Active</option><option ${p.status==='Archived'?'selected':''}>Archived</option></select>
+          </div>
+        </div>
+      </div>`).join('');
+
+    $$('[data-open]').forEach(b=> b.onclick = ()=> openProjectById(b.dataset.open));
+    $$('[data-dup]').forEach(b=> b.onclick = ()=> duplicateProjectById(b.dataset.dup));
+    $$('[data-exp]').forEach(b=> b.onclick = ()=> exportProjectById(b.dataset.exp));
+    $$('[data-genq]').forEach(b=> b.onclick = ()=> openAndGen(b.dataset.genq, 'qre'));
+    $$('[data-genx]').forEach(b=> b.onclick = ()=> openAndGen(b.dataset.genx, 'tab'));
+    $$('[data-fav]').forEach(b=> b.onclick = ()=> toggleFav(b.dataset.fav));
+    $$('[data-status]').forEach(sel=> sel.onchange = ()=> setStatusFor(sel.dataset.status, sel.value));
+  };
+
+  draw(list);
+  $('#dashNew').onclick = ()=>{ newProject(); location.hash = '#/editor'; };
+  $('#dashOpenCurrent').onclick = ()=>{ location.hash = '#/editor'; };
+  $('#dashSearch').oninput = (e)=>{
+    const q = e.target.value.toLowerCase(); const f = $('#dashFilter').value; draw(list.filter(p => (!f||p.status===f) && (p.name.toLowerCase().includes(q) || (p.client||'').toLowerCase().includes(q))));
+  };
+  $('#dashFilter').onchange = ()=> $('#dashSearch').oninput({target:$('#dashSearch')});
+}
+
+function openProjectById(id){
+  const stash = JSON.parse(localStorage.getItem(`proj:${id}`)||'null');
+  if(stash){ state.project = stash.project; state.globals = stash.globals; state.questions = stash.questions; autosaveNow(); }
+  location.hash = '#/editor';
+}
+function duplicateProjectById(id){ const stash = JSON.parse(localStorage.getItem(`proj:${id}`)||'null'); if(!stash) return; const copy = JSON.parse(JSON.stringify(stash)); copy.project.id = "proj-" + Math.random().toString(16).slice(2,10); copy.project.name += ' (Copy)'; localStorage.setItem(`proj:${copy.project.id}`, JSON.stringify(copy)); const list = getProjects(); list.unshift({ id: copy.project.id, name: copy.project.name, client: copy.project.client, version: copy.project.version, updated_at: new Date().toISOString(), favorite:false, status:'Draft' }); saveProjects(list); renderRoute(); }
+function exportProjectById(id){ const stash = JSON.parse(localStorage.getItem(`proj:${id}`)||'null'); if(!stash) return; const data = JSON.stringify(stash, null, 2); const blob = new Blob([data], {type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`${(stash.project.name||'project').replace(/[^\w\-]+/g,'_')}.json`; a.click(); URL.revokeObjectURL(a.href); }
+function toggleFav(id){ const list = getProjects(); const i = list.findIndex(p=>p.id===id); if(i<0) return; list[i].favorite = !list[i].favorite; saveProjects(list); renderRoute(); }
+function setStatusFor(id, status){ const list = getProjects(); const i = list.findIndex(p=>p.id===id); if(i<0) return; list[i].status = status; saveProjects(list); }
+function openAndGen(id, which){ openProjectById(id); setTimeout(()=>{ if(which==='qre') $('#generateDocx').click(); else $('#generateXlsx').click(); }, 150); }
+function newProject(){ state.project = { id: "proj-" + Math.random().toString(16).slice(2,10), name:"", client:"", version:"0.1.0", created_at:new Date().toISOString(), updated_at:new Date().toISOString(), notes:"" }; state.questions = []; ui_state.active_question_index = null; autosaveNow(); touchCurrentIntoProjects(); }
+
+/************* EDITOR *************/
+function renderEditor(root){
+  root.innerHTML = `
+    <section class="app-grid">
+      <div class="left-panel">
+        <div id="question-list" class="stack" style="flex-direction:column; align-items:stretch;"></div>
+        <div class="stack">
+          <button id="addScreener" style="flex:1;">+ Screener</button>
+          <button id="addMain" style="flex:1;">+ Main</button>
+          <button id="addHidden" style="flex:1;">+ Hidden</button>
+          <button id="addQC" style="flex:1;">+ Red Herring</button>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div id="editor-panel" class="right-panel-content"></div>
+      </div>
+    </section>`;
+  renderProjectHeader(); renderQuestionList(); renderEditorPanel(); wireEditorShortcuts();
+}
+
+function renderProjectHeader(){
+  $("#projName").value = state.project.name || "";
+  $("#projClient").value = state.project.client || "";
+  $("#projVersion").value = state.project.version || "0.1.0";
+}
+$("#projName").addEventListener("input", e=>{ state.project.name=e.target.value; queueAutosave(); });
+$("#projClient").addEventListener("input", e=>{ state.project.client=e.target.value; queueAutosave(); });
+$("#projVersion").addEventListener("input", e=>{ state.project.version=e.target.value; queueAutosave(); });
+
+// ---------- SUMMARIES (updated for numeric & table)
+function numericSummary(q){
+  const N = q.numeric || {};
+  const range = (N.min!=null || N.max!=null) ? ` ${N.min??''}–${N.max??''}` : '';
+  if (q.type === 'numeric_time')  return `time${range} ${N.time_unit||''}`.trim();
+  if (q.type === 'numeric_count') return `count${range} ${N.unit||''}`.trim();
+  if (q.type === 'numeric_open')  return `num${range} ${N.unit||''}`.trim();
+  return '';
+}
+function summaryFor(q){
+  const base = `${q.type || 'single'}`;
+  const scal = q.scale?.points ? ` • ${q.scale.points}pt` : '';
+  const opts = (q.options?.length||0) ? ` • ${q.options.length} opt` : '';
+  const stm  = (q.statements?.length||0) ? ` • ${q.statements.length} stmts` : '';
+  const num  = /^numeric_/.test(q.type||'') ? ` • ${numericSummary(q)}` : '';
+  const tbl  = (q.grid?.rows?.length||0) || (q.grid?.cols?.length||0)
+                ? ` • table ${q.grid.rows.length}×${q.grid.cols.length}` : '';
+  return base + scal + opts + stm + num + tbl;
+}
+
+function renderQuestionList(){
+  const list = $("#question-list"); if(!list) return; list.innerHTML = "";
+  state.questions.forEach((q, idx)=>{
+    const item = document.createElement("div"); item.className = "q-item" + (idx===ui_state.active_question_index? " active":""); item.dataset.index = idx; item.draggable = true;
+    item.innerHTML = `
+      <div class="stack">
+        <span class="tag">${q.id}</span>
+        <span class="text">${escapeHTML(q.text || "...")}</span>
+      </div>
+      <div class="summary">${summaryFor(q)}</div>`;
+
+    item.onclick = ()=>{ ui_state.active_question_index=idx; ui_state.active_tab='main'; renderEditorPanel(); };
+    item.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", idx); });
+    item.addEventListener("dragover", e=> e.preventDefault());
+    item.addEventListener("drop", e=>{ e.preventDefault(); e.stopPropagation(); const from = +e.dataTransfer.getData("text/plain"); const to = idx; if (isNaN(from)||isNaN(to)||from===to) return; const [m] = state.questions.splice(from,1); state.questions.splice(to,0,m); ui_state.active_question_index = to; renderQuestionList(); renderEditorPanel(); queueAutosave(); });
+    list.appendChild(item);
+  });
+}
+
+/* -----------------------
+   MODE <-> TYPE MAPPING
+   ----------------------- */
+function inferModeFromType(q){
+  const t = q.type || 'single';
+  if (t.startsWith('numeric_') || t === 'numeric') return 'numeric';
+  if (t.startsWith('grid_') || (t.startsWith('likert_') && (q.statements?.length||0) >= 2)) return 'table';
+  return 'list';
+}
+function ensureMode(q){ q.mode ||= inferModeFromType(q); return q.mode; }
+function getListSelection(q){ return (q.type === 'multi' || q.type === 'grid_multi') ? 'multi' : 'single'; }
+function setListSelection(q, sel){ if (q.mode !== 'list') return; q.type = (sel === 'multi') ? 'multi' : 'single'; }
+function harmonizeTypeFromMode(q){
+  const mode = ensureMode(q);
+  if (mode === 'numeric'){
+    if (!/^numeric_/.test(q.type||'')) q.type = 'numeric_open';
+    return;
+  }
+  if (mode === 'table'){
+    q.grid ||= { rows: q.statements || [], cols: (q.scale?.labels || []) };
+    q.type = (q.type === 'grid_multi') ? 'grid_multi' : 'grid_single';
+    return;
+  }
+  // list
+  const hasScale = !!q.scale?.points;
+  const stmts = q.statements?.length || 0;
+  if (hasScale && stmts <= 1) q.type = 'likert_single';
+  else if (hasScale && stmts === 2) q.type = 'likert_dual';
+  else if (hasScale && stmts >= 3) q.type = 'likert_multi';
+  else q.type = getListSelection(q);
+}
+function syncTableFacets(q){
+  if (q.mode === 'table' && q.grid){
+    q.statements = [...q.grid.rows];
+    q.scale ||= {};
+    q.scale.labels = [...q.grid.cols];
+    q.scale.points = q.grid.cols.length || q.scale.points || null;
+  }
+}
+
+/* -------------
+   NUMERIC API
+   ------------- */
+// Guarantees a numeric object exists for question i, with safe defaults.
+function ensureNumeric(i){
+  const q = state.questions[i];
+  if (!q.numeric) q.numeric = {};
+  const n = q.numeric;
+  if (n.min === undefined)        n.min = null;
+  if (n.max === undefined)        n.max = null;
+  if (n.unit === undefined)       n.unit = '';       // for numeric_open / numeric_count
+  if (n.time_unit === undefined)  n.time_unit = '';  // for numeric_time
+  if (n.placeholder === undefined)n.placeholder = ''; // e.g., "____ years"
+  if (n.zero_pad === undefined)   n.zero_pad = 0;    // 0 = none, 2 = pad to "01"
+  if (n.integer_only === undefined)n.integer_only = true;
+  return n;
+}
+
+// Normalizes numeric updates; blanks become null, numbers parse safely.
+function updateNumeric(i, key, value){
+  ensureNumeric(i);
+  const n = state.questions[i].numeric;
+
+  if (key === 'integer_only') {
+    n.integer_only = !!value;
+  } else if (key === 'min' || key === 'max') {
+    if (value === '' || value === null) n[key] = null;
+    else {
+      const num = Number(value);
+      n[key] = Number.isFinite(num) ? num : null;
+    }
+  } else if (key === 'zero_pad') {
+    // Accept only 0 or 2; blank -> 0
+    const z = String(value).trim() === '' ? 0 : Number(value);
+    n.zero_pad = (z === 2) ? 2 : 0;
+  } else if (key === 'unit' || key === 'time_unit' || key === 'placeholder') {
+    n[key] = String(value ?? '');
+  }
+  queueAutosave();
+}
+
+/* -------- EDITOR PANEL (Type UI removed entirely) -------- */
+function renderEditorPanel(){
+  const panel = $("#editor-panel");
+  if (!panel) return;
+
+  const i = ui_state.active_question_index;
+  if (i === null || !state.questions[i]) { panel.innerHTML = ""; return; }
+
+  const q = state.questions[i];
+
+  // Keep type consistent with chosen mode & sync grid facets
+  harmonizeTypeFromMode(q);
+  syncTableFacets(q);
+
+  // Ensure numeric sub-obj exists early so we can render without guards
+  const N = ensureNumeric(i);
+
+  const priorQs = state.questions
+    .filter((_, j) => j < i)
+    .map(qq => `<option value="${qq.id}">${qq.id}</option>`)
+    .join("");
+
+  const mode = ensureMode(q);
+
+  // Always overwrite table helpers so stale functions can’t survive reloads
+  window._tb_addRow = (ii) => { state.questions[ii].grid.rows.push(''); renderEditorPanel(); queueAutosave(); };
+  window._tb_delRow = (ii, idx) => { state.questions[ii].grid.rows.splice(idx,1); renderEditorPanel(); queueAutosave(); };
+  window._tb_updRow = (ii, idx, val) => { state.questions[ii].grid.rows[idx] = val; queueAutosave(); };
+
+  window._tb_addCol = (ii) => { state.questions[ii].grid.cols.push(''); renderEditorPanel(); queueAutosave(); };
+  window._tb_delCol = (ii, idx) => { state.questions[ii].grid.cols.splice(idx,1); renderEditorPanel(); queueAutosave(); };
+  window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
+
+  // Build UI
+  panel.innerHTML = `
+    <div class="card" style="flex-grow:1;">
+      <div class="card-header">
+        <span>Editing: <strong>${q.id}</strong></span>
+        <div class="stack">
+          <button onclick="saveQuestionToLibrary(${i})">💾 Save to Library</button>
+          <button onclick="dupQ(${i})">Duplicate</button>
+          <button class="danger" onclick="delQ(${i})">Delete</button>
+        </div>
+      </div>
+
+      <div class="editor-tabs">
+        <div class="tab ${ui_state.active_tab==='main'?'active':''}" onclick="setActiveTab('main')">Main</div>
+        <div class="tab ${ui_state.active_tab==='logic'?'active':''}" onclick="setActiveTab('logic')">Logic & Base</div>
+        <div class="tab ${ui_state.active_tab==='tabplan'?'active':''}" onclick="setActiveTab('tabplan')">Tab Plan</div>
+      </div>
+
+      <div class="card-content">
+        <!-- MAIN TAB -->
+        <div class="tab-content ${ui_state.active_tab==='main'?'active':''}">
+          <div class="row"><div class="k">Question ID</div>
+            <input value="${q.id}" oninput="updateQ(${i}, 'id', event.target.value)"/>
+          </div>
+
+          <!-- MODE SELECTOR -->
+          <div class="row"><div class="k">Mode</div>
+            <div class="stack">
+              <label><input type="radio" name="mode-${i}" value="list"   ${mode==='list'?'checked':''}
+                onchange="state.questions[${i}].mode='list'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Item or list</label>
+              <label><input type="radio" name="mode-${i}" value="numeric" ${mode==='numeric'?'checked':''}
+                onchange="state.questions[${i}].mode='numeric'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Numeric</label>
+              <label><input type="radio" name="mode-${i}" value="table"  ${mode==='table'?'checked':''}
+                onchange="state.questions[${i}].mode='table'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Table</label>
+            </div>
+          </div>
+
+          <div class="row"><div class="k">Question Text</div>
+            <textarea oninput="updateQ(${i}, 'text', event.target.value)">${q.text || ""}</textarea>
+          </div>
+
+          <!-- LIST MODE -->
+          ${mode==='list' ? `
+            <div class="row"><div class="k">Selection</div>
+              <div class="stack">
+                <label><input type="radio" name="listSel-${i}" value="single" ${getListSelection(q)==='single'?'checked':''}
+                  onchange="setListSelection(state.questions[${i}], 'single'); queueAutosave(); renderQuestionList();"/> Single</label>
+                <label><input type="radio" name="listSel-${i}" value="multi" ${getListSelection(q)==='multi'?'checked':''}
+                  onchange="setListSelection(state.questions[${i}], 'multi'); queueAutosave(); renderQuestionList();"/> Multi</label>
+              </div>
+            </div>
+
+            <div class="row"><div class="k">Options</div>
+              <div>
+                ${(q.options||[]).map((o,j)=> `
+                  <div class="row">
+                    <div class="k">Option ${j+1}</div>
+                    <div class="stack" style="flex-wrap:nowrap;">
+                      <input style="flex:0 0 80px;" placeholder="Code" value="${o.code ?? ""}" oninput="updateOpt(${i},${j},'code',event.target.value,true)"/>
+                      <input placeholder="Label" value="${escapeHTML(o.label || '')}" oninput="updateOpt(${i},${j},'label',event.target.value)"/>
+                      <label><input type="checkbox" ${o.exclusive?'checked':''} onchange="updateOpt(${i},${j},'exclusive',this.checked)"/> exclusive</label>
+                      <label><input type="checkbox" ${o.terminate?'checked':''} onchange="updateOpt(${i},${j},'terminate',this.checked)"/> terminate</label>
+                      <button onclick="delOpt(${i},${j})">🗑️</button>
+                    </div>
+                  </div>`).join('')}
+                <div class="stack">
+                  <button onclick="addOpt(${i})">+ Add Option</button>
+                  <button onclick="bulkAddOptions(${i})">📋 Bulk Add</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="row"><div class="k">Statements</div>
+              <div>
+                ${(q.statements||[]).map((s,j)=> `
+                  <div class="row">
+                    <div class="k">Statement ${j+1}</div>
+                    <div class="stack" style="flex-wrap:nowrap;">
+                      <input value="${escapeHTML(s)}" oninput="updateStmt(${i},${j},event.target.value)"/>
+                      <button onclick="delStmt(${i},${j})">🗑️</button>
+                    </div>
+                  </div>`).join('')}
+                <div class="stack">
+                  <button onclick="addStmt(${i})">+ Add Statement</button>
+                  <button onclick="bulkAddStatements(${i})">📋 Bulk Add</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="row"><div class="k">Likert scale</div>
+              <div class="grid2">
+                <select onchange="updateScalePoints(${i}, this.value)">
+                  <option value="">(none)</option>
+                  ${[5,7,10].map(n=>`<option value="${n}" ${q.scale?.points==n?'selected':''}>${n}</option>`).join('')}
+                </select>
+                <input placeholder="Labels (pipe-separated: Strongly Disagree|...|Strongly Agree)" value="${(q.scale?.labels||[]).join('|')}" oninput="updateScaleLabels(${i}, this.value)" />
+              </div>
+              <small class="muted">If points + ≥3 statements ⇒ treated as Likert multi by the generator.</small>
+            </div>
+          ` : ''}
+
+          <!-- NUMERIC MODE -->
+          ${mode==='numeric' ? `
+            <div class="row"><div class="k">Numeric settings</div>
+              <div>
+                <div class="stack" style="flex-wrap:wrap; gap:10px;">
+                  <input style="width:120px" placeholder="Min (optional)" value="${N.min ?? ''}" oninput="updateNumeric(${i}, 'min', this.value)"/>
+                  <input style="width:120px" placeholder="Max (optional)" value="${N.max ?? ''}" oninput="updateNumeric(${i}, 'max', this.value)"/>
+
+                  ${q.type === 'numeric_time' ? `
+                    <select style="width:160px" onchange="updateNumeric(${i}, 'time_unit', this.value)">
+                      <option value="">(pick time unit)</option>
+                      ${['seconds','minutes','hours','days','weeks','months','years'].map(u=>`<option value="${u}" ${N.time_unit===u?'selected':''}>${u}</option>`).join('')}
+                    </select>
+                  ` : `
+                    <input style="width:160px" placeholder="Unit (e.g., years)" value="${N.unit || ''}" oninput="updateNumeric(${i}, 'unit', this.value)"/>
+                  `}
+
+                  <input style="width:200px" placeholder="Placeholder (e.g., ____ years)" value="${N.placeholder || ''}" oninput="updateNumeric(${i}, 'placeholder', this.value)"/>
+
+                  <label class="stack" style="gap:6px;">
+                    <span class="muted">Zero-pad</span>
+                    <input style="width:80px" placeholder="0 or 2" value="${N.zero_pad ?? 0}" oninput="updateNumeric(${i}, 'zero_pad', this.value)"/>
+                  </label>
+
+                  <label class="stack" style="gap:6px;">
+                    <input type="checkbox" ${N.integer_only ? 'checked' : ''} onchange="updateNumeric(${i}, 'integer_only', this.checked)"/>
+                    <span class="muted">Integer only</span>
+                  </label>
+                </div>
+                <small class="muted">Tip: Leave min/max blank to allow any value. Use zero-pad=2 for inputs like 01–24.</small>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- TABLE MODE -->
+          ${mode==='table' ? (function () {
+            // Ensure grid object exists without using ||= (max browser compatibility)
+            if (!q.grid) q.grid = { rows: (q.statements || []).slice(), cols: (q.scale?.labels || []).slice() };
+
+            // Re-bind helpers on every re-render so stale ones can’t stick around
+            window._tb_addRow = (ii) => { state.questions[ii].grid.rows.push(''); renderEditorPanel(); queueAutosave(); };
+            window._tb_delRow = (ii, idx) => { state.questions[ii].grid.rows.splice(idx, 1); renderEditorPanel(); queueAutosave(); };
+            window._tb_updRow = (ii, idx, val) => { state.questions[ii].grid.rows[idx] = val; queueAutosave(); };
+
+            window._tb_addCol = (ii) => { state.questions[ii].grid.cols.push(''); renderEditorPanel(); queueAutosave(); };
+            window._tb_delCol = (ii, idx) => { state.questions[ii].grid.cols.splice(idx, 1); renderEditorPanel(); queueAutosave(); };
+            window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
+
+            const G = q.grid;
+
+            return `
+            <div class="row"><div class="k">Table</div>
+              <div>
+                <div class="stack" style="margin-bottom:6px;">
+                  <button onclick="_tb_addRow(${i})">+ Row</button>
+                  <button onclick="_tb_addCol(${i})">+ Column</button>
+                </div>
+                <div style="overflow:auto; border:1px solid var(--line); border-radius:8px;">
+                  <table style="width:100%; border-collapse:collapse; min-width:520px;">
+                    <thead>
+                      <tr>
+                        <th style="text-align:left; padding:6px; border-bottom:1px solid var(--line); width:42%;">Statements (rows)</th>
+                        ${G.cols.map((c,ci)=>(
+                          '<th style="text-align:left; padding:6px; border-bottom:1px solid var(--line);">' +
+                            '<input value="'+ escapeHTML(c) +'" oninput="_tb_updCol('+ i +','+ ci +', this.value)" /> ' +
+                            '<button onclick="_tb_delCol('+ i +','+ ci +')">🗑️</button>' +
+                          '</th>'
+                        )).join('')}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${G.rows.map((r,ri)=>(
+                        '<tr>' +
+                          '<td style="padding:6px; border-bottom:1px solid var(--line);">' +
+                            '<input value="'+ escapeHTML(r) +'" oninput="_tb_updRow('+ i +','+ ri +', this.value)" /> ' +
+                            '<button onclick="_tb_delRow('+ i +','+ ri +')">🗑️</button>' +
+                          '</td>' +
+                          G.cols.map(()=>'<td style="padding:6px; border-bottom:1px solid var(--line); color:var(--muted);">•</td>').join('') +
+                        '</tr>'
+                      )).join('')}
+                    </tbody>
+                  </table>
+                </div>
+                <small class="muted">Rows = statements, Columns = scale/options. This will export as a grid/likert table; nets follow your rules.</small>
+              </div>
+            </div>`;
+          })() : '' }
+
+
+        <!-- LOGIC TAB -->
+        <div class="tab-content ${ui_state.active_tab==='logic'?'active':''}">
+          <div class="row"><div class="k">Base Verbiage</div>
+            <input value="${q.base?.verbiage || ''}" oninput="updateBase(${i}, 'verbiage', event.target.value)" placeholder="Default: ${state.globals.default_base_verbiage}" />
+          </div>
+
+          <div class="row"><div class="k">Base Definition</div>
+            <div>
+              <input value="${q.base?.definition || ''}" oninput="updateBase(${i}, 'definition', event.target.value)" placeholder="e.g., S1 in [2]" />
+              <div class="stack muted" style="margin-top:8px;">
+                <small>Helper:</small>
+                <select id="priorQ-${i}" onchange="populatePriorOpts(${i})"><option value="">Pick Q</option>${priorQs}</select>
+                <select id="priorOpt-${i}"></select>
+                <button class="primary" style="padding:4px 8px;" onclick="applyBase(${i})">Apply</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row"><div class="k">Notes</div>
+            <input value="${q.notes || ''}" oninput="updateQ(${i}, 'notes', event.target.value)" placeholder="e.g., Hidden, Red herring, etc." />
+          </div>
+        </div>
+
+        <!-- TAB PLAN TAB -->
+        <div class="tab-content ${ui_state.active_tab==='tabplan'?'active':''}">
+          <div class="row"><div class="k">Nets Text</div>
+            <input value="${q.exports?.tab_plan?.nets_text || ''}" oninput="updateExport(${i}, 'tab_plan.nets_text', event.target.value)" placeholder='e.g., Net: T2B, B2B'/>
+          </div>
+          <div class="row"><div class="k">Instructions</div>
+            <textarea oninput="updateExport(${i}, 'tab_plan.additional_instructions', event.target.value)">${q.exports?.tab_plan?.additional_instructions || ''}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* -------- Small editor helpers (unchanged) -------- */
+function setActiveTab(tab){ ui_state.active_tab=tab; renderEditorPanel(); }
+function updateQ(i, k, v){ state.questions[i][k]=v; if (k==='id'||k==='text'||k==='type') renderQuestionList(); queueAutosave(); }
+function updateBase(i, k, v){ state.questions[i].base ??= {}; state.questions[i].base[k]=v; queueAutosave(); }
+function updateExport(i, path, v){
+  const [root, leaf] = path.split('.');
+  state.questions[i].exports ??= {};
+  state.questions[i].exports[root] ??= {};
+  state.questions[i].exports[root][leaf] = v; queueAutosave();
+}
+function updateScalePoints(i, val){ state.questions[i].scale ??= {}; state.questions[i].scale.points = val? parseInt(val): null; queueAutosave(); }
+function updateScaleLabels(i, txt){ state.questions[i].scale ??= {}; state.questions[i].scale.labels = txt.split('|').map(s=>s.trim()).filter(Boolean); queueAutosave(); }
+function addOpt(i){ state.questions[i].options ??= []; state.questions[i].options.push({code:(state.questions[i].options.length+1), label:""}); renderEditorPanel(); queueAutosave(); }
+function delOpt(i,j){ state.questions[i].options.splice(j,1); renderEditorPanel(); queueAutosave(); }
+function updateOpt(i,j,k,v,num=false){
+  // Avoid NaN codes; if blank, keep ''
+  state.questions[i].options[j][k] = num
+    ? (String(v).trim()==='' ? '' : (Number.isFinite(parseInt(v,10)) ? parseInt(v,10) : v))
+    : v;
+  queueAutosave();
+}
+function addStmt(i){ state.questions[i].statements ??= []; state.questions[i].statements.push(""); renderEditorPanel(); queueAutosave(); }
+function delStmt(i,j){ state.questions[i].statements.splice(j,1); renderEditorPanel(); queueAutosave(); }
+function updateStmt(i,j,v){ state.questions[i].statements[j]=v; queueAutosave(); }
+function bulkAddOptions(i){
+  const txt = prompt("Paste options (one per line). Use 'code\\tlabel', 'code label', '1) label', or just 'label'.");
+  if(!txt) return;
+  const lines = txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  let nextCode = (state.questions[i].options?.at(-1)?.code || 0) + 1;
+  state.questions[i].options ??= [];
+  for (const line of lines){
+    const m = line.match(/^(\d+)[\s\.\-\t\)]\s*(.+)$/);
+    if (m) state.questions[i].options.push({code:parseInt(m[1],10), label:m[2].trim()});
+    else {
+      const parts = line.split(/\t/);
+      if (parts.length>=2 && /^\d+$/.test(parts[0])) state.questions[i].options.push({code:parseInt(parts[0],10), label:parts.slice(1).join(" ").trim()});
+      else state.questions[i].options.push({code: nextCode++, label: line});
+    }
+  }
+  renderEditorPanel(); queueAutosave();
+}
+function bulkAddStatements(i){
+  const txt = prompt("Paste statements (one per line).");
+  if(!txt) return;
+  state.questions[i].statements ??= [];
+  state.questions[i].statements.push(...txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean));
+  renderEditorPanel(); queueAutosave();
+}
+function populatePriorOpts(i){
+  const priorQId = $(`#priorQ-${i}`).value;
+  const optSel = $(`#priorOpt-${i}`);
+  const qq = state.questions.find(qq => qq.id === priorQId);
+  optSel.innerHTML = `<option value="">Pick Opt</option>` + (qq?.options || []).map(o=>`<option value="${o.code}">${o.code}: ${escapeHTML(o.label)}</option>`).join("");
+}
+function applyBase(i){
+  const pq = $(`#priorQ-${i}`).value, po = $(`#priorOpt-${i}`).value;
+  if(!pq || !po) return;
+  updateBase(i, 'definition', `${pq} in [${po}]`);
+  renderEditorPanel();
+}
+function nextNumber(prefix){
+  let n=1;
+  while (state.questions.some(q=>q.id===`${prefix}${n}`)) n++;
+  return n;
+}
+function addQuestion(prefix){
+  if (prefix==='S'){
+    const id=`S${nextNumber('S')}`; state.questions.push({id, type:'single', text:'', options:[]});
+  } else if (prefix==='Q'){
+    const id=`Q${nextNumber('Q')}`; state.questions.push({id, type:'single', text:'', options:[]});
+  } else if (prefix==='H'){
+    const id=`Q${nextNumber('Q')}_H`; state.questions.push({id, type:'single', text:'', notes:'Hidden question', options:[]});
+  } else if (prefix==='R'){
+    const id=`Q${nextNumber('Q')}_R`; state.questions.push({id, type:'single', text:'', notes:'Red herring', options:[]});
+  }
+  ui_state.active_question_index = state.questions.length-1;
+  renderQuestionList(); renderEditorPanel(); queueAutosave();
+}
+function delQ(i){
+  if(!confirm(`Delete ${state.questions[i].id}?`)) return;
+  state.questions.splice(i,1);
+  ui_state.active_question_index = Math.min(i, state.questions.length-1);
+  if (state.questions.length===0) ui_state.active_question_index=null;
+  renderQuestionList(); renderEditorPanel(); queueAutosave();
+}
+function dupQ(i){
+  const copy = JSON.parse(JSON.stringify(state.questions[i]));
+  const pref = copy.id.startsWith('S') ? 'S':'Q';
+  const suffix = (/_([HR])$/.test(copy.id)) ? copy.id.match(/_([HR])$/)[0] : '';
+  copy.id = `${pref}${nextNumber(pref)}${suffix}`;
+  state.questions.splice(i+1,0,copy);
+  ui_state.active_question_index = i+1;
+  renderQuestionList(); renderEditorPanel(); queueAutosave();
+}
+function wireEditorShortcuts(){
+  document.onkeydown = (e)=>{
+    const i = ui_state.active_question_index ?? -1;
+    if(e.ctrlKey||e.metaKey){
+      if(e.key.toLowerCase()==='s'){ e.preventDefault(); downloadJSON(); }
+      if(e.key.toLowerCase()==='d'){ e.preventDefault(); if(i>=0) dupQ(i); }
+    } else {
+      if(e.key==='ArrowUp' && i>0){ ui_state.active_question_index=i-1; renderQuestionList(); renderEditorPanel(); }
+      if(e.key==='ArrowDown' && i<state.questions.length-1){ ui_state.active_question_index=i+1; renderQuestionList(); renderEditorPanel(); }
+      if(e.key==='Enter' && i<0 && state.questions.length){ ui_state.active_question_index=0; renderEditorPanel(); }
+    }
+  };
+  $("#addScreener").onclick = ()=> addQuestion('S');
+  $("#addMain").onclick     = ()=> addQuestion('Q');
+  $("#addHidden").onclick   = ()=> addQuestion('H');
+  $("#addQC").onclick       = ()=> addQuestion('R');
+}
+
+
+/* =========================================================
+   LIBRARY
+   ========================================================= */
+function getLibrary(){ try{ return JSON.parse(localStorage.getItem(LIB_KEY)||'{}'); } catch{ return {}; } }
+function saveLibrary(lib){ localStorage.setItem(LIB_KEY, JSON.stringify(lib)); }
+function saveQuestionToLibrary(i){
+  const q   = JSON.parse(JSON.stringify(state.questions[i]));
+  const key = state.project.client || '_global';
+  const lib = getLibrary();
+  (lib[key] ||= []).push({ saved_at:new Date().toISOString(), project_id: state.project.id, q });
+  saveLibrary(lib);
+  alert('Saved to library.');
+}
+function renderLibrary(root){
+  const lib      = getLibrary();
+  const clients  = Object.keys(lib).sort();
+  root.innerHTML = `
+    <section class="app-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <strong>Question Library</strong>
+          <div class="stack">
+            <select id="libClient"></select>
+            <button id="libInsert">Insert into current project</button>
+            <button id="libDel">Delete selected</button>
+          </div>
+        </div>
+        <div class="card-content"><div class="grid" id="libGrid"></div></div>
+      </div>
+    </section>`;
+
+  const sel = $('#libClient');
+  sel.innerHTML = clients.map(c=>`<option value="${c}">${c}</option>`).join('') || '<option value="_global">_global</option>';
+  const grid = $('#libGrid');
+
+  const draw = ()=>{
+    const key   = sel.value || clients[0] || '_global';
+    const items = lib[key]||[];
+    grid.innerHTML = items.map((it,idx)=>`
+      <label class="card" style="padding:10px; display:block;">
+        <input type="radio" name="libpick" value="${idx}"/>
+        <strong>${escapeHTML(it.q.id)} • ${escapeHTML(it.q.type)}</strong>
+        <div class="meta">${escapeHTML((it.q.text||'').slice(0,120))}</div>
+        <div class="meta">Saved ${new Date(it.saved_at).toLocaleString()}</div>
+      </label>
+    `).join('') || '<div class="muted">No saved items for this client.</div>';
+  };
+
+  sel.onchange = draw;
+  draw();
+
+  $('#libInsert').onclick = ()=>{
+    const key = sel.value || clients[0] || '_global';
+    const idx = +(document.querySelector('input[name="libpick"]:checked')?.value ?? -1);
+    if(idx<0) return alert('Pick one');
+    const q = JSON.parse(JSON.stringify((lib[key]||[])[idx].q));
+    const pref = q.id.startsWith('S') ? 'S':'Q';
+    q.id = `${pref}${nextNumber(pref)}`;
+    state.questions.push(q);
+    ui_state.active_question_index = state.questions.length-1;
+    autosaveNow();
+    location.hash = '#/editor';
+  };
+
+  $('#libDel').onclick = ()=>{
+    const key = sel.value || clients[0] || '_global';
+    const idx = +(document.querySelector('input[name="libpick"]:checked')?.value ?? -1);
+    if(idx<0) return;
+    (lib[key]||[]).splice(idx,1);
+    saveLibrary(lib);
+    draw();
+  };
+}
+
+/* =========================================================
+   RULES
+   ========================================================= */
+function ensureRules(){
+  state.globals.rules ||= {
+    likert:   { single:true, dual:true, multi:true },
+    screener: { noNetsOnTerminate:true },
+    nets:     { ageMaxInference:true, hoursDefaultBands:true },
+    // sensible defaults for numeric questions
+    numeric:  {
+      default_unit: "years",   // seconds|minutes|hours|days|weeks|months|years|count|other
+      default_decimals: false,
+      default_min: null,       // null = no bound
+      default_max: null
+    }
+  };
+}
+function renderRules(root){
+  ensureRules();
+  const r = state.globals.rules;
+  root.innerHTML = `
+    <section class="app-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header"><strong>Rules & Nets Studio</strong></div>
+        <div class="card-content">
+
+          <div class="row"><div class="k">Likert presets</div>
+            <div class="stack">
+              <label><input type="checkbox" id="rLikS" ${r.likert.single?'checked':''}/> single → Net: T2B, B2B</label>
+              <label><input type="checkbox" id="rLikD" ${r.likert.dual?'checked':''}/> dual → Net: T2B, B2B</label>
+              <label><input type="checkbox" id="rLikM" ${r.likert.multi?'checked':''}/> ≥3 stmts → add Q5 summaries</label>
+            </div>
+          </div>
+
+          <div class="row"><div class="k">Screener</div>
+            <div class="stack">
+              <label><input type="checkbox" id="rScr" ${r.screener.noNetsOnTerminate?'checked':''}/> no nets on terminate options</label>
+            </div>
+          </div>
+
+          <div class="row"><div class="k">Nets engine</div>
+            <div class="stack">
+              <label><input type="checkbox" id="rAge" ${r.nets.ageMaxInference?'checked':''}/> infer max age from S3</label>
+              <label><input type="checkbox" id="rHours" ${r.nets.hoursDefaultBands?'checked':''}/> default hours bands</label>
+            </div>
+          </div>
+
+          <div class="row"><div class="k">Numeric defaults</div>
+            <div class="stack" style="align-items:flex-end">
+              <label>Unit
+                <select id="rNumUnit" style="min-width:160px">
+                  ${["years","months","weeks","days","hours","minutes","seconds","count","other"].map(u=>`<option ${r.numeric.default_unit===u?'selected':''}>${u}</option>`).join("")}
+                </select>
+              </label>
+              <label><input type="checkbox" id="rNumDec" ${r.numeric.default_decimals?'checked':''}/> allow decimals</label>
+              <label>Min <input id="rNumMin" type="number" step="any" value="${r.numeric.default_min ?? ''}" placeholder="(none)" style="width:120px"/></label>
+              <label>Max <input id="rNumMax" type="number" step="any" value="${r.numeric.default_max ?? ''}" placeholder="(none)" style="width:120px"/></label>
+            </div>
+          </div>
+
+          <div class="stack"><button id="saveRules" class="primary">Save</button></div>
+        </div>
+      </div>
+    </section>`;
+
+  $('#saveRules').onclick = ()=>{
+    r.likert.single = $('#rLikS').checked;
+    r.likert.dual   = $('#rLikD').checked;
+    r.likert.multi  = $('#rLikM').checked;
+    r.screener.noNetsOnTerminate = $('#rScr').checked;
+    r.nets.ageMaxInference       = $('#rAge').checked;
+    r.nets.hoursDefaultBands     = $('#rHours').checked;
+
+    // numeric defaults
+    r.numeric.default_unit     = $('#rNumUnit').value;
+    r.numeric.default_decimals = $('#rNumDec').checked;
+    const minV = $('#rNumMin').value, maxV = $('#rNumMax').value;
+    r.numeric.default_min = (minV===''? null : Number(minV));
+    r.numeric.default_max = (maxV===''? null : Number(maxV));
+
+    queueAutosave();
+    alert('Saved');
+  };
+}
+
+/* =========================================================
+   VALIDATOR
+   ========================================================= */
+function validateProject(){
+  const issues = [];
+
+  // 0) mode sanity (expect list|numeric|table)
+  state.questions.forEach(q=>{
+    if(q.mode && !['list','numeric','table'].includes(q.mode)){
+      issues.push(["red", `${q.id}: invalid mode "${q.mode}" (must be list | numeric | table)`]);
+    }
+  });
+
+  // 1) codes & labels
+  state.questions.forEach((q)=>{
+    const codes  = (q.options||[]).map(o=>o.code).filter(v=>v!==undefined && v!==null && v!=='');
+    const labels = (q.options||[]).map(o=>o.label||'');
+    const dup    = codes.filter((v,i,a)=> a.indexOf(v)!==i);
+    if(dup.length) issues.push(["red", `${q.id}: duplicate codes ${[...new Set(dup)].join(', ')}`]);
+    if(codes.length){
+      const sorted=[...codes].sort((a,b)=>a-b);
+      for(let i=1;i<sorted.length;i++){
+        if(sorted[i]-sorted[i-1]>1){ issues.push(["amber", `${q.id}: code gap between ${sorted[i-1]} and ${sorted[i]}`]); break; }
+      }
+    }
+    labels.forEach((l,li)=>{ if(!String(l).trim()) issues.push(["red", `${q.id}: option ${li+1} missing label`]); });
+  });
+
+  // 1b) numeric config
+  const validUnits = new Set(["seconds","minutes","hours","days","weeks","months","years","count","other",""]);
+  state.questions.forEach(q=>{
+    const isNumeric = q.mode==='numeric' || (q.type||'').startsWith('numeric');
+    if(!isNumeric) return;
+    const n = q.numeric || {};
+    if(n.unit && !validUnits.has(n.unit)) issues.push(["red", `${q.id}: invalid numeric unit "${n.unit}"`]);
+    if(n.min!=null && n.max!=null && Number(n.min) > Number(n.max)) issues.push(["red", `${q.id}: numeric min > max`]);
+    if(n.placeholder && typeof n.placeholder !== 'string') issues.push(["amber", `${q.id}: numeric placeholder should be text`]);
+  });
+
+  // 2) bases referencing future questions
+  state.questions.forEach((q,qi)=>{
+    const def = q.base?.definition||'';
+    const m = def.match(/^(S\d+|Q\d+)[^\d]*\[(\d+)\]/i);
+    if(m){
+      const refId  = m[1];
+      const refIdx = state.questions.findIndex(x=>x.id===refId);
+      if(refIdx>qi) issues.push(["red", `${q.id}: base references future question ${refId}`]);
+    }
+  });
+
+  // 3) likert mismatches
+  state.questions.forEach(q=>{
+    if(q.scale?.points && q.scale.labels && q.scale.labels.length && q.scale.labels.length !== q.scale.points){
+      issues.push(["amber", `${q.id}: ${q.scale.points}pt but ${q.scale.labels.length} labels`]);
+    }
+  });
+
+  // 4) terminate included in nets
+  state.questions.forEach(q=>{
+    const hasTerm = (q.options||[]).some(o=>o.terminate);
+    if(hasTerm && (q.exports?.tab_plan?.nets_text||'').trim()){
+      issues.push(["amber", `${q.id}: has terminate options but nets text present`]);
+    }
+  });
+
+  return issues;
+}
+function renderValidator(root){
+  const issues = validateProject();
+  root.innerHTML = `
+    <section class="app-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <strong>Validator</strong>
+          <div class="pill">${issues.length? issues.length+" issues" : "All checks passed"}</div>
+        </div>
+        <div class="card-content">
+          ${
+            issues.length
+              ? issues.map(([sev,msg])=>`<div class="stack"><span class="pill" style="${sev==='red'?'background:#fee2e2;':''}${sev==='amber'?'background:#fef9c3;':''}">${sev.toUpperCase()}</span><span>${escapeHTML(msg)}</span></div>`).join('')
+              : '<div class="ok">No blocking issues detected.</div>'
+          }
+          <div class="stack" style="margin-top:12px;"><button onclick="location.hash='#/editor'">Go to Editor</button></div>
+        </div>
+      </div>
+    </section>`;
+}
+
+/* =========================================================
+   PREVIEW
+   ========================================================= */
+function renderPreview(root){
+  root.innerHTML = `
+    <section class="app-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header"><strong>Preview</strong></div>
+        <div class="card-content">
+          <div class="preview-wrap">
+            <div class="qre-paper" id="qrePreview">
+              <h3>Questionnaire (preview)</h3>
+              <div class="muted">Lightweight in-app preview of the .docx</div>
+              <div id="qreBody"></div>
+            </div>
+            <div class="qre-paper">
+              <h3>Tab Plan (preview)</h3>
+              <div class="muted">Sanity check nets/instructions and bases</div>
+              <table id="tabPrev" style="width:100%; border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">QID</th>
+                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Type/Mode</th>
+                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Nets</th>
+                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Instructions</th>
+                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Base</th>
+                  </tr>
+                </thead>
+                <tbody id="tabPrevBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="stack" style="margin-top:12px;">
+            <button onclick="location.hash='#/editor'">Back to Editor</button>
+            <button class="primary" onclick="snapshotCurrent('Pre-generate snapshot')">📸 Snapshot</button>
+          </div>
+        </div>
+      </div>
+    </section>`;
+
+  // QRE preview body
+  const qre = document.getElementById('qreBody');
+  qre.innerHTML = state.questions.map(q => {
+    const opts   = (q.options||[]).map(o => `<div>- [ ] ${o.code ?? ''} ${escapeHTML(o.label||'')}</div>`).join('');
+    const stmts  = (q.statements||[]).map((s,i)=> `<div class="mono">(${i+1}) ${escapeHTML(s)}</div>`).join('');
+    const scale  = q.scale?.points
+      ? `<div class="muted">${q.scale.points}-pt scale${q.scale.labels?.length ? ` — ${escapeHTML(q.scale.labels.join(' | '))}`:''}</div>` : '';
+
+    // numeric line (placeholder + rules fallback)
+    const isNumeric = q.mode === 'numeric' || (q.type || '').startsWith('numeric');
+    const n = isNumeric ? (q.numeric||{}) : null;
+    const rulesUnit = state.globals?.rules?.numeric?.default_unit || '';
+    const unit = (n.unit || n.time_unit || rulesUnit || '').trim();
+    const placeholder = (n.placeholder && n.placeholder.trim()) || (unit ? `____ ${unit}` : '____');
+
+    const numLine = isNumeric ? `
+      <div class="mono">${escapeHTML(placeholder)}</div>
+      <div class="muted">
+        ${n.min!=null ? 'min ' + n.min + ' • ' : ''}${n.max!=null ? 'max ' + n.max + ' • ' : ''}
+        ${n.integer_only ? 'whole numbers only' : 'decimals allowed'}${n.zero_pad ? ' • zero-pad ' + n.zero_pad : ''}
+      </div>
+    ` : '';
+
+    const baseText = q.base?.verbiage || state.globals.default_base_verbiage;
+    const baseDef  = q.base?.definition ? ` • ${escapeHTML(q.base.definition)}` : '';
+
+    return `
+      <section style="margin:10px 0; padding:8px; border-bottom:1px dashed var(--line);">
+        <div><span class="tag">${q.id}</span> <strong>${escapeHTML(q.text||'')}</strong></div>
+        ${scale}
+        ${numLine}
+        ${opts? `<div style="margin-left:10px; margin-top:6px;">${opts}</div>`:''}
+        ${stmts? `<div style="margin-left:10px; margin-top:6px;">${stmts}</div>`:''}
+        ${(q.base?.verbiage || q.base?.definition) ? `<div class="muted" style="margin-top:6px;">Base: ${escapeHTML(baseText)}${baseDef}</div>`:''}
+      </section>`;
+  }).join('') || `<div class="muted">No questions yet.</div>`;
+
+  // Tab plan preview table
+  const tb = document.getElementById('tabPrevBody');
+  tb.innerHTML = state.questions.map(q => `
+    <tr>
+      <td style="padding:6px; border-bottom:1px solid var(--line);">${q.id}</td>
+      <td style="padding:6px; border-bottom:1px solid var(--line);">${escapeHTML(q.mode || q.type || 'single')}</td>
+      <td style="padding:6px; border-bottom:1px solid var(--line);">${escapeHTML(q.exports?.tab_plan?.nets_text || '')}</td>
+      <td style="padding:6px; border-bottom:1px solid var(--line); white-space:pre-wrap;">
+        ${escapeHTML(q.exports?.tab_plan?.additional_instructions || '')}
+      </td>
+      <td style="padding:6px; border-bottom:1px solid var(--line);">
+        ${escapeHTML(q.base?.verbiage || state.globals.default_base_verbiage)}${q.base?.definition? `; ${escapeHTML(q.base.definition)}`:''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* =========================================================
+   VERSIONS / SNAPSHOTS
+   ========================================================= */
+function getSnapshotsMap(){ try{ return JSON.parse(localStorage.getItem(SNAP_KEY)||'{}'); } catch{ return {}; } }
+function saveSnapshotsMap(map){ localStorage.setItem(SNAP_KEY, JSON.stringify(map)); }
+function snapshotCurrent(note=''){
+  const map  = getSnapshotsMap();
+  const pid  = state.project.id;
+  const snap = {
+    id: 'snap-' + Math.random().toString(16).slice(2,10),
+    ts: new Date().toISOString(),
+    note,
+    project: JSON.parse(JSON.stringify(state))
+  };
+  (map[pid] ||= []).unshift(snap);
+  saveSnapshotsMap(map);
+  setStatus('Snapshot saved.', true);
+  return snap;
+}
+function restoreSnapshot(id, byId){
+  const snap = byId?.[id] || (getSnapshotsMap()[state.project.id]||[]).find(s=>s.id===id);
+  if(!snap) return;
+  if(!confirm('Restore this snapshot? Your current unsaved changes will be replaced.')) return;
+  state.project   = snap.project.project;
+  state.globals   = snap.project.globals;
+  state.questions = snap.project.questions;
+  autosaveNow();
+  touchCurrentIntoProjects();
+  location.hash = '#/editor';
+}
+function renderVersions(root){
+  const map   = getSnapshotsMap();
+  const pid   = state.project.id;
+  const snaps = map[pid] || [];
+  root.innerHTML = `
+    <section class="app-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <strong>Versions & Diff</strong>
+          <div class="stack">
+            <input id="snapNote" placeholder="Snapshot note (optional)" style="width:240px"/>
+            <button id="makeSnap" class="primary">📸 Snapshot</button>
+          </div>
+        </div>
+        <div class="card-content">
+          ${snaps.length ? `
+            <div class="stack" style="flex-wrap:wrap;">
+              <select id="snapA">${snaps.map(s=>`<option value="${s.id}">${new Date(s.ts).toLocaleString()} — ${escapeHTML(s.note||'')}</option>`).join('')}</select>
+              <span>↔</span>
+              <select id="snapB">${snaps.map(s=>`<option value="${s.id}">${new Date(s.ts).toLocaleString()} — ${escapeHTML(s.note||'')}</option>`).join('')}</select>
+              <button id="doDiff">Compare</button>
+              <button id="restoreA">Restore A</button>
+              <button id="restoreB">Restore B</button>
+              <button id="deleteA">Delete A</button>
+            </div>
+            <div id="diffOut" class="diff" style="margin-top:12px; white-space:pre-wrap;"></div>
+          ` : `<div class="muted">No snapshots yet.</div>`}
+        </div>
+      </div>
+    </section>`;
+
+  $('#makeSnap').onclick = ()=>{
+    snapshotCurrent($('#snapNote').value.trim());
+    renderVersions(root);
+  };
+  if(!snaps.length) return;
+
+  const byId = Object.fromEntries(snaps.map(s=>[s.id,s]));
+  $('#doDiff').onclick    = ()=>{ const a = byId[$('#snapA').value]; const b = byId[$('#snapB').value]; if(!a||!b) return; $('#diffOut').innerHTML = prettyJsonDiff(a.project, b.project); };
+  $('#restoreA').onclick  = ()=> restoreSnapshot($('#snapA').value, byId);
+  $('#restoreB').onclick  = ()=> restoreSnapshot($('#snapB').value, byId);
+  $('#deleteA').onclick   = ()=>{
+    const id  = $('#snapA').value;
+    const idx = snaps.findIndex(s=>s.id===id);
+    if(idx>=0 && confirm('Delete snapshot A?')){
+      snaps.splice(idx,1);
+      saveSnapshotsMap(map);
+      renderVersions(root);
+    }
+  };
+}
+/* Simple JSON diff (line-based) */
+function prettyJsonDiff(a,b){
+  const A = JSON.stringify(a, null, 2).split('\n');
+  const B = JSON.stringify(b, null, 2).split('\n');
+  const max = Math.max(A.length, B.length);
+  const out = [];
+  for(let i=0;i<max;i++){
+    const l = A[i] ?? '', r = B[i] ?? '';
+    if(l===r){ out.push(escapeHTML(l)); }
+    else{ if(l) out.push('<del>− ' + escapeHTML(l) + '</del>'); if(r) out.push('<ins>+ ' + escapeHTML(r) + '</ins>'); }
+  }
+  return out.join('\n');
+}
+
+/* =========================================================
+   IMPORT / EXPORT / GENERATE
+   ========================================================= */
+function downloadJSON(){
+  state.project.updated_at = new Date().toISOString();
+  const data = JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions }, null, 2);
+  const blob = new Blob([data], {type:"application/json"});
+  const a    = document.createElement("a");
+  a.href     = URL.createObjectURL(blob);
+  a.download = `${(state.project.name||'project').replace(/[^\w\-]+/g,'_')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+$('#downloadJson').onclick = downloadJSON;
+
+$('#importJson').onclick = ()=>{
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="application/json";
+  inp.onchange = async (e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    const data=JSON.parse(await file.text());
+    state.project   = data.project   || state.project;
+    state.globals   = data.globals   || state.globals;
+    state.questions = data.questions || [];
+    ui_state.active_question_index = state.questions.length? 0 : null;
+    renderRoute(); autosaveNow(); setStatus("Loaded JSON.", true);
+    touchCurrentIntoProjects();
+  };
+  inp.click();
+};
+
+async function postAndDownload(url, filename){
+  $("#serverError").style.display="none";
+  setStatus("Generating…", false);
+  try{
+    const res = await fetch(url, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions })
+    });
+    if(!res.ok){ throw new Error(await res.text() || `HTTP ${res.status}`); }
+    const blob = await res.blob();
+    const a    = document.createElement("a");
+    a.href     = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(a.href);
+    setStatus("Download complete.", true);
+  }catch(err){
+    $("#serverError").textContent = "Server error:\n\n" + err.message;
+    $("#serverError").style.display="block";
+    setStatus("Generation failed.", false);
+  }
+}
+$('#generateXlsx').onclick = ()=> postAndDownload("/generate/tab-plan",      `${(state.project.name||'project').replace(/[^\w\-]+/g,'_')}_tab_plan.xlsx`);
+$('#generateDocx').onclick = ()=> postAndDownload("/generate/questionnaire", `${(state.project.name||'project').replace(/[^\w\-]+/g,'_')}_questionnaire.docx`);
+
+/* =========================================================
+   AUTOSAVE
+   ========================================================= */
+function autosaveNow(){
+  try{
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions }));
+    localStorage.setItem(`proj:${state.project.id}`, JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions }));
+    touchCurrentIntoProjects();
+    setStatus("Autosaved.", true);
+  }catch(e){ console.warn("Autosave failed", e); }
+}
+let _asTimer=null;
+function queueAutosave(){ clearTimeout(_asTimer); _asTimer=setTimeout(autosaveNow, 600); }
+document.addEventListener("input",  queueAutosave, true);
+document.addEventListener("change", queueAutosave, true);
+
+function loadAutosave(){
+  const s = localStorage.getItem(AUTOSAVE_KEY);
+  if(!s) return false;
+  const d = JSON.parse(s);
+  state.project   = d.project   || state.project;
+  state.globals   = d.globals   || state.globals;
+  state.questions = d.questions || [];
+  ui_state.active_question_index = state.questions.length? 0 : null;
+  return true;
+}
+
+/* =========================================================
+   ROUTING & BOOTSTRAP
+   ========================================================= */
+routes.set('#/dashboard', renderDashboard);
+routes.set('#/editor',    renderEditor);
+routes.set('#/library',   renderLibrary);
+routes.set('#/rules',     renderRules);
+routes.set('#/validator', renderValidator);
+routes.set('#/preview',   renderPreview);
+routes.set('#/versions',  renderVersions);
+
+function renderRoute(){
+  const root  = $('#view-root');
+  const route = ui_state.route || '#/dashboard';
+  (routes.get(route) || renderDashboard)(root);
+  highlightNav();
+}
+
+(function bootstrap(){
+  ensureRules(); // make defaults available before any view uses them
+  const s = localStorage.getItem(AUTOSAVE_KEY);
+  if(s && confirm("Restore your last autosaved session?")) loadAutosave();
+  renderRoute();
+})();
+</script>
+</body>
+</html>

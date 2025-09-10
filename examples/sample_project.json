@@ -1,0 +1,373 @@
+{
+  "project": {
+    "id": "proj-9c58be2d",
+    "name": "Q-Gen Sample (INFUSE & ATLAS motifs)",
+    "client": "Demo",
+    "version": "0.1.0",
+    "created_at": "2025-09-09T17:39:07.831151Z",
+    "updated_at": "2025-09-09T17:39:07.831164Z",
+    "notes": "Illustrative sample covering single/dual/multi-statement likert and numeric age."
+  },
+  "globals": {
+    "default_base_verbiage": "Total (qualified respondents)",
+    "default_base_definition": "",
+    "default_banners": [
+      {
+        "id": "AGE_BIN",
+        "label": "Age",
+        "definition": "S3 in [18..99]"
+      },
+      {
+        "id": "GENDER",
+        "label": "Gender",
+        "definition": "S1 in [1,2]"
+      }
+    ],
+    "scale_buckets": {
+      "5pt": {
+        "TB": [
+          5
+        ],
+        "T2B": [
+          4,
+          5
+        ],
+        "B2B": [
+          1,
+          2
+        ],
+        "BB": [
+          1
+        ],
+        "Mean": true
+      },
+      "7pt": {
+        "TB": [
+          7
+        ],
+        "T2B": [
+          6,
+          7
+        ],
+        "B2B": [
+          1,
+          2
+        ],
+        "BB": [
+          1
+        ],
+        "Mean": true
+      },
+      "10pt": {
+        "TB": [
+          10
+        ],
+        "T2B": [
+          9,
+          10
+        ],
+        "B2B": [
+          1,
+          2
+        ],
+        "BB": [
+          1
+        ],
+        "Mean": true
+      }
+    }
+  },
+  "questions": [
+    {
+      "id": "S1",
+      "type": "single",
+      "text": "What is your gender?",
+      "special_verbiage": "S1 (Gender)",
+      "options": [
+        {
+          "code": 1,
+          "label": "Male"
+        },
+        {
+          "code": 2,
+          "label": "Female"
+        },
+        {
+          "code": 3,
+          "label": "Non-binary/Other",
+          "hidden": false
+        }
+      ],
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Column % only (no nets)."
+        }
+      }
+    },
+    {
+      "id": "S3",
+      "type": "numeric",
+      "text": "What is your age?",
+      "special_verbiage": "S3 (Age)",
+      "numeric": {
+        "units": "years",
+        "bands": [
+          {
+            "label": "18–24",
+            "min": 18,
+            "max": 24
+          },
+          {
+            "label": "25–34",
+            "min": 25,
+            "max": 34
+          },
+          {
+            "label": "35–44",
+            "min": 35,
+            "max": 44
+          },
+          {
+            "label": "45–54",
+            "min": 45,
+            "max": 54
+          },
+          {
+            "label": "55–64",
+            "min": 55,
+            "max": 64
+          },
+          {
+            "label": "65–74",
+            "min": 65,
+            "max": 74
+          },
+          {
+            "label": "75–99",
+            "min": 75,
+            "max": 99
+          }
+        ],
+        "report_mean": true
+      },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Show bands and mean age."
+        }
+      }
+    },
+    {
+      "id": "Q8",
+      "type": "likert_single",
+      "text": "Please indicate your agreement with the following statement: 'The product is easy to use.'",
+      "special_verbiage": "Q8 (Ease of use)",
+      "scale": {
+        "points": 5,
+        "labels": [
+          "Strongly disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly agree"
+        ],
+        "buckets": {
+          "TB": [
+            5
+          ],
+          "T2B": [
+            4,
+            5
+          ],
+          "B2B": [
+            1,
+            2
+          ],
+          "BB": [
+            1
+          ],
+          "Mean": true
+        }
+      },
+      "likert": {
+        "kind": "single_statement",
+        "scale_points": 5,
+        "scale_type": "sentiment",
+        "net_column_text": "Net: T2B, B2B"
+      },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "Net: T2B, B2B",
+          "additional_instructions": "Single-statement Likert: only nets column populated; no derived rows."
+        }
+      }
+    },
+    {
+      "id": "Q6",
+      "type": "likert_dual",
+      "text": "How interested are you in using the following products?",
+      "special_verbiage": "Q6 (Interest by 2 concepts)",
+      "statements": [
+        "AO1D",
+        "INFUSE"
+      ],
+      "scale": {
+        "points": 5,
+        "labels": [
+          "Not at all interested",
+          "Slightly",
+          "Moderately",
+          "Very",
+          "Extremely"
+        ],
+        "buckets": {
+          "TB": [
+            5
+          ],
+          "T2B": [
+            4,
+            5
+          ],
+          "B2B": [
+            1,
+            2
+          ],
+          "BB": [
+            1
+          ],
+          "Mean": true
+        }
+      },
+      "likert": {
+        "kind": "dual_statement",
+        "scale_points": 5,
+        "scale_type": "sentiment",
+        "net_column_text": "Net: T2B, B2B"
+      },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "Net: T2B, B2B",
+          "additional_instructions": "Dual-statement Likert: only nets column populated; no extra summary rows."
+        }
+      }
+    },
+    {
+      "id": "Q5",
+      "type": "likert_multi",
+      "text": "Please indicate your agreement with each of the following statements about the brand.",
+      "special_verbiage": "Q5 (Brand agreement statements)",
+      "statements": [
+        "Is a brand I trust",
+        "Offers good value",
+        "Is recommended by HCPs",
+        "Is easy to find",
+        "Works quickly"
+      ],
+      "scale": {
+        "points": 5,
+        "labels": [
+          "Strongly disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly agree"
+        ],
+        "buckets": {
+          "TB": [
+            5
+          ],
+          "T2B": [
+            4,
+            5
+          ],
+          "B2B": [
+            1,
+            2
+          ],
+          "BB": [
+            1
+          ],
+          "Mean": true
+        }
+      },
+      "likert": {
+        "kind": "multi_statement",
+        "scale_points": 5,
+        "scale_type": "sentiment",
+        "net_column_text": "Net: T2B, B2B",
+        "summary_rows_for_multi": [
+          "T2B",
+          "B2B",
+          "TB",
+          "BB",
+          "Mean"
+        ]
+      },
+      "derived_rows": [
+        {
+          "id": "Q5_TB_Summary",
+          "label": "Q5_TB Summary",
+          "rule": "TB by statement"
+        },
+        {
+          "id": "Q5_T2B_Summary",
+          "label": "Q5_T2B Summary",
+          "rule": "T2B by statement"
+        },
+        {
+          "id": "Q5_B2B_Summary",
+          "label": "Q5_B2B Summary",
+          "rule": "B2B by statement"
+        },
+        {
+          "id": "Q5_BB_Summary",
+          "label": "Q5_BB Summary",
+          "rule": "BB by statement"
+        },
+        {
+          "id": "Q5_Mean_Summary",
+          "label": "Q5_Mean Summary",
+          "rule": "mean by statement"
+        }
+      ],
+      "exports": {
+        "tab_plan": {
+          "nets_text": "Net: T2B, B2B",
+          "additional_instructions": "Q5 Total (qualified respondents) Net: T2B, B2B; Net T2B and B2B by statement. Show 1 table for each statement plus TB/T2B/B2B/BB/Mean summaries. Only the first base row prints the nets text."
+        }
+      }
+    },
+    {
+      "id": "S7",
+      "type": "single",
+      "text": "Which brand do you currently wear?",
+      "special_verbiage": "S7 (Current brand)",
+      "options": [
+        {
+          "code": 1,
+          "label": "AO1D"
+        },
+        {
+          "code": 2,
+          "label": "INFUSE"
+        },
+        {
+          "code": 97,
+          "label": "Other"
+        },
+        {
+          "code": 98,
+          "label": "Don't know",
+          "exclusive": true
+        }
+      ],
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Column % only; remove T2B/B2B nets."
+        }
+      }
+    }
+  ]
+}

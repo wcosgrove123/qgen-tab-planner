@@ -1,0 +1,190 @@
+{
+  "project": {
+    "id": "proj-infuse-v1",
+    "name": "INFUSE Claims Test",
+    "client": "Cue / MJC",
+    "version": "0.1.0",
+    "created_at": "2025-09-10T07:30:00.000Z",
+    "updated_at": "2025-09-10T07:30:00.000Z",
+    "notes": "Starter build for INFUSE — S1–S7 + sample Likert singles (Q8, Q9)."
+  },
+  "globals": {
+    "default_base_verbiage": "Total (qualified respondents)",
+    "default_base_definition": "",
+    "default_banners": [],
+    "scale_buckets": {
+      "5pt": { "TB":[5], "T2B":[4,5], "B2B":[1,2], "BB":[1], "Mean": true },
+      "7pt": { "TB":[7], "T2B":[6,7], "B2B":[1,2], "BB":[1], "Mean": true },
+      "10pt": { "TB":[10], "T2B":[9,10], "B2B":[1,2], "BB":[1], "Mean": true }
+    },
+    "rules": {
+      "likert": { "single": true, "dual": true, "multi": true },
+      "screener": { "noNetsOnTerminate": true },
+      "nets": { "ageMaxInference": true, "hoursDefaultBands": true }
+    }
+  },
+  "questions": [
+    {
+      "id": "S1",
+      "type": "single",
+      "text": "What is your gender?",
+      "options": [
+        { "code": 1, "label": "Male" },
+        { "code": 2, "label": "Female" },
+        { "code": 3, "label": "Non-binary / Other" },
+        { "code": 4, "label": "Prefer not to answer" }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Column % only (no nets)."
+        }
+      }
+    },
+    {
+      "id": "S2",
+      "type": "multi",
+      "text": "Which of the following industries best describe your employment? (Select all that apply)",
+      "options": [
+        { "code": 1, "label": "Optical retailer" },
+        { "code": 2, "label": "Contact lens manufacturer", "terminate": true },
+        { "code": 3, "label": "Advertising/Market research", "terminate": true },
+        { "code": 4, "label": "Healthcare (non-vision)" },
+        { "code": 5, "label": "Other" }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Column % only. Some options terminate — do not net."
+        }
+      }
+    },
+    {
+      "id": "S3",
+      "type": "single",
+      "text": "What is your age?",
+      "options": [
+        { "code": 1, "label": "1–17" },
+        { "code": 2, "label": "18–24" },
+        { "code": 3, "label": "25–34" },
+        { "code": 4, "label": "35–44" },
+        { "code": 5, "label": "45–54" },
+        { "code": 6, "label": "55–60" },
+        { "code": 7, "label": "61–75" },
+        { "code": 8, "label": "76–99" }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Keep these age bands and show mean age."
+        }
+      }
+    },
+    {
+      "id": "S4",
+      "type": "multi",
+      "text": "Which of the following items have you used in the past X months? (Select all that apply)",
+      "options": [
+        { "code": 1, "label": "Daily disposables" },
+        { "code": 2, "label": "Monthly lenses" },
+        { "code": 3, "label": "Rewetting drops" },
+        { "code": 4, "label": "Solution" },
+        { "code": 5, "label": "Other" }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Column % only; no nets."
+        }
+      }
+    },
+    {
+      "id": "S5",
+      "type": "single",
+      "text": "Do you have any of the following vision conditions?",
+      "options": [
+        { "code": 1, "label": "None of the above" },
+        { "code": 2, "label": "Condition A", "terminate": true },
+        { "code": 3, "label": "Condition B", "terminate": true }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Column % only; several options terminate — don’t net."
+        }
+      }
+    },
+    {
+      "id": "S6",
+      "type": "single",
+      "text": "Which type of contact lenses do you primarily wear?",
+      "options": [
+        { "code": 1, "label": "Daily disposables" },
+        { "code": 2, "label": "Weekly" },
+        { "code": 3, "label": "Monthly" },
+        { "code": 4, "label": "Other" }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Single choice → Column % only."
+        }
+      }
+    },
+    {
+      "id": "S7",
+      "type": "single",
+      "text": "What is your current brand?",
+      "options": [
+        { "code": 1, "label": "AO1D" },
+        { "code": 2, "label": "INFUSE" },
+        { "code": 3, "label": "Other" }
+      ],
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "",
+          "additional_instructions": "Sample is restricted; Column % only. Remove T2B/B2B nets."
+        }
+      }
+    },
+    {
+      "id": "Q8",
+      "type": "likert_single",
+      "text": "Please indicate how much you agree or disagree with the following statement about your contact lenses: They are comfortable for all-day wear.",
+      "scale": {
+        "points": 5,
+        "labels": ["Strongly disagree", "Somewhat disagree", "Neither", "Somewhat agree", "Strongly agree"]
+      },
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "Net: T2B, B2B",
+          "additional_instructions": "Single-statement 5-pt Likert: only the net column is filled. No extra rows."
+        }
+      }
+    },
+    {
+      "id": "Q9",
+      "type": "likert_single",
+      "text": "Please indicate how much you agree or disagree: I would recommend my current lenses to a friend.",
+      "scale": {
+        "points": 5,
+        "labels": ["Strongly disagree", "Somewhat disagree", "Neither", "Somewhat agree", "Strongly agree"]
+      },
+      "base": { "verbiage": "Total (qualified respondents)" },
+      "exports": {
+        "tab_plan": {
+          "nets_text": "Net: T2B, B2B",
+          "additional_instructions": "Single-statement 5-pt Likert: only the net column is filled. No extra rows."
+        }
+      }
+    }
+  ]
+}
