@@ -205,6 +205,34 @@
     /* versions */
     .diff del{ background:#fde2e2; text-decoration:none; }
     .diff ins{ background:#e2f7e2; text-decoration:none; }
+
+    .preset-pane button { border-radius: 8px; }
+
+    /* ---- Preset dropdown layout ---- */
+    /* .preset-wrap { position: relative; } anchor for absolutely-positioned panel */
+
+    .preset-panel {
+      position: absolute;
+      top: 40px;             /* sits just under the Presets button row */
+      left: 0;
+      width: min(860px, calc(100vw - 64px));
+      max-height: 60vh;      /* internal scroll instead of page scroll */
+      overflow: auto;
+      z-index: 1000;
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 10px;
+      display: none;         /* toggled by JS */
+    }
+    .preset-panel .sticky-head {
+      position: sticky; top: 0;
+      background: var(--surface-1);
+      padding-bottom: 8px; margin-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
   </style>
 </head>
 <body>
@@ -253,6 +281,145 @@ for (const k of ["ensureRules","renderEditorPanel","renderRules","renderEditor",
   try { delete window[k]; } catch {}
 }
 
+/* =========================
+   LIKERT PRESET CATALOG
+   ========================= */
+const LIKERT_PRESETS = {
+  agreement: {
+    label: "Agreement",
+    byPoints: {
+      3: ["Disagree","Neither","Agree"],
+      5: ["Strongly disagree","Disagree","Neither","Agree","Strongly agree"],
+      7: ["Strongly disagree","Disagree","Somewhat disagree","Neither","Somewhat agree","Agree","Strongly agree"],
+      10: ["1","2","3","4","5","6","7","8","9","10"]
+    }
+  },
+  applicability: {
+    label: "Applicability",
+    byPoints: {
+      3: ["Not applicable","Somewhat applicable","Fully applicable"],
+      5: ["Not at all applicable","Slightly applicable","Moderately applicable","Very applicable","Extremely applicable"],
+      7: ["Not at all","Slightly","Somewhat","Moderately","Very","Highly","Extremely"],
+      10: ["1","2","3","4","5","6","7","8","9","10"]
+    }
+  },
+  consideration: {
+    label: "Consideration",
+    byPoints: {
+      3: ["Would not consider","Might consider","Would consider"],
+      5: ["Definitely would not","Probably would not","Might or might not","Probably would","Definitely would"],
+      7: ["Definitely not","Probably not","Somewhat not","Unsure","Somewhat would","Probably would","Definitely would"],
+      10: ["1","2","3","4","5","6","7","8","9","10"]
+    }
+  },
+  likelihood: {
+    label: "Likelihood",
+    byPoints: {
+      3: ["Unlikely","Neither","Likely"],
+      5: ["Very unlikely","Unlikely","Neither","Likely","Very likely"],
+      7: ["Extremely unlikely","Very unlikely","Unlikely","Neither","Likely","Very likely","Extremely likely"],
+      10:["Not at all likely","2","3","4","5","6","7","8","9","Extremely likely"]
+    }
+  },
+  satisfaction: {
+    label: "Satisfaction",
+    byPoints: {
+      3: ["Dissatisfied","Neutral","Satisfied"],
+      5: ["Very dissatisfied","Dissatisfied","Neutral","Satisfied","Very satisfied"],
+      7: ["Extremely dissatisfied","Very dissatisfied","Dissatisfied","Neutral","Satisfied","Very satisfied","Extremely satisfied"],
+      10:["1","2","3","4","5","6","7","8","9","10"]
+    }
+  }
+};
+
+/* Build the mini UI for picking a preset (renders inside a host div) */
+function openPresetPicker(i){
+  const host = document.getElementById(`presetHost-${i}`);
+  if (!host) return;
+
+  // Toggle open/close
+  if (host.style.display === 'block') { host.style.display = 'none'; host.innerHTML = ''; return; }
+  host.style.display = 'block';
+
+  const close = () => {
+    host.style.display = 'none';
+    host.innerHTML = '';
+    document.removeEventListener('click', onDocClick, true);
+    document.removeEventListener('keydown', onEsc, true);
+  };
+  const onDocClick = (e) => {
+    if (!host.contains(e.target) && e.target.id !== `presetBtn-${i}`) close();
+  };
+  const onEsc = (e) => { if (e.key === 'Escape') close(); };
+
+  document.addEventListener('click', onDocClick, true);
+  document.addEventListener('keydown', onEsc, true);
+
+  const ptsOptions = [3,5,7,10].map(n=>`<option value="${n}">${n} pt.</option>`).join("");
+  const typeOptions = Object.entries(LIKERT_PRESETS)
+    .map(([k,v])=>`<option value="${k}">${v.label}</option>`).join("");
+
+  host.innerHTML = `
+    <div class="sticky-head">
+      <div class="stack" style="align-items:flex-end; flex-wrap:wrap;">
+        <label>Points
+          <select id="prePts-${i}" style="min-width:120px">${ptsOptions}</select>
+        </label>
+        <label>Scale type
+          <select id="preType-${i}" style="min-width:220px">${typeOptions}</select>
+        </label>
+        <button id="preApply-${i}" class="primary">Apply</button>
+        <button id="preCancel-${i}">Cancel</button>
+      </div>
+    </div>
+    <div class="muted">Preview:</div>
+    <div id="prePrev-${i}" class="mono" style="white-space:normal; word-break:break-word;"></div>
+  `;
+
+  const $pts  = document.getElementById(`prePts-${i}`);
+  const $type = document.getElementById(`preType-${i}`);
+  const $prev = document.getElementById(`prePrev-${i}`);
+
+  function refreshPreview(){
+    const t   = $type.value;
+    const pts = parseInt($pts.value, 10);
+    const labels = (LIKERT_PRESETS[t]?.byPoints?.[pts]) || [];
+    $prev.textContent = labels.join("  |  ");
+  }
+  $pts.onchange = refreshPreview;
+  $type.onchange = refreshPreview;
+  refreshPreview();
+
+  document.getElementById(`preCancel-${i}`).onclick = close;
+  document.getElementById(`preApply-${i}`).onclick = ()=>{
+    const q   = state.questions[i];
+    const t   = $type.value;
+    const pts = parseInt($pts.value, 10);
+    const labels = (LIKERT_PRESETS[t]?.byPoints?.[pts]) || [];
+    if (!labels.length) return close();
+
+    // Ensure table mode & sync
+    q.mode = 'table';
+    q.grid ||= { rows: q.statements || [], cols: [] };
+    q.grid.cols = [...labels];
+    q.scale ||= {};
+    q.scale.labels = [...labels];
+    q.scale.points = labels.length;
+
+    harmonizeTypeFromMode(q);
+    syncTableFacets(q);
+    queueAutosave();
+    renderEditorPanel();
+    setStatus(`Applied ${pts}-pt ${LIKERT_PRESETS[t].label} preset.`, true);
+    close();
+  };
+
+  // Keep the panel within viewport horizontally (simple edge guard)
+  const rect = host.getBoundingClientRect();
+  const overflowRight = rect.right - (window.innerWidth - 12);
+  if (overflowRight > 0) host.style.left = `calc(0px - ${overflowRight}px)`;
+}
+
 /************* THEME *************/
 const THEME_KEY = "qgen_theme";
 const themeSel = document.getElementById("themeSwitch");
@@ -272,6 +439,63 @@ const SNAP_KEY = "qgen_snapshots_v1";   // versions per project (by id)
 
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* ========= PRESET SCALES (built-in + custom storage) ========= */
+const PRESET_KEY = "qgen_custom_scales_v1"; // localStorage
+
+// Built-ins. Keep "Numerical" first; others alphabetical in UI.
+const BUILTIN_SCALES = {
+  3: {
+    Numerical: ["1","2","3"],
+    Agreement: ["Strongly disagree","Disagree","Strongly agree"],
+    Frequency: ["Rarely","Sometimes","Often"],
+  },
+  5: {
+    Numerical: ["1","2","3","4","5"],
+    Agreement: ["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"],
+    Consideration: ["Definitely would not consider","Probably would not consider","Might or might not consider","Probably would consider","Definitely would consider"],
+    Application: ["Not at all applicable","Slightly applicable","Moderately applicable","Very applicable","Extremely applicable"],
+  },
+  7: {
+    Numerical: ["1","2","3","4","5","6","7"],
+    Agreement: ["Strongly disagree","Disagree","Somewhat disagree","Neutral","Somewhat agree","Agree","Strongly agree"],
+  },
+  10: {
+    Numerical: ["1","2","3","4","5","6","7","8","9","10"],
+  }
+};
+
+function loadCustomScales(){
+  try { return JSON.parse(localStorage.getItem(PRESET_KEY) || "{}"); }
+  catch { return {}; }
+}
+function saveCustomScales(map){
+  localStorage.setItem(PRESET_KEY, JSON.stringify(map));
+}
+function getScalesFor(points){
+  const built = BUILTIN_SCALES[points] || {};
+  const customMap = loadCustomScales();
+  const custom = (customMap[points] || {});    // {Name: [labels]}
+  // Order: Numerical first (if present), then others alpha
+  const names = Object.keys({...built, ...custom});
+  const numericalFirst = names.sort((a,b)=>{
+    if (a==="Numerical") return -1;
+    if (b==="Numerical") return 1;
+    return a.localeCompare(b);
+  });
+  return numericalFirst.map(name => ({
+    name,
+    labels: (custom[name] || built[name])
+  }));
+}
+function saveCustomPreset(points, name, labels, description=""){
+  const map = loadCustomScales();
+  (map[points] ||= {});
+  map[points][name] = labels;
+  // (Optional) you could also store descriptions in a sibling map if wanted
+  saveCustomScales(map);
+}
+
 
 const state = {
   project: { id: "proj-" + Math.random().toString(16).slice(2,10), name:"", client:"", version:"0.1.0", created_at:new Date().toISOString(), updated_at:new Date().toISOString(), notes:"" },
@@ -566,6 +790,74 @@ function renderEditorPanel(){
   window._tb_delCol = (ii, idx) => { state.questions[ii].grid.cols.splice(idx,1); renderEditorPanel(); queueAutosave(); };
   window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
 
+  // Create your own Preset 
+  function openPresetMaker(i){
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.35);
+    display:flex; align-items:center; justify-content:center; z-index:1000;`;
+  overlay.innerHTML = `
+    <div class="card" style="width:640px; max-width:92vw;">
+      <div class="card-header">
+        <strong>Create a custom scale</strong>
+        <div class="stack"><button id="pmClose">Close</button></div>
+      </div>
+      <div class="card-content">
+        <div class="row"><div class="k">Name</div>
+          <input id="pmName" placeholder="e.g., Usage intensity"/>
+        </div>
+        <div class="row"><div class="k">Description</div>
+          <input id="pmDesc" placeholder="(optional)"/>
+        </div>
+        <div class="row"><div class="k">Labels</div>
+          <textarea id="pmLabels" placeholder="One label per line, left → right"></textarea>
+        </div>
+        <div class="stack" style="justify-content:space-between;">
+          <div class="muted">Tip: keep 3–10 labels. You can still edit after inserting.</div>
+          <div class="stack">
+            <button id="pmInsert">Insert only</button>
+            <button id="pmSaveApply" class="primary">Save to presets & Insert</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const close = ()=> overlay.remove();
+  overlay.querySelector('#pmClose').onclick = close;
+
+  function parseLabels(){
+    const raw = overlay.querySelector('#pmLabels').value;
+    return raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  }
+  function apply(labels){
+    const q = state.questions[i];
+    q.mode = 'table';
+    q.grid ||= { rows: q.statements||[], cols: [] };
+    q.grid.cols  = [...labels];
+    q.scale    ||= {};
+    q.scale.labels = [...labels];
+    q.scale.points = labels.length;
+    renderEditorPanel(); queueAutosave();
+  }
+
+  overlay.querySelector('#pmInsert').onclick = ()=>{
+    const labels = parseLabels();
+    if(labels.length < 2){ alert("Please provide at least 2 labels."); return; }
+    apply(labels); close();
+  };
+
+  overlay.querySelector('#pmSaveApply').onclick = ()=>{
+    const name   = overlay.querySelector('#pmName').value.trim();
+    const desc   = overlay.querySelector('#pmDesc').value.trim();
+    const labels = parseLabels();
+    if(!name){ alert("Please provide a name."); return; }
+    if(labels.length < 2){ alert("Please provide at least 2 labels."); return; }
+    saveCustomPreset(labels.length, name, labels, desc);
+    apply(labels); close();
+  };
+}
+
   // Build UI
   panel.innerHTML = `
     <div class="card" style="flex-grow:1;">
@@ -718,12 +1010,14 @@ function renderEditorPanel(){
             const G = q.grid;
 
             return `
-            <div class="row"><div class="k">Table</div>
-              <div>
-                <div class="stack" style="margin-bottom:6px;">
-                  <button onclick="_tb_addRow(${i})">+ Row</button>
-                  <button onclick="_tb_addCol(${i})">+ Column</button>
-                </div>
+            <div class="stack preset-wrap" style="margin-bottom:6px;">
+              <button onclick="_tb_addRow(${i})">+ Row</button>
+              <button onclick="_tb_addCol(${i})">+ Column</button>
+              <button id="presetBtn-${i}" onclick="openPresetPicker(${i})">⋯ Presets</button>
+
+              <!-- anchored dropdown panel -->
+              <div id="presetHost-${i}" class="preset-panel"></div>
+            </div>
                 <div style="overflow:auto; border:1px solid var(--line); border-radius:8px;">
                   <table style="width:100%; border-collapse:collapse; min-width:520px;">
                     <thead>
@@ -790,6 +1084,92 @@ function renderEditorPanel(){
         </div>
       </div>
     </div>`;
+  // --- Preset UI wiring (table mode) ---
+  {
+    // const btn    = document.getElementById(`presetBtn-${i}`);
+    // const pane   = document.getElementById(`presetPane-${i}`);
+    // const ptsSel = document.getElementById(`presetPoints-${i}`);
+    // const list   = document.getElementById(`presetList-${i}`);
+    // const doBlank= document.getElementById(`presetBlank-${i}`);
+    // const maker  = document.getElementById(`presetMaker-${i}`);
+
+    // Defender: if we’re not on table mode right now, nothing to wire.
+    if (!btn || !pane) { /* not in table view */ }
+    else {
+      function drawPresetList(){
+        const points = parseInt(ptsSel.value, 10);
+        const items  = getScalesFor(points); // ← uses your helpers (Numerical first, then A–Z, then customs)
+
+        list.innerHTML = items.map(it => `
+          <button class="preset-item" data-name="${it.name}"
+                  style="display:block; width:100%; text-align:left; margin:4px 0;">
+            ${escapeHTML(it.name)}
+            <span class="muted" style="float:right">${points}-pt</span>
+            <div class="muted" style="font-size:12px; margin-top:2px;
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${escapeHTML(it.labels.join(" | "))}
+            </div>
+          </button>
+        `).join('') || '<div class="muted">No presets for this point count.</div>';
+
+        list.querySelectorAll('.preset-item').forEach(b=>{
+          b.onclick = ()=>{
+            const name   = b.dataset.name;
+            const points = parseInt(ptsSel.value, 10);
+            const chosen = getScalesFor(points).find(x=>x.name===name);
+            if(!chosen) return;
+
+            // Apply to this question:
+            const q = state.questions[i];
+            q.mode = 'table';
+            q.grid ||= { rows: q.statements||[], cols: [] };
+            q.grid.cols  = [...chosen.labels];
+            q.scale    ||= {};
+            q.scale.labels = [...chosen.labels];
+            q.scale.points = points;
+
+            renderEditorPanel();
+            queueAutosave();
+            pane.style.display = 'none';
+          };
+        });
+      }
+
+      btn.onclick = ()=>{
+        const now = (pane.style.display==='none' || !pane.style.display) ? 'block' : 'none';
+        pane.style.display = now;
+        if (now === 'block') drawPresetList();
+      };
+
+      ptsSel?.addEventListener('change', drawPresetList);
+
+      doBlank.onclick = ()=>{
+        const points = parseInt(ptsSel.value, 10);
+        const q = state.questions[i];
+        q.mode = 'table';
+        q.grid ||= { rows: q.statements||[], cols: [] };
+        q.grid.cols  = Array(points).fill("");
+        q.scale    ||= {};
+        q.scale.labels = Array(points).fill("");
+        q.scale.points = points;
+
+        renderEditorPanel();
+        queueAutosave();
+        pane.style.display = 'none';
+      };
+
+      maker.onclick = ()=> openPresetMaker(i);
+
+      // close on outside click (single-shot)
+      setTimeout(()=>{
+        const onDoc = (e)=>{
+          if (!pane.contains(e.target) && e.target !== btn) pane.style.display = 'none';
+          document.removeEventListener('click', onDoc);
+        };
+        document.addEventListener('click', onDoc);
+      }, 0);
+    }
+  }
 }
 
 /* -------- Small editor helpers (unchanged) -------- */

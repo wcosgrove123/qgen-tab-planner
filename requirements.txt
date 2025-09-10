@@ -1,0 +1,12 @@
+# Web server
+flask
+
+# Data processing and Excel export
+pandas
+xlsxwriter
+
+# Word document generation
+python-docx
+
+# JSON validation
+jsonschema
