@@ -1,20 +1,42 @@
-# Python
+# --- Python ---
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
 venv/
-.env
+env/
 
-# PyInstaller build artifacts
-build/
-dist/
+# --- Build / Dist (PyInstaller, etc.) ---
+/dist/
+/build/
+/_output/
+/_build/
 *.spec
 
-# IDE / OS specific
-.idea/
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
 .vscode/
-*.DS_Store
+.idea/
 
-# Generated output files (optional, but recommended)
-# It's better to generate these from source files.
-*.xlsx
+# --- Logs & temp ---
+*.log
+*.tmp
+*.swp
+
+# --- Project-generated outputs ---
+# Questionnaire & tab plan exports
 *.docx
+*.xlsx
+
+# JSON exports (user data, autosaves)
+*.json
+
+# HTML/Pandoc intermediate builds
+*.html
+*.htm
+
+# Media generated during runs
+/media/

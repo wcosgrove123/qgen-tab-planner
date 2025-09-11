@@ -100,17 +100,21 @@
       flex-direction:column;
     }
 
-    header{
-      background:var(--surface-2);
-      border-bottom:1px solid var(--line);
-      padding:12px 16px;
-      display:flex; align-items:center; gap:16px; flex-shrink:0;
+    header {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* <-- ADD THIS LINE */
+      flex-shrink: 0;
       box-shadow: var(--shadow);
     }
+
     header .logo{ font-size:20px; font-weight:700; }
     header .project-inputs{ display:flex; gap:8px; align-items:center; }
     header .project-inputs input{ padding:6px 10px; width:auto; }
-    header .actions{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+    header .actions{ display:flex; gap:8px; align-items:center; }
 
     /* top nav */
     nav.app-nav{ background:var(--surface-2); border-bottom:1px solid var(--line); padding:6px 12px; display:flex; gap:8px; align-items:center; }
@@ -209,10 +213,9 @@
     .preset-pane button { border-radius: 8px; }
 
     /* ---- Preset dropdown layout ---- */
-    /* .preset-wrap { position: relative; } anchor for absolutely-positioned panel */
 
     .preset-panel {
-      position: absolute;
+      position: relative;
       top: 40px;             /* sits just under the Presets button row */
       left: 0;
       width: min(860px, calc(100vw - 64px));
@@ -238,12 +241,16 @@
 <body>
   <!-- HEADER -->
   <header>
-    <div class="logo">Q-Gen</div>
     <div class="project-inputs">
       <input id="projName" placeholder="Project Name" title="Project Name" />
       <input id="projClient" placeholder="Client" title="Client" />
       <input id="projVersion" placeholder="Version" title="Version" />
     </div>
+
+    <div class="logo">
+      <img src="icons/logo.png" alt="Your Company Name" height="48" />
+    </div>
+
     <div class="actions">
       <label class="muted" for="themeSwitch">Theme</label>
       <select id="themeSwitch" title="Theme">
@@ -255,8 +262,8 @@
       <button id="downloadJson" class="cta">💾 Export</button>
       <button id="generateDocx" class="cta">📝 QRE</button>
       <button id="generateXlsx" class="cta">⚙️ Tab Plan</button>
+      <div id="status" class="status-msg"></div>
     </div>
-    <div id="status" class="status-msg"></div>
   </header>
 
   <!-- APP NAV (pages) -->
@@ -333,7 +340,7 @@ const LIKERT_PRESETS = {
 };
 
 /* Build the mini UI for picking a preset (renders inside a host div) */
-function openPresetPicker(i){
+  function openPresetPicker(i){
   const host = document.getElementById(`presetHost-${i}`);
   if (!host) return;
 
@@ -370,6 +377,7 @@ function openPresetPicker(i){
         </label>
         <button id="preApply-${i}" class="primary">Apply</button>
         <button id="preCancel-${i}">Cancel</button>
+        <button id="preCustom-${i}">Create your own...</button>
       </div>
     </div>
     <div class="muted">Preview:</div>
@@ -384,14 +392,20 @@ function openPresetPicker(i){
     const t   = $type.value;
     const pts = parseInt($pts.value, 10);
     const labels = (LIKERT_PRESETS[t]?.byPoints?.[pts]) || [];
-    $prev.textContent = labels.join("  |  ");
+    $prev.textContent = labels.join(" | ");
   }
   $pts.onchange = refreshPreview;
   $type.onchange = refreshPreview;
   refreshPreview();
 
   document.getElementById(`preCancel-${i}`).onclick = close;
-  document.getElementById(`preApply-${i}`).onclick = ()=>{
+
+  // "Create your own…" is now correctly wired here
+  document.getElementById(`preCustom-${i}`).onclick = () => {
+    openPresetMaker(i);
+  };
+
+  document.getElementById(`preApply-${i}`).onclick = () => {
     const q   = state.questions[i];
     const t   = $type.value;
     const pts = parseInt($pts.value, 10);
@@ -512,6 +526,7 @@ const state = {
   questions: []
 };
 const ui_state = { active_question_index: null, active_tab: 'main', route: location.hash || '#/dashboard' };
+ui_state.base_builders = ui_state.base_builders || {};
 
 /************* ROUTER *************/
 const routes = new Map();
@@ -573,6 +588,7 @@ function renderDashboard(root){
             <button data-exp="${p.id}">Export JSON</button>
             <button data-genq="${p.id}">📝 QRE</button>
             <button data-genx="${p.id}">⚙️ Tab</button>
+            <button data-del="${p.id}" class="danger">🗑️ Delete</button>
             <select data-status="${p.id}"><option ${p.status==='Draft'?'selected':''}>Draft</option><option ${p.status==='Active'?'selected':''}>Active</option><option ${p.status==='Archived'?'selected':''}>Archived</option></select>
           </div>
         </div>
@@ -585,6 +601,23 @@ function renderDashboard(root){
     $$('[data-genx]').forEach(b=> b.onclick = ()=> openAndGen(b.dataset.genx, 'tab'));
     $$('[data-fav]').forEach(b=> b.onclick = ()=> toggleFav(b.dataset.fav));
     $$('[data-status]').forEach(sel=> sel.onchange = ()=> setStatusFor(sel.dataset.status, sel.value));
+    $$('[data-del]').forEach(b => b.onclick = () => {
+      const id = b.dataset.del;
+      const projName = getProjects().find(p => p.id === id)?.name || 'this project';
+      if (!confirm(`Are you sure you want to permanently delete "${projName}"? This cannot be undone.`)) {
+        return;
+      }
+
+      // Remove the main project data
+      localStorage.removeItem(`proj:${id}`);
+
+      // Remove the project from the master list
+      const updatedProjects = getProjects().filter(p => p.id !== id);
+      saveProjects(updatedProjects);
+
+      // Re-draw the dashboard to show the change
+      draw(updatedProjects);
+    });
   };
 
   draw(list);
@@ -791,8 +824,7 @@ function renderEditorPanel(){
   window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
 
   // Create your own Preset 
-  function openPresetMaker(i){
-  const overlay = document.createElement('div');
+  window.openPresetMaker = function(i){  const overlay = document.createElement('div');
   overlay.style.cssText = `
     position:fixed; inset:0; background:rgba(0,0,0,.35);
     display:flex; align-items:center; justify-content:center; z-index:1000;`;
@@ -858,430 +890,578 @@ function renderEditorPanel(){
   };
 }
 
-  // Build UI
-  panel.innerHTML = `
-    <div class="card" style="flex-grow:1;">
-      <div class="card-header">
-        <span>Editing: <strong>${q.id}</strong></span>
-        <div class="stack">
-          <button onclick="saveQuestionToLibrary(${i})">💾 Save to Library</button>
-          <button onclick="dupQ(${i})">Duplicate</button>
-          <button class="danger" onclick="delQ(${i})">Delete</button>
+// Build UI
+// safe tab-plan object so inputs don't error if not yet created
+const tp = (q.exports && q.exports.tab_plan) ? q.exports.tab_plan : {};
+
+panel.innerHTML = `
+  <div class="card" style="flex-grow:1;">
+    <div class="card-header">
+      <span>Editing: <strong>${q.id}</strong></span>
+      <div class="stack">
+        <button onclick="saveQuestionToLibrary(${i})">💾 Save to Library</button>
+        <button onclick="dupQ(${i})">Duplicate</button>
+        <button class="danger" onclick="delQ(${i})">Delete</button>
+      </div>
+    </div>
+
+    <div class="editor-tabs">
+      <div class="tab-btn tab ${ui_state.active_tab==='main'?'active':''}"   data-tab="main">Main</div>
+      <div class="tab-btn tab ${ui_state.active_tab==='logic'?'active':''}"  data-tab="logic">Logic & Base</div>
+      <div class="tab-btn tab ${ui_state.active_tab==='tabplan'?'active':''}" data-tab="tabplan">Tab Plan</div>
+    </div>
+
+    <div class="card-content">
+      <!-- MAIN TAB -->
+      <div class="tab-content ${ui_state.active_tab==='main'?'active':''}">
+        <div class="row"><div class="k">Question ID</div>
+          <input value="${q.id}" oninput="updateQ(${i}, 'id', event.target.value)"/>
         </div>
-      </div>
 
-      <div class="editor-tabs">
-        <div class="tab ${ui_state.active_tab==='main'?'active':''}" onclick="setActiveTab('main')">Main</div>
-        <div class="tab ${ui_state.active_tab==='logic'?'active':''}" onclick="setActiveTab('logic')">Logic & Base</div>
-        <div class="tab ${ui_state.active_tab==='tabplan'?'active':''}" onclick="setActiveTab('tabplan')">Tab Plan</div>
-      </div>
-
-      <div class="card-content">
-        <!-- MAIN TAB -->
-        <div class="tab-content ${ui_state.active_tab==='main'?'active':''}">
-          <div class="row"><div class="k">Question ID</div>
-            <input value="${q.id}" oninput="updateQ(${i}, 'id', event.target.value)"/>
+        <!-- MODE SELECTOR -->
+        <div class="row"><div class="k">Mode</div>
+          <div class="stack">
+            <label><input type="radio" name="mode-${i}" value="list"   ${mode==='list'?'checked':''}
+              onchange="state.questions[${i}].mode='list'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Item or list</label>
+            <label><input type="radio" name="mode-${i}" value="numeric" ${mode==='numeric'?'checked':''}
+              onchange="state.questions[${i}].mode='numeric'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Numeric</label>
+            <label><input type="radio" name="mode-${i}" value="table"  ${mode==='table'?'checked':''}
+              onchange="state.questions[${i}].mode='table'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Table</label>
           </div>
+        </div>
 
-          <!-- MODE SELECTOR -->
-          <div class="row"><div class="k">Mode</div>
+        <div class="row"><div class="k">Question Text</div>
+          <textarea oninput="updateQ(${i}, 'text', event.target.value)">${q.text || ""}</textarea>
+        </div>
+
+        <!-- LIST MODE -->
+        ${mode==='list' ? `
+          <div class="row"><div class="k">Selection</div>
             <div class="stack">
-              <label><input type="radio" name="mode-${i}" value="list"   ${mode==='list'?'checked':''}
-                onchange="state.questions[${i}].mode='list'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Item or list</label>
-              <label><input type="radio" name="mode-${i}" value="numeric" ${mode==='numeric'?'checked':''}
-                onchange="state.questions[${i}].mode='numeric'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Numeric</label>
-              <label><input type="radio" name="mode-${i}" value="table"  ${mode==='table'?'checked':''}
-                onchange="state.questions[${i}].mode='table'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Table</label>
+              <label><input type="radio" name="listSel-${i}" value="single" ${getListSelection(q)==='single'?'checked':''}
+                onchange="setListSelection(state.questions[${i}], 'single'); queueAutosave(); renderQuestionList();"/> Single</label>
+              <label><input type="radio" name="listSel-${i}" value="multi" ${getListSelection(q)==='multi'?'checked':''}
+                onchange="setListSelection(state.questions[${i}], 'multi'); queueAutosave(); renderQuestionList();"/> Multi</label>
             </div>
           </div>
 
-          <div class="row"><div class="k">Question Text</div>
-            <textarea oninput="updateQ(${i}, 'text', event.target.value)">${q.text || ""}</textarea>
-          </div>
-
-          <!-- LIST MODE -->
-          ${mode==='list' ? `
-            <div class="row"><div class="k">Selection</div>
+          <div class="row"><div class="k">Options</div>
+            <div>
+              ${(q.options||[]).map((o,j)=> `
+                <div class="row">
+                  <div class="k">Option ${j+1}</div>
+                  <div class="stack" style="flex-wrap:nowrap;">
+                    <input style="flex:0 0 80px;" placeholder="Code" value="${o.code ?? ""}" oninput="updateOpt(${i},${j},'code',event.target.value,true)"/>
+                    <input placeholder="Label" value="${escapeHTML(o.label || '')}" oninput="updateOpt(${i},${j},'label',event.target.value)"/>
+                    <label><input type="checkbox" ${o.exclusive?'checked':''} onchange="updateOpt(${i},${j},'exclusive',this.checked)"/> exclusive</label>
+                    <label><input type="checkbox" ${o.terminate?'checked':''} onchange="updateOpt(${i},${j},'terminate',this.checked)"/> terminate</label>
+                    <button onclick="delOpt(${i},${j})">🗑️</button>
+                  </div>
+                </div>`).join('')}
               <div class="stack">
-                <label><input type="radio" name="listSel-${i}" value="single" ${getListSelection(q)==='single'?'checked':''}
-                  onchange="setListSelection(state.questions[${i}], 'single'); queueAutosave(); renderQuestionList();"/> Single</label>
-                <label><input type="radio" name="listSel-${i}" value="multi" ${getListSelection(q)==='multi'?'checked':''}
-                  onchange="setListSelection(state.questions[${i}], 'multi'); queueAutosave(); renderQuestionList();"/> Multi</label>
+                <button onclick="addOpt(${i})">+ Add Option</button>
+                <button onclick="bulkAddOptions(${i})">📋 Bulk Add</button>
               </div>
             </div>
+          </div>
 
-            <div class="row"><div class="k">Options</div>
-              <div>
-                ${(q.options||[]).map((o,j)=> `
-                  <div class="row">
-                    <div class="k">Option ${j+1}</div>
-                    <div class="stack" style="flex-wrap:nowrap;">
-                      <input style="flex:0 0 80px;" placeholder="Code" value="${o.code ?? ""}" oninput="updateOpt(${i},${j},'code',event.target.value,true)"/>
-                      <input placeholder="Label" value="${escapeHTML(o.label || '')}" oninput="updateOpt(${i},${j},'label',event.target.value)"/>
-                      <label><input type="checkbox" ${o.exclusive?'checked':''} onchange="updateOpt(${i},${j},'exclusive',this.checked)"/> exclusive</label>
-                      <label><input type="checkbox" ${o.terminate?'checked':''} onchange="updateOpt(${i},${j},'terminate',this.checked)"/> terminate</label>
-                      <button onclick="delOpt(${i},${j})">🗑️</button>
-                    </div>
-                  </div>`).join('')}
-                <div class="stack">
-                  <button onclick="addOpt(${i})">+ Add Option</button>
-                  <button onclick="bulkAddOptions(${i})">📋 Bulk Add</button>
-                </div>
+          <div class="row"><div class="k">Statements</div>
+            <div>
+              ${(q.statements||[]).map((s,j)=> `
+                <div class="row">
+                  <div class="k">Statement ${j+1}</div>
+                  <div class="stack" style="flex-wrap:nowrap;">
+                    <input value="${escapeHTML(s)}" oninput="updateStmt(${i},${j},event.target.value)"/>
+                    <button onclick="delStmt(${i},${j})">🗑️</button>
+                  </div>
+                </div>`).join('')}
+              <div class="stack">
+                <button onclick="addStmt(${i})">+ Add Statement</button>
+                <button onclick="bulkAddStatements(${i})">📋 Bulk Add</button>
               </div>
             </div>
+          </div>
 
-            <div class="row"><div class="k">Statements</div>
-              <div>
-                ${(q.statements||[]).map((s,j)=> `
-                  <div class="row">
-                    <div class="k">Statement ${j+1}</div>
-                    <div class="stack" style="flex-wrap:nowrap;">
-                      <input value="${escapeHTML(s)}" oninput="updateStmt(${i},${j},event.target.value)"/>
-                      <button onclick="delStmt(${i},${j})">🗑️</button>
-                    </div>
-                  </div>`).join('')}
-                <div class="stack">
-                  <button onclick="addStmt(${i})">+ Add Statement</button>
-                  <button onclick="bulkAddStatements(${i})">📋 Bulk Add</button>
-                </div>
-              </div>
+          <div class="row"><div class="k">Likert scale</div>
+            <div class="grid2">
+              <select onchange="updateScalePoints(${i}, this.value)">
+                <option value="">(none)</option>
+                ${[5,7,10].map(n=>`<option value="${n}" ${q.scale?.points==n?'selected':''}>${n}</option>`).join('')}
+              </select>
+              <input placeholder="Labels (pipe-separated: Strongly Disagree|...|Strongly Agree)" value="${(q.scale?.labels||[]).join('|')}" oninput="updateScaleLabels(${i}, this.value)" />
             </div>
+            <small class="muted">If points + ≥3 statements ⇒ treated as Likert multi by the generator.</small>
+          </div>
+        ` : ''}
 
-            <div class="row"><div class="k">Likert scale</div>
-              <div class="grid2">
-                <select onchange="updateScalePoints(${i}, this.value)">
-                  <option value="">(none)</option>
-                  ${[5,7,10].map(n=>`<option value="${n}" ${q.scale?.points==n?'selected':''}>${n}</option>`).join('')}
-                </select>
-                <input placeholder="Labels (pipe-separated: Strongly Disagree|...|Strongly Agree)" value="${(q.scale?.labels||[]).join('|')}" oninput="updateScaleLabels(${i}, this.value)" />
+        <!-- NUMERIC MODE -->
+        ${mode==='numeric' ? `
+          <div class="row"><div class="k">Numeric settings</div>
+            <div>
+              <div class="stack" style="flex-wrap:wrap; gap:10px;">
+                <input style="width:120px" placeholder="Min (optional)" value="${N.min ?? ''}" oninput="updateNumeric(${i}, 'min', this.value)"/>
+                <input style="width:120px" placeholder="Max (optional)" value="${N.max ?? ''}" oninput="updateNumeric(${i}, 'max', this.value)"/>
+
+                ${q.type === 'numeric_time' ? `
+                  <select style="width:160px" onchange="updateNumeric(${i}, 'time_unit', this.value)">
+                    <option value="">(pick time unit)</option>
+                    ${['seconds','minutes','hours','days','weeks','months','years'].map(u=>`<option value="${u}" ${N.time_unit===u?'selected':''}>${u}</option>`).join('')}
+                  </select>
+                ` : `
+                  <input style="width:160px" placeholder="Unit (e.g., years)" value="${N.unit || ''}" oninput="updateNumeric(${i}, 'unit', this.value)"/>
+                `}
+
+                <input style="width:200px" placeholder="Placeholder (e.g., ____ years)" value="${N.placeholder || ''}" oninput="updateNumeric(${i}, 'placeholder', this.value)"/>
+
+                <label class="stack" style="gap:6px;">
+                  <span class="muted">Zero-pad</span>
+                  <input style="width:80px" placeholder="0 or 2" value="${N.zero_pad ?? 0}" oninput="updateNumeric(${i}, 'zero_pad', this.value)"/>
+                </label>
+
+                <label class="stack" style="gap:6px;">
+                  <input type="checkbox" ${N.integer_only ? 'checked' : ''} onchange="updateNumeric(${i}, 'integer_only', this.checked)"/>
+                  <span class="muted">Integer only</span>
+                </label>
               </div>
-              <small class="muted">If points + ≥3 statements ⇒ treated as Likert multi by the generator.</small>
+              <small class="muted">Tip: Leave min/max blank to allow any value. Use zero-pad=2 for inputs like 01–24.</small>
             </div>
-          ` : ''}
+          </div>
+        ` : ''}
 
-          <!-- NUMERIC MODE -->
-          ${mode==='numeric' ? `
-            <div class="row"><div class="k">Numeric settings</div>
-              <div>
-                <div class="stack" style="flex-wrap:wrap; gap:10px;">
-                  <input style="width:120px" placeholder="Min (optional)" value="${N.min ?? ''}" oninput="updateNumeric(${i}, 'min', this.value)"/>
-                  <input style="width:120px" placeholder="Max (optional)" value="${N.max ?? ''}" oninput="updateNumeric(${i}, 'max', this.value)"/>
-
-                  ${q.type === 'numeric_time' ? `
-                    <select style="width:160px" onchange="updateNumeric(${i}, 'time_unit', this.value)">
-                      <option value="">(pick time unit)</option>
-                      ${['seconds','minutes','hours','days','weeks','months','years'].map(u=>`<option value="${u}" ${N.time_unit===u?'selected':''}>${u}</option>`).join('')}
-                    </select>
-                  ` : `
-                    <input style="width:160px" placeholder="Unit (e.g., years)" value="${N.unit || ''}" oninput="updateNumeric(${i}, 'unit', this.value)"/>
-                  `}
-
-                  <input style="width:200px" placeholder="Placeholder (e.g., ____ years)" value="${N.placeholder || ''}" oninput="updateNumeric(${i}, 'placeholder', this.value)"/>
-
-                  <label class="stack" style="gap:6px;">
-                    <span class="muted">Zero-pad</span>
-                    <input style="width:80px" placeholder="0 or 2" value="${N.zero_pad ?? 0}" oninput="updateNumeric(${i}, 'zero_pad', this.value)"/>
-                  </label>
-
-                  <label class="stack" style="gap:6px;">
-                    <input type="checkbox" ${N.integer_only ? 'checked' : ''} onchange="updateNumeric(${i}, 'integer_only', this.checked)"/>
-                    <span class="muted">Integer only</span>
-                  </label>
-                </div>
-                <small class="muted">Tip: Leave min/max blank to allow any value. Use zero-pad=2 for inputs like 01–24.</small>
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- TABLE MODE -->
-          ${mode==='table' ? (function () {
-            // Ensure grid object exists without using ||= (max browser compatibility)
-            if (!q.grid) q.grid = { rows: (q.statements || []).slice(), cols: (q.scale?.labels || []).slice() };
-
-            // Re-bind helpers on every re-render so stale ones can’t stick around
-            window._tb_addRow = (ii) => { state.questions[ii].grid.rows.push(''); renderEditorPanel(); queueAutosave(); };
-            window._tb_delRow = (ii, idx) => { state.questions[ii].grid.rows.splice(idx, 1); renderEditorPanel(); queueAutosave(); };
-            window._tb_updRow = (ii, idx, val) => { state.questions[ii].grid.rows[idx] = val; queueAutosave(); };
-
-            window._tb_addCol = (ii) => { state.questions[ii].grid.cols.push(''); renderEditorPanel(); queueAutosave(); };
-            window._tb_delCol = (ii, idx) => { state.questions[ii].grid.cols.splice(idx, 1); renderEditorPanel(); queueAutosave(); };
-            window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
-
-            const G = q.grid;
-
-            return `
+        <!-- TABLE MODE -->
+        ${mode==='table' ? (() => {
+          // ensure grid object
+          if (!q.grid) q.grid = { rows: (q.statements || []).slice(), cols: (q.scale?.labels || []).slice() };
+          const G = q.grid;
+          return `
             <div class="stack preset-wrap" style="margin-bottom:6px;">
               <button onclick="_tb_addRow(${i})">+ Row</button>
               <button onclick="_tb_addCol(${i})">+ Column</button>
-              <button id="presetBtn-${i}" onclick="openPresetPicker(${i})">⋯ Presets</button>
-
-              <!-- anchored dropdown panel -->
+              <button id="presetBtn-${i}" onclick="openPresetPicker(${i})">📊 Presets</button>
               <div id="presetHost-${i}" class="preset-panel"></div>
             </div>
-                <div style="overflow:auto; border:1px solid var(--line); border-radius:8px;">
-                  <table style="width:100%; border-collapse:collapse; min-width:520px;">
-                    <thead>
-                      <tr>
-                        <th style="text-align:left; padding:6px; border-bottom:1px solid var(--line); width:42%;">Statements (rows)</th>
-                        ${G.cols.map((c,ci)=>(
-                          '<th style="text-align:left; padding:6px; border-bottom:1px solid var(--line);">' +
-                            '<input value="'+ escapeHTML(c) +'" oninput="_tb_updCol('+ i +','+ ci +', this.value)" /> ' +
-                            '<button onclick="_tb_delCol('+ i +','+ ci +')">🗑️</button>' +
-                          '</th>'
-                        )).join('')}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${G.rows.map((r,ri)=>(
-                        '<tr>' +
-                          '<td style="padding:6px; border-bottom:1px solid var(--line);">' +
-                            '<input value="'+ escapeHTML(r) +'" oninput="_tb_updRow('+ i +','+ ri +', this.value)" /> ' +
-                            '<button onclick="_tb_delRow('+ i +','+ ri +')">🗑️</button>' +
-                          '</td>' +
-                          G.cols.map(()=>'<td style="padding:6px; border-bottom:1px solid var(--line); color:var(--muted);">•</td>').join('') +
-                        '</tr>'
-                      )).join('')}
-                    </tbody>
-                  </table>
-                </div>
-                <small class="muted">Rows = statements, Columns = scale/options. This will export as a grid/likert table; nets follow your rules.</small>
-              </div>
-            </div>`;
-          })() : '' }
+            <div style="overflow:auto; border:1px solid var(--line); border-radius:8px;">
+              <table style="width:100%; border-collapse:collapse; min-width:520px;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left; padding:6px; border-bottom:1px solid var(--line); width:42%;">Statements (rows)</th>
+                    ${G.cols.map((c,ci)=>(`
+                      <th style="text-align:left; padding:6px; border-bottom:1px solid var(--line);">
+                        <input value="${escapeHTML(c)}" oninput="_tb_updCol(${i},${ci}, this.value)" />
+                        <button onclick="_tb_delCol(${i},${ci})">🗑️</button>
+                      </th>
+                    `)).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${G.rows.map((r,ri)=>(`
+                    <tr>
+                      <td style="padding:6px; border-bottom:1px solid var(--line);">
+                        <input value="${escapeHTML(r)}" oninput="_tb_updRow(${i},${ri}, this.value)" />
+                        <button onclick="_tb_delRow(${i},${ri})">🗑️</button>
+                      </td>
+                      ${G.cols.map(()=>'<td style="padding:6px; border-bottom:1px solid var(--line); color:var(--muted);">•</td>').join('')}
+                    </tr>
+                  `)).join('')}
+                </tbody>
+              </table>
+            </div>
+            <small class="muted">Rows = statements, Columns = scale/options. This will export as a grid/likert table; nets follow your rules.</small>
+          `;
+        })() : ''}
 
+      </div> <!-- /MAIN TAB -->
 
-        <!-- LOGIC TAB -->
-        <div class="tab-content ${ui_state.active_tab==='logic'?'active':''}">
-          <div class="row"><div class="k">Base Verbiage</div>
-            <input value="${q.base?.verbiage || ''}" oninput="updateBase(${i}, 'verbiage', event.target.value)" placeholder="Default: ${state.globals.default_base_verbiage}" />
-          </div>
+      <!-- LOGIC & BASE TAB -->
+      <div class="tab-content ${ui_state.active_tab==='logic'?'active':''}">
+        <div class="row"><div class="k">Base Verbiage</div>
+          <input value="${q.base && q.base.verbiage != null ? q.base.verbiage : ''}"
+                oninput="updateBase(${i}, 'verbiage', event.target.value)"
+                placeholder="Default: ${state.globals.default_base_verbiage}" />
+        </div>
 
-          <div class="row"><div class="k">Base Definition</div>
-            <div>
-              <input value="${q.base?.definition || ''}" oninput="updateBase(${i}, 'definition', event.target.value)" placeholder="e.g., S1 in [2]" />
-              <div class="stack muted" style="margin-top:8px;">
-                <small>Helper:</small>
-                <select id="priorQ-${i}" onchange="populatePriorOpts(${i})"><option value="">Pick Q</option>${priorQs}</select>
-                <select id="priorOpt-${i}"></select>
-                <button class="primary" style="padding:4px 8px;" onclick="applyBase(${i})">Apply</button>
+        <div class="row"><div class="k">Base Definition</div>
+          <div>
+            <input id="baseDef-${i}"
+                  value="${q.base && q.base.definition ? q.base.definition : ''}"
+                  oninput="updateBase(${i}, 'definition', event.target.value)"
+                  placeholder="e.g., S1 in [2]" />
+
+            <!-- Multi-clause Helper -->
+            <div class="stack muted" style="margin-top:8px; align-items:flex-start; flex-direction:column; gap:6px;">
+              <small>Helper:</small>
+              <div id="bbHost-${i}" class="stack" style="flex-direction:column; gap:8px; width:100%;"></div>
+              <div class="stack" style="gap:8px;">
+                <button class="primary" style="padding:4px 8px;" onclick="bbApply(${i})">Apply</button>
+                <span class="muted" id="bbPrev-${i}"></span>
               </div>
             </div>
           </div>
-
-          <div class="row"><div class="k">Notes</div>
-            <input value="${q.notes || ''}" oninput="updateQ(${i}, 'notes', event.target.value)" placeholder="e.g., Hidden, Red herring, etc." />
-          </div>
         </div>
 
-        <!-- TAB PLAN TAB -->
-        <div class="tab-content ${ui_state.active_tab==='tabplan'?'active':''}">
-          <div class="row"><div class="k">Nets Text</div>
-            <input value="${q.exports?.tab_plan?.nets_text || ''}" oninput="updateExport(${i}, 'tab_plan.nets_text', event.target.value)" placeholder='e.g., Net: T2B, B2B'/>
-          </div>
-          <div class="row"><div class="k">Instructions</div>
-            <textarea oninput="updateExport(${i}, 'tab_plan.additional_instructions', event.target.value)">${q.exports?.tab_plan?.additional_instructions || ''}</textarea>
-          </div>
+        <div class="row"><div class="k">Notes</div>
+          <input value="${q.notes || ''}" oninput="updateQ(${i}, 'notes', event.target.value)" placeholder="e.g., Hidden, Red herring, etc." />
         </div>
       </div>
-    </div>`;
-  // --- Preset UI wiring (table mode) ---
-  {
-    // const btn    = document.getElementById(`presetBtn-${i}`);
-    // const pane   = document.getElementById(`presetPane-${i}`);
-    // const ptsSel = document.getElementById(`presetPoints-${i}`);
-    // const list   = document.getElementById(`presetList-${i}`);
-    // const doBlank= document.getElementById(`presetBlank-${i}`);
-    // const maker  = document.getElementById(`presetMaker-${i}`);
 
-    // Defender: if we’re not on table mode right now, nothing to wire.
-    if (!btn || !pane) { /* not in table view */ }
-    else {
-      function drawPresetList(){
-        const points = parseInt(ptsSel.value, 10);
-        const items  = getScalesFor(points); // ← uses your helpers (Numerical first, then A–Z, then customs)
 
-        list.innerHTML = items.map(it => `
-          <button class="preset-item" data-name="${it.name}"
-                  style="display:block; width:100%; text-align:left; margin:4px 0;">
-            ${escapeHTML(it.name)}
-            <span class="muted" style="float:right">${points}-pt</span>
-            <div class="muted" style="font-size:12px; margin-top:2px;
-                white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              ${escapeHTML(it.labels.join(" | "))}
-            </div>
-          </button>
-        `).join('') || '<div class="muted">No presets for this point count.</div>';
+      <!-- TAB PLAN TAB -->
+      <div class="tab-content ${ui_state.active_tab==='tabplan'?'active':''}">
+        <div class="row"><div class="k">Nets Text</div>
+          <input value="${tp.nets_text || ''}"
+                 oninput="updateTabPlan(${i}, 'nets_text', this.value)"
+                 placeholder="Default: ${state.globals.default_nets || 'Net: T2B, B2B'}" />
+        </div>
+        <div class="row"><div class="k">Instructions</div>
+          <textarea oninput="updateTabPlan(${i}, 'additional_instructions', this.value)"
+                    placeholder="Add any specific instructions for the tabulation team.">${tp.additional_instructions || ''}</textarea>
+        </div>
+      </div>
 
-        list.querySelectorAll('.preset-item').forEach(b=>{
-          b.onclick = ()=>{
-            const name   = b.dataset.name;
-            const points = parseInt(ptsSel.value, 10);
-            const chosen = getScalesFor(points).find(x=>x.name===name);
-            if(!chosen) return;
+    </div> <!-- /.card-content -->
+  </div> <!-- /.card -->
+`;
+drawBaseBuilder(i);
+} 
 
-            // Apply to this question:
-            const q = state.questions[i];
-            q.mode = 'table';
-            q.grid ||= { rows: q.statements||[], cols: [] };
-            q.grid.cols  = [...chosen.labels];
-            q.scale    ||= {};
-            q.scale.labels = [...chosen.labels];
-            q.scale.points = points;
-
-            renderEditorPanel();
-            queueAutosave();
-            pane.style.display = 'none';
-          };
-        });
-      }
-
-      btn.onclick = ()=>{
-        const now = (pane.style.display==='none' || !pane.style.display) ? 'block' : 'none';
-        pane.style.display = now;
-        if (now === 'block') drawPresetList();
-      };
-
-      ptsSel?.addEventListener('change', drawPresetList);
-
-      doBlank.onclick = ()=>{
-        const points = parseInt(ptsSel.value, 10);
-        const q = state.questions[i];
-        q.mode = 'table';
-        q.grid ||= { rows: q.statements||[], cols: [] };
-        q.grid.cols  = Array(points).fill("");
-        q.scale    ||= {};
-        q.scale.labels = Array(points).fill("");
-        q.scale.points = points;
-
-        renderEditorPanel();
-        queueAutosave();
-        pane.style.display = 'none';
-      };
-
-      maker.onclick = ()=> openPresetMaker(i);
-
-      // close on outside click (single-shot)
-      setTimeout(()=>{
-        const onDoc = (e)=>{
-          if (!pane.contains(e.target) && e.target !== btn) pane.style.display = 'none';
-          document.removeEventListener('click', onDoc);
-        };
-        document.addEventListener('click', onDoc);
-      }, 0);
-    }
-  }
-}
-
-/* -------- Small editor helpers (unchanged) -------- */
-function setActiveTab(tab){ ui_state.active_tab=tab; renderEditorPanel(); }
-function updateQ(i, k, v){ state.questions[i][k]=v; if (k==='id'||k==='text'||k==='type') renderQuestionList(); queueAutosave(); }
-function updateBase(i, k, v){ state.questions[i].base ??= {}; state.questions[i].base[k]=v; queueAutosave(); }
-function updateExport(i, path, v){
-  const [root, leaf] = path.split('.');
-  state.questions[i].exports ??= {};
-  state.questions[i].exports[root] ??= {};
-  state.questions[i].exports[root][leaf] = v; queueAutosave();
-}
-function updateScalePoints(i, val){ state.questions[i].scale ??= {}; state.questions[i].scale.points = val? parseInt(val): null; queueAutosave(); }
-function updateScaleLabels(i, txt){ state.questions[i].scale ??= {}; state.questions[i].scale.labels = txt.split('|').map(s=>s.trim()).filter(Boolean); queueAutosave(); }
-function addOpt(i){ state.questions[i].options ??= []; state.questions[i].options.push({code:(state.questions[i].options.length+1), label:""}); renderEditorPanel(); queueAutosave(); }
-function delOpt(i,j){ state.questions[i].options.splice(j,1); renderEditorPanel(); queueAutosave(); }
-function updateOpt(i,j,k,v,num=false){
-  // Avoid NaN codes; if blank, keep ''
-  state.questions[i].options[j][k] = num
-    ? (String(v).trim()==='' ? '' : (Number.isFinite(parseInt(v,10)) ? parseInt(v,10) : v))
-    : v;
-  queueAutosave();
-}
-function addStmt(i){ state.questions[i].statements ??= []; state.questions[i].statements.push(""); renderEditorPanel(); queueAutosave(); }
-function delStmt(i,j){ state.questions[i].statements.splice(j,1); renderEditorPanel(); queueAutosave(); }
-function updateStmt(i,j,v){ state.questions[i].statements[j]=v; queueAutosave(); }
-function bulkAddOptions(i){
-  const txt = prompt("Paste options (one per line). Use 'code\\tlabel', 'code label', '1) label', or just 'label'.");
-  if(!txt) return;
-  const lines = txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  let nextCode = (state.questions[i].options?.at(-1)?.code || 0) + 1;
-  state.questions[i].options ??= [];
-  for (const line of lines){
-    const m = line.match(/^(\d+)[\s\.\-\t\)]\s*(.+)$/);
-    if (m) state.questions[i].options.push({code:parseInt(m[1],10), label:m[2].trim()});
-    else {
-      const parts = line.split(/\t/);
-      if (parts.length>=2 && /^\d+$/.test(parts[0])) state.questions[i].options.push({code:parseInt(parts[0],10), label:parts.slice(1).join(" ").trim()});
-      else state.questions[i].options.push({code: nextCode++, label: line});
-    }
-  }
-  renderEditorPanel(); queueAutosave();
-}
-function bulkAddStatements(i){
-  const txt = prompt("Paste statements (one per line).");
-  if(!txt) return;
-  state.questions[i].statements ??= [];
-  state.questions[i].statements.push(...txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean));
-  renderEditorPanel(); queueAutosave();
-}
-function populatePriorOpts(i){
-  const priorQId = $(`#priorQ-${i}`).value;
-  const optSel = $(`#priorOpt-${i}`);
-  const qq = state.questions.find(qq => qq.id === priorQId);
-  optSel.innerHTML = `<option value="">Pick Opt</option>` + (qq?.options || []).map(o=>`<option value="${o.code}">${o.code}: ${escapeHTML(o.label)}</option>`).join("");
-}
-function applyBase(i){
-  const pq = $(`#priorQ-${i}`).value, po = $(`#priorOpt-${i}`).value;
-  if(!pq || !po) return;
-  updateBase(i, 'definition', `${pq} in [${po}]`);
+/* -------- Small editor helpers (hardened) -------- */
+function setActiveTab(tab){
+  ui_state.active_question_index = ui_state.active_question_index ?? null;
+  ui_state.active_tab = tab || 'main';
   renderEditorPanel();
 }
+
+function updateQ(i, k, v){
+  if (!state.questions[i]) return;
+  state.questions[i][k] = v;
+  if (k === 'id' || k === 'text' || k === 'type') renderQuestionList();
+  queueAutosave();
+}
+
+function updateBase(i, k, v){
+  if (!state.questions[i]) return;
+  if (!state.questions[i].base) state.questions[i].base = {};
+  // empty string means "use default" → store null
+  var val = (v == null ? '' : String(v)).trim();
+  state.questions[i].base[k] = val === '' ? null : val;
+  queueAutosave();
+}
+
+function updateTabPlan(i, key, value){
+  if (!state.questions[i]) return;
+  if (!state.questions[i].exports) state.questions[i].exports = {};
+  if (!state.questions[i].exports.tab_plan) state.questions[i].exports.tab_plan = {};
+  state.questions[i].exports.tab_plan[key] = value;
+  queueAutosave();
+}
+
+function updateScalePoints(i, val){
+  if (!state.questions[i]) return;
+  if (!state.questions[i].scale) state.questions[i].scale = {};
+  state.questions[i].scale.points = val ? parseInt(val, 10) : null;
+  queueAutosave();
+}
+
+function updateScaleLabels(i, txt){
+  if (!state.questions[i]) return;
+  if (!state.questions[i].scale) state.questions[i].scale = {};
+  var labels = String(txt || '').split('|').map(function(s){ return s.trim(); }).filter(Boolean);
+  state.questions[i].scale.labels = labels;
+  queueAutosave();
+}
+
+function addOpt(i){
+  if (!state.questions[i]) return;
+  if (!state.questions[i].options) state.questions[i].options = [];
+  state.questions[i].options.push({ code: state.questions[i].options.length + 1, label: "" });
+  renderEditorPanel(); queueAutosave();
+}
+
+function delOpt(i, j){
+  if (!state.questions[i] || !state.questions[i].options) return;
+  state.questions[i].options.splice(j, 1);
+  renderEditorPanel(); queueAutosave();
+}
+
+function updateOpt(i, j, k, v, num){
+  if (!state.questions[i] || !state.questions[i].options || !state.questions[i].options[j]) return;
+  if (num) {
+    var s = String(v == null ? '' : v).trim();
+    state.questions[i].options[j][k] = (s === '') ? '' : (isFinite(parseInt(s, 10)) ? parseInt(s, 10) : s);
+  } else {
+    state.questions[i].options[j][k] = v;
+  }
+  queueAutosave();
+}
+
+function addStmt(i){
+  if (!state.questions[i]) return;
+  if (!state.questions[i].statements) state.questions[i].statements = [];
+  state.questions[i].statements.push("");
+  renderEditorPanel(); queueAutosave();
+}
+
+function delStmt(i, j){
+  if (!state.questions[i] || !state.questions[i].statements) return;
+  state.questions[i].statements.splice(j, 1);
+  renderEditorPanel(); queueAutosave();
+}
+
+function updateStmt(i, j, v){
+  if (!state.questions[i] || !state.questions[i].statements) return;
+  state.questions[i].statements[j] = v;
+  queueAutosave();
+}
+
+function bulkAddOptions(i){
+  if (!state.questions[i]) return;
+  var txt = prompt("Paste options (one per line). Use 'code\\tlabel', 'code label', '1) label', or just 'label'.");
+  if (!txt) return;
+
+  if (!state.questions[i].options) state.questions[i].options = [];
+  var lines = txt.split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+
+  // Next code = 1 + current max numeric code (more reliable than .at(-1))
+  var currentCodes = state.questions[i].options.map(function(o){ return o && isFinite(o.code) ? Number(o.code) : 0; });
+  var maxCode = currentCodes.length ? Math.max.apply(null, currentCodes) : 0;
+  var nextCode = isFinite(maxCode) ? (maxCode + 1) : (state.questions[i].options.length + 1);
+
+  lines.forEach(function(line){
+    var m = line.match(/^(\d+)[\s\.\-\t\)]\s*(.+)$/);
+    if (m) {
+      state.questions[i].options.push({ code: parseInt(m[1], 10), label: m[2].trim() });
+    } else {
+      var parts = line.split(/\t/);
+      if (parts.length >= 2 && /^\d+$/.test(parts[0])) {
+        state.questions[i].options.push({ code: parseInt(parts[0], 10), label: parts.slice(1).join(" ").trim() });
+      } else {
+        state.questions[i].options.push({ code: nextCode++, label: line });
+      }
+    }
+  });
+
+  renderEditorPanel(); queueAutosave();
+}
+
+function bulkAddStatements(i){
+  if (!state.questions[i]) return;
+  var txt = prompt("Paste statements (one per line).");
+  if (!txt) return;
+  if (!state.questions[i].statements) state.questions[i].statements = [];
+  state.questions[i].statements.push.apply(
+    state.questions[i].statements,
+    txt.split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean)
+  );
+  renderEditorPanel(); queueAutosave();
+}
+
+function populatePriorOpts(i){
+  var priorQSel = document.querySelector('#priorQ-' + i);
+  var optSel    = document.querySelector('#priorOpt-' + i);
+  if (!priorQSel || !optSel) return;
+
+  var priorQId = priorQSel.value;
+  var qq = state.questions.find(function(x){ return x.id === priorQId; });
+  var opts = (qq && qq.options) ? qq.options : [];
+
+  optSel.innerHTML = '<option value="">Pick Opt</option>' +
+    opts.map(function(o){
+      var lbl = escapeHTML(o && o.label ? o.label : '');
+      return '<option value="' + (o && o.code != null ? o.code : '') + '">' +
+             (o && o.code != null ? o.code : '') + ': ' + lbl + '</option>';
+    }).join('');
+}
+
+function applyBase(i){
+  var qSel = document.querySelector('#priorQ-' + i);
+  var oSel = document.querySelector('#priorOpt-' + i);
+  if (!qSel || !oSel) return;
+
+  var pq = qSel.value;
+  var po = oSel.value;
+  if (!pq || !po) return;
+
+  var newCondition = pq + ' in [' + po + ']';
+  var existingDef = (state.questions[i].base && state.questions[i].base.definition) ? state.questions[i].base.definition : '';
+  var finalDef = existingDef ? (existingDef + ' AND ' + newCondition) : newCondition;
+
+  updateBase(i, 'definition', finalDef);
+  renderEditorPanel(); // reflect change
+}
+
 function nextNumber(prefix){
-  let n=1;
-  while (state.questions.some(q=>q.id===`${prefix}${n}`)) n++;
+  var n = 1;
+  while (state.questions.some(function(q){ return q.id === (prefix + n); })) n++;
   return n;
 }
+
 function addQuestion(prefix){
-  if (prefix==='S'){
-    const id=`S${nextNumber('S')}`; state.questions.push({id, type:'single', text:'', options:[]});
-  } else if (prefix==='Q'){
-    const id=`Q${nextNumber('Q')}`; state.questions.push({id, type:'single', text:'', options:[]});
-  } else if (prefix==='H'){
-    const id=`Q${nextNumber('Q')}_H`; state.questions.push({id, type:'single', text:'', notes:'Hidden question', options:[]});
-  } else if (prefix==='R'){
-    const id=`Q${nextNumber('Q')}_R`; state.questions.push({id, type:'single', text:'', notes:'Red herring', options:[]});
+  var id;
+  if (prefix === 'S'){
+    id = 'S' + nextNumber('S');
+    state.questions.push({ id: id, type: 'single', text: '', options: [] });
+  } else if (prefix === 'Q'){
+    id = 'Q' + nextNumber('Q');
+    state.questions.push({ id: id, type: 'single', text: '', options: [] });
+  } else if (prefix === 'H'){
+    id = 'Q' + nextNumber('Q') + '_H';
+    state.questions.push({ id: id, type: 'single', text: '', notes: 'Hidden question', options: [] });
+  } else if (prefix === 'R'){
+    id = 'Q' + nextNumber('Q') + '_R';
+    state.questions.push({ id: id, type: 'single', text: '', notes: 'Red herring', options: [] });
   }
-  ui_state.active_question_index = state.questions.length-1;
+  ui_state.active_question_index = state.questions.length - 1;
   renderQuestionList(); renderEditorPanel(); queueAutosave();
 }
+
 function delQ(i){
-  if(!confirm(`Delete ${state.questions[i].id}?`)) return;
-  state.questions.splice(i,1);
-  ui_state.active_question_index = Math.min(i, state.questions.length-1);
-  if (state.questions.length===0) ui_state.active_question_index=null;
+  if (!state.questions[i]) return;
+  if (!confirm('Delete ' + state.questions[i].id + '?')) return;
+  state.questions.splice(i, 1);
+  ui_state.active_question_index = Math.min(i, state.questions.length - 1);
+  if (state.questions.length === 0) ui_state.active_question_index = null;
   renderQuestionList(); renderEditorPanel(); queueAutosave();
 }
+
 function dupQ(i){
-  const copy = JSON.parse(JSON.stringify(state.questions[i]));
-  const pref = copy.id.startsWith('S') ? 'S':'Q';
-  const suffix = (/_([HR])$/.test(copy.id)) ? copy.id.match(/_([HR])$/)[0] : '';
-  copy.id = `${pref}${nextNumber(pref)}${suffix}`;
-  state.questions.splice(i+1,0,copy);
-  ui_state.active_question_index = i+1;
+  if (!state.questions[i]) return;
+  var copy = JSON.parse(JSON.stringify(state.questions[i]));
+  var pref = (copy.id && copy.id.startsWith('S')) ? 'S' : 'Q';
+  var m = copy.id && copy.id.match(/_([HR])$/);
+  var suffix = m ? m[0] : '';
+  copy.id = pref + nextNumber(pref) + suffix;
+  state.questions.splice(i + 1, 0, copy);
+  ui_state.active_question_index = i + 1;
   renderQuestionList(); renderEditorPanel(); queueAutosave();
 }
+
 function wireEditorShortcuts(){
-  document.onkeydown = (e)=>{
-    const i = ui_state.active_question_index ?? -1;
-    if(e.ctrlKey||e.metaKey){
-      if(e.key.toLowerCase()==='s'){ e.preventDefault(); downloadJSON(); }
-      if(e.key.toLowerCase()==='d'){ e.preventDefault(); if(i>=0) dupQ(i); }
+  document.onkeydown = function(e){
+    var i = (ui_state.active_question_index == null) ? -1 : ui_state.active_question_index;
+    if (e.ctrlKey || e.metaKey){
+      if (e.key.toLowerCase() === 's'){ e.preventDefault(); downloadJSON(); }
+      if (e.key.toLowerCase() === 'd'){ e.preventDefault(); if (i >= 0) dupQ(i); }
     } else {
-      if(e.key==='ArrowUp' && i>0){ ui_state.active_question_index=i-1; renderQuestionList(); renderEditorPanel(); }
-      if(e.key==='ArrowDown' && i<state.questions.length-1){ ui_state.active_question_index=i+1; renderQuestionList(); renderEditorPanel(); }
-      if(e.key==='Enter' && i<0 && state.questions.length){ ui_state.active_question_index=0; renderEditorPanel(); }
+      if (e.key === 'ArrowUp'   && i > 0){ ui_state.active_question_index = i - 1; renderQuestionList(); renderEditorPanel(); }
+      if (e.key === 'ArrowDown' && i < state.questions.length - 1){ ui_state.active_question_index = i + 1; renderQuestionList(); renderEditorPanel(); }
+      if (e.key === 'Enter'     && i < 0 && state.questions.length){ ui_state.active_question_index = 0; renderEditorPanel(); }
     }
   };
-  $("#addScreener").onclick = ()=> addQuestion('S');
-  $("#addMain").onclick     = ()=> addQuestion('Q');
-  $("#addHidden").onclick   = ()=> addQuestion('H');
-  $("#addQC").onclick       = ()=> addQuestion('R');
+  document.getElementById('addScreener').onclick = function(){ addQuestion('S'); };
+  document.getElementById('addMain').onclick     = function(){ addQuestion('Q'); };
+  document.getElementById('addHidden').onclick   = function(){ addQuestion('H'); };
+  document.getElementById('addQC').onclick       = function(){ addQuestion('R'); };
+}
+
+/* ====== Multi-clause Base Builder ====== */
+// Ensure a builder for question i exists with at least one empty clause
+function bbEnsure(i){
+  ui_state.base_builders = ui_state.base_builders || {};
+  if (!ui_state.base_builders[i]) {
+    ui_state.base_builders[i] = [{ op: null, qid: "", opt: "" }]; // first clause has no leading op
+  }
+  return ui_state.base_builders[i];
+}
+
+// Build "(Q in [x]) OP (Q2 in [y]) ..." string from the current clauses
+function bbBuildExpr(i){
+  var clauses = bbEnsure(i);
+  var parts = [];
+  for (var idx = 0; idx < clauses.length; idx++){
+    var c = clauses[idx];
+    if (!c || !c.qid || !c.opt) continue;
+    var lit = '(' + c.qid + ' in [' + c.opt + '])';
+    if (idx > 0 && c.op) parts.push(c.op);
+    parts.push(lit);
+  }
+  return parts.join(' ');
+}
+
+function bbAddClause(i, op){
+  var clauses = bbEnsure(i);
+  clauses.push({ op: op || 'AND', qid: "", opt: "" });
+  drawBaseBuilder(i);
+}
+
+function bbRemoveClause(i, idx){
+  var clauses = bbEnsure(i);
+  if (idx >= 0 && idx < clauses.length){
+    clauses.splice(idx, 1);
+    if (!clauses.length) clauses.push({ op: null, qid: "", opt: "" });
+  }
+  drawBaseBuilder(i);
+}
+
+function bbSet(i, idx, field, value){
+  var clauses = bbEnsure(i);
+  if (!clauses[idx]) return;
+  if (field === 'op')   clauses[idx].op  = value;
+  if (field === 'qid') { clauses[idx].qid = value; clauses[idx].opt = ""; }
+  if (field === 'opt')  clauses[idx].opt = value;
+  drawBaseBuilder(i);
+}
+
+function bbApply(i){
+  var expr = bbBuildExpr(i);
+  if (!expr) return;
+  updateBase(i, 'definition', expr);
+  var baseInput = document.getElementById('baseDef-' + i);
+  if (baseInput) baseInput.value = expr;
+  drawBaseBuilder(i);
+}
+
+// Draw the rows (one per clause) with AND/OR + Pick Q + Pick Opt
+function drawBaseBuilder(i){
+  var host = document.getElementById('bbHost-' + i);
+  var prev = document.getElementById('bbPrev-' + i);
+  if (!host) return;
+
+  var clauses = bbEnsure(i);
+
+  // Build list of prior question ids (only those indexed before i)
+  var prior = state.questions.filter(function(_, j){ return j < i; });
+
+  var html = clauses.map(function(c, idx){
+    // Build Q options
+    var qOpts = ['<option value="">Pick Q</option>']
+      .concat(prior.map(function(qq){
+        var sel = (qq.id === c.qid) ? ' selected' : '';
+        return '<option value="'+ qq.id +'"' + sel + '>'+ qq.id +'</option>';
+      })).join('');
+
+    // Build Opt options based on chosen qid
+    var chosen = prior.find(function(qq){ return qq.id === c.qid; });
+    var opts = (chosen && chosen.options) ? chosen.options : [];
+    var oOpts = ['<option value="">Pick option</option>']
+      .concat(opts.map(function(o){
+        var code = (o && o.code != null) ? o.code : '';
+        var sel = (String(code) === String(c.opt)) ? ' selected' : '';
+        var lbl = escapeHTML(o && o.label ? o.label : '');
+        return '<option value="'+ code +'"' + sel + '>'+ code +': '+ lbl +'</option>';
+      })).join('');
+
+    // Leading connector (not shown for first row)
+    var opSel = (idx === 0)
+      ? '<span class="muted" style="min-width:42px; display:inline-block;"></span>'
+      : '<select style="min-width:70px" onchange="bbSet('+ i +','+ idx +',\'op\', this.value)">' +
+          '<option value="AND"'+ (c.op==='AND'?' selected':'') +'>AND</option>' +
+          '<option value="OR"'+  (c.op==='OR' ?' selected':'') +'>OR</option>' +
+        '</select>';
+
+    // Row UI
+    return '' +
+    '<div class="stack" style="gap:8px; align-items:center; width:100%;">' +
+      opSel +
+      '<select style="flex:1" onchange="bbSet('+ i +','+ idx +',\'qid\', this.value)">'+ qOpts +'</select>' +
+      '<select style="flex:1" onchange="bbSet('+ i +','+ idx +',\'opt\', this.value)">'+ oOpts +'</select>' +
+      (idx === clauses.length - 1
+        ? '<button title="Add clause" onclick="bbAddClause('+ i +', \'AND\')">＋</button>'
+        : '<button title="Remove clause" onclick="bbRemoveClause('+ i +','+ idx +')">🗑️</button>') +
+    '</div>';
+  }).join('');
+
+  host.innerHTML = html;
+  if (prev) prev.textContent = bbBuildExpr(i) ? ('Preview: ' + bbBuildExpr(i)) : '';
 }
 
 
@@ -1360,32 +1540,48 @@ function renderLibrary(root){
 }
 
 /* =========================================================
-   RULES
+   RULES (defensive defaults + UI)
    ========================================================= */
+
+const RULES_DEFAULTS = {
+  likert:   { single: true,  dual: true,  multi: true  },
+  screener: { noNetsOnTerminate: true },
+  nets:     { ageMaxInference:  true, hoursDefaultBands: true },
+  numeric:  {
+    // seconds|minutes|hours|days|weeks|months|years|count|other
+    default_unit: "years",
+    default_decimals: false,
+    default_min: null,
+    default_max: null
+  }
+};
+
+/** Deep fill: ensures state.globals.rules exists and has every leaf. */
 function ensureRules(){
-  state.globals.rules ||= {
-    likert:   { single:true, dual:true, multi:true },
-    screener: { noNetsOnTerminate:true },
-    nets:     { ageMaxInference:true, hoursDefaultBands:true },
-    // sensible defaults for numeric questions
-    numeric:  {
-      default_unit: "years",   // seconds|minutes|hours|days|weeks|months|years|count|other
-      default_decimals: false,
-      default_min: null,       // null = no bound
-      default_max: null
-    }
-  };
+  const tgt = (state.globals.rules ||= {});
+  const src = RULES_DEFAULTS;
+
+  // leaf-by-leaf merge (avoids clobbering user values)
+  tgt.likert   = Object.assign({}, src.likert,   tgt.likert);
+  tgt.screener = Object.assign({}, src.screener, tgt.screener);
+  tgt.nets     = Object.assign({}, src.nets,     tgt.nets);
+  tgt.numeric  = Object.assign({}, src.numeric,  tgt.numeric);
+
+  return tgt;
 }
+
+/** Rules screen */
 function renderRules(root){
-  ensureRules();
-  const r = state.globals.rules;
+  const r = ensureRules();
+
   root.innerHTML = `
     <section class="app-grid" style="grid-template-columns: 1fr;">
       <div class="card">
         <div class="card-header"><strong>Rules & Nets Studio</strong></div>
         <div class="card-content">
 
-          <div class="row"><div class="k">Likert presets</div>
+          <div class="row">
+            <div class="k">Likert presets</div>
             <div class="stack">
               <label><input type="checkbox" id="rLikS" ${r.likert.single?'checked':''}/> single → Net: T2B, B2B</label>
               <label><input type="checkbox" id="rLikD" ${r.likert.dual?'checked':''}/> dual → Net: T2B, B2B</label>
@@ -1393,24 +1589,28 @@ function renderRules(root){
             </div>
           </div>
 
-          <div class="row"><div class="k">Screener</div>
+          <div class="row">
+            <div class="k">Screener</div>
             <div class="stack">
               <label><input type="checkbox" id="rScr" ${r.screener.noNetsOnTerminate?'checked':''}/> no nets on terminate options</label>
             </div>
           </div>
 
-          <div class="row"><div class="k">Nets engine</div>
+          <div class="row">
+            <div class="k">Nets engine</div>
             <div class="stack">
               <label><input type="checkbox" id="rAge" ${r.nets.ageMaxInference?'checked':''}/> infer max age from S3</label>
               <label><input type="checkbox" id="rHours" ${r.nets.hoursDefaultBands?'checked':''}/> default hours bands</label>
             </div>
           </div>
 
-          <div class="row"><div class="k">Numeric defaults</div>
+          <div class="row">
+            <div class="k">Numeric defaults</div>
             <div class="stack" style="align-items:flex-end">
               <label>Unit
                 <select id="rNumUnit" style="min-width:160px">
-                  ${["years","months","weeks","days","hours","minutes","seconds","count","other"].map(u=>`<option ${r.numeric.default_unit===u?'selected':''}>${u}</option>`).join("")}
+                  ${["years","months","weeks","days","hours","minutes","seconds","count","other"]
+                    .map(u=>`<option ${r.numeric.default_unit===u?'selected':''}>${u}</option>`).join("")}
                 </select>
               </label>
               <label><input type="checkbox" id="rNumDec" ${r.numeric.default_decimals?'checked':''}/> allow decimals</label>
@@ -1424,22 +1624,28 @@ function renderRules(root){
       </div>
     </section>`;
 
+  // Save & autosave
   $('#saveRules').onclick = ()=>{
-    r.likert.single = $('#rLikS').checked;
-    r.likert.dual   = $('#rLikD').checked;
-    r.likert.multi  = $('#rLikM').checked;
-    r.screener.noNetsOnTerminate = $('#rScr').checked;
-    r.nets.ageMaxInference       = $('#rAge').checked;
-    r.nets.hoursDefaultBands     = $('#rHours').checked;
+    const rr = ensureRules(); // ensure structure still intact
 
-    // numeric defaults
-    r.numeric.default_unit     = $('#rNumUnit').value;
-    r.numeric.default_decimals = $('#rNumDec').checked;
+    rr.likert.single = $('#rLikS').checked;
+    rr.likert.dual   = $('#rLikD').checked;
+    rr.likert.multi  = $('#rLikM').checked;
+
+    rr.screener.noNetsOnTerminate = $('#rScr').checked;
+
+    rr.nets.ageMaxInference   = $('#rAge').checked;
+    rr.nets.hoursDefaultBands = $('#rHours').checked;
+
+    rr.numeric.default_unit     = $('#rNumUnit').value;
+    rr.numeric.default_decimals = $('#rNumDec').checked;
+
     const minV = $('#rNumMin').value, maxV = $('#rNumMax').value;
-    r.numeric.default_min = (minV===''? null : Number(minV));
-    r.numeric.default_max = (maxV===''? null : Number(maxV));
+    rr.numeric.default_min = (minV==='' ? null : Number(minV));
+    rr.numeric.default_max = (maxV==='' ? null : Number(maxV));
 
     queueAutosave();
+    setStatus('Rules saved.', true);
     alert('Saved');
   };
 }
@@ -1754,7 +1960,7 @@ $('#importJson').onclick = ()=>{
 
 async function postAndDownload(url, filename){
   $("#serverError").style.display="none";
-  setStatus("Generating…", false);
+  setStatus("Generating...", false);
   try{
     const res = await fetch(url, {
       method:"POST",
@@ -1801,6 +2007,7 @@ function loadAutosave(){
   state.project   = d.project   || state.project;
   state.globals   = d.globals   || state.globals;
   state.questions = d.questions || [];
+  ensureRules();
   ui_state.active_question_index = state.questions.length? 0 : null;
   return true;
 }
@@ -1829,6 +2036,16 @@ function renderRoute(){
   if(s && confirm("Restore your last autosaved session?")) loadAutosave();
   renderRoute();
 })();
+
+document.addEventListener('click', (e) => {
+  const tabsBar = e.target.closest('.editor-tabs');
+  if (!tabsBar) return;
+
+  const btn = e.target.closest('[data-tab]');
+  if (!btn) return;
+
+  setActiveTab(btn.dataset.tab);
+});
 </script>
 </body>
 </html>
