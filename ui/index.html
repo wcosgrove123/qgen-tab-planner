@@ -3,245 +3,938 @@
 <head>
   <meta charset="utf-8" />
   <title>Q-Gen -- Questionnaire & Tab Plan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
   <style>
-    /* =========================================
-      BRAND PALETTE (base, stable across themes)
-      ========================================= */
-    :root{
-      --brand-primary:   #212161;  /* deep navy */
-      --brand-secondary: #F2B800;  /* gold */
-      --brand-yellow:    #F4E412;
-      --brand-blue-1:    #3F6AB7;
-      --brand-blue-2:    #335899;
+  /* =======================================================
+    Q-GEN DESIGN TOKENS & BASE LAYOUT (Step 1 clean refactor)
+    - Brand base (stable)
+    - Theme tokens (cue-light / cue-dark / cue-gold)
+    - Global resets & page chrome (header/nav scaffolding)
+    - Non-breaking: same selectors, deduped helpers
+    ======================================================= */
 
-      --brand-accent-1:  #A7B5DB;  /* soft periwinkle */
-      --brand-accent-2:  #8197D0;
-      --brand-accent-3:  #E3EAF7;  /* light panel */
-      --danger:          #C62828;
-    }
+  /* ------------------------------
+    0) Brand Palette (stable base)
+    ------------------------------ */
+  :root{
+    --brand-primary:   #212161;  /* deep navy */
+    --brand-secondary: #F2B800;  /* gold */
+    --brand-yellow:    #F4E412;
+    --brand-blue-1:    #3F6AB7;
+    --brand-blue-2:    #335899;
 
-    /* =========================
-      THEMES (tokens by role)
-      ========================= */
+    --brand-accent-1:  #A7B5DB;  /* soft periwinkle */
+    --brand-accent-2:  #8197D0;
+    --brand-accent-3:  #E3EAF7;  /* light panel */
 
-    /* Cue Light (DEFAULT) */
-    :root[data-theme="cue-light"]{
-      --accent:       var(--brand-primary);
-      --accent-weak:  #3b3b7d;
+    --danger:          #C62828;
 
-      --cta:          var(--brand-secondary);
-      --cta-text:     #1a1a1a;
+    /* spacing / radius tokens used by components down the tree */
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --space-1: 6px;
+    --space-2: 8px;
+    --space-3: 10px;
+    --space-4: 12px;
+    --space-5: 14px;
+    --space-6: 16px;
+  }
 
-      /* layered surfaces (distant → near) */
-      --bg:           #EEF2FB;   /* canvas */
-      --surface-3:    #F1F4FB;   /* subtle elevation */
-      --surface-2:    #F6F8FD;   /* header / rail */
-      --surface-1:    #FFFFFF;   /* cards / inputs */
+  /* ---------------------------------------
+    1) Theme Tokens (override by data-theme)
+    --------------------------------------- */
 
-      --fg:           #0F172A;
-      --muted:        #637189;
-      --line:         #D9E0EF;
-      --ring:         rgba(51,88,153,.35);
-      --shadow:       0 8px 24px rgba(15, 23, 42, .06);
-    }
+  /* Cue Light (DEFAULT) */
+  :root[data-theme="cue-light"]{
+    --accent:       var(--brand-primary);
+    --accent-weak:  #3b3b7d;
 
-    /* Cue Dark (refined, cohesive) */
-    :root[data-theme="cue-dark"]{
-      --accent:       #A7B5DB;
-      --accent-weak:  #8ea1da;
+    --cta:          var(--brand-secondary);
+    --cta-text:     #1a1a1a;
 
-      --cta:          var(--brand-secondary);
-      --cta-text:     #101010;
+    /* layered surfaces (distant → near) */
+    --bg:           #EEF2FB;   /* canvas */
+    --surface-3:    #F1F4FB;   /* subtle elevation */
+    --surface-2:    #F6F8FD;   /* header / rail */
+    --surface-1:    #FFFFFF;   /* cards / inputs */
 
-      --bg:           #0A0F24;   /* canvas */
-      --surface-3:    #101631;   /* distant */
-      --surface-2:    #131A35;   /* header / rail */
-      --surface-1:    #151F41;   /* cards / inputs */
+    --fg:           #0F172A;
+    --muted:        #637189;
+    --line:         #D9E0EF;
+    --ring:         rgba(51,88,153,.35);
+    --shadow:       0 8px 24px rgba(15, 23, 42, .06);
+  }
 
-      --fg:           #E7ECFF;
-      --muted:        #A8B2CC;
-      --line:         rgba(231,236,255,.10);
-      --ring:         rgba(167,181,219,.45);
-      --shadow:       0 10px 28px rgba(0,0,0,.35);
-    }
+  /* Cue Dark */
+  :root[data-theme="cue-dark"]{
+    --accent:       #A7B5DB;
+    --accent-weak:  #8ea1da;
 
-    /* Cue Gold (light neutrals; gold CTAs) */
-    :root[data-theme="cue-gold"]{
-      --accent:       var(--brand-primary);
-      --accent-weak:  #3b3b7d;
+    --cta:          var(--brand-secondary);
+    --cta-text:     #101010;
 
-      --cta:          var(--brand-secondary);
-      --cta-text:     #1a1a1a;
+    --bg:           #0A0F24;
+    --surface-3:    #101631;
+    --surface-2:    #131A35;
+    --surface-1:    #151F41;
 
-      --bg:           #EEF2FB;
-      --surface-3:    #F1F4FB;
-      --surface-2:    #F6F8FD;
-      --surface-1:    #FFFFFF;
+    --fg:           #E7ECFF;
+    --muted:        #A8B2CC;
+    --line:         rgba(231,236,255,.10);
+    --ring:         rgba(167,181,219,.45);
+    --shadow:       0 10px 28px rgba(0,0,0,.35);
+  }
 
-      --fg:           #0F172A;
-      --muted:        #637189;
-      --line:         #D9E0EF;
-      --ring:         rgba(51,88,153,.35);
-      --shadow:       0 8px 24px rgba(15, 23, 42, .06);
-    }
+  /* Cue Gold (light neutrals; gold CTAs) */
+  :root[data-theme="cue-gold"]{
+    --accent:       var(--brand-primary);
+    --accent-weak:  #3b3b7d;
 
-    /* =========================
-      GLOBAL / LAYOUT
-      ========================= */
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { height: 100%; overflow-x: hidden; }
-    body{
-      margin:0;
-      font:14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--fg);
-      background:var(--bg);
-      display:flex;
-      flex-direction:column;
-    }
+    --cta:          var(--brand-secondary);
+    --cta-text:     #1a1a1a;
 
-    header {
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--line);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between; /* <-- ADD THIS LINE */
-      flex-shrink: 0;
-      box-shadow: var(--shadow);
-    }
+    --bg:           #EEF2FB;
+    --surface-3:    #F1F4FB;
+    --surface-2:    #F6F8FD;
+    --surface-1:    #FFFFFF;
 
-    header .logo{ font-size:20px; font-weight:700; }
-    header .project-inputs{ display:flex; gap:8px; align-items:center; }
-    header .project-inputs input{ padding:6px 10px; width:auto; }
-    header .actions{ display:flex; gap:8px; align-items:center; }
+    --fg:           #0F172A;
+    --muted:        #637189;
+    --line:         #D9E0EF;
+    --ring:         rgba(51,88,153,.35);
+    --shadow:       0 8px 24px rgba(15, 23, 42, .06);
+  }
 
-    /* top nav */
-    nav.app-nav{ background:var(--surface-2); border-bottom:1px solid var(--line); padding:6px 12px; display:flex; gap:8px; align-items:center; }
-    .nav-btn{ padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:var(--surface-1); cursor:pointer; color:var(--muted); }
-    .nav-btn.active{ color:var(--fg); box-shadow:0 0 0 2px var(--ring); }
+  /* ------------------------------
+    2) Global Reset & Typography
+    ------------------------------ */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; overflow-x: hidden; }
+  body{
+    margin:0;
+    font:14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--fg);
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+  }
 
-    /* grid */
-    .app-grid{
-      display:grid;
-      grid-template-columns: 360px minmax(0, 1fr);
-      gap:16px;
-      padding:16px;
-      flex-grow:1;
-      overflow:hidden;
-    }
-    .left-panel, .right-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; overflow-y:auto; overflow-x:hidden; }
-    .left-panel{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow: var(--shadow); }
-    .right-panel-content{ flex-grow:1; }
+  /* shared utility helpers (deduped) */
+  .is-hidden { display: none !important; }
+  .muted { color:var(--muted); }
 
-    /* cards */
-    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:12px; box-shadow: var(--shadow); }
-    .card-header{ padding:10px 14px; border-bottom:1px solid var(--line); font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .card-content{ padding:14px; }
+  .content-blur { filter: blur(4px); transition: filter .2s ease-out; }
 
-    #editor-panel:empty::before{
-      content:"Select a question from the left to edit it, or add a new one.";
-      color:var(--muted);
-      background:var(--surface-1);
-      border:2px dashed var(--line);
-      border-radius:12px;
-      display:flex; align-items:center; justify-content:center;
-      height:100%; text-align:center; padding:20px;
-    }
+  #view-root { padding-top: 8px; } /* breathing room below sticky bars */
 
-    /* forms */
-    input, select, textarea{ width:100%; max-width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-1); color:var(--fg); outline:none; transition: box-shadow .15s, border-color .15s, background .15s; }
-    input:focus, select:focus, textarea:focus{ box-shadow:0 0 0 3px var(--ring); border-color:transparent; }
-    textarea{ min-height:70px; }
-    button{ font-size:14px; padding:8px 12px; border-radius:10px; border:1px solid var(--line); background:var(--surface-1); color:var(--fg); cursor:pointer; transition: filter .12s, background .12s, border-color .12s; max-width:100%; }
-    button:hover{ filter:brightness(0.98); }
-    button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
-    button.danger{ border-color:var(--danger); color:var(--danger); }
-    .actions button{ background:var(--cta); border-color:var(--cta); color:var(--cta-text); }
-    .actions button:hover{ filter:brightness(.95); }
-    body.gold-all button:not(.danger){ background:var(--cta) !important; border-color:var(--cta) !important; color:var(--cta-text) !important; }
+  /* ------------------------------
+    3) App Chrome (Header / Nav)
+    ------------------------------ */
+  header {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* keep from prior patch */
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  header .logo{ font-size:20px; font-weight:700; }
+  header .project-inputs{ display:flex; gap:8px; align-items:center; }
+  header .project-inputs input{ padding:6px 10px; width:auto; }
+  header .actions{ display:flex; gap:8px; align-items:center; }
 
-    /* question list */
-    .q-item{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-1); cursor:grab; transition: border-color .12s, background .12s, box-shadow .12s; }
-    .q-item + .q-item{ margin-top:8px; }
-    .q-item:hover{ border-color:var(--accent-weak); }
-    .q-item.active{ background:var(--surface-3); border-color:var(--accent-weak); box-shadow:0 0 0 1px var(--accent-weak) inset; }
-    .q-item .text{ color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .q-item .summary{ font-size:12px; color:var(--muted); margin-top:4px; }
-    .tag{ background: rgba(167,181,219,.25); color: var(--accent-weak); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+  /* Utilities missing but referenced */
+  .btn { all: unset; display:inline-flex; align-items:center; gap:6px;
+    padding:8px 12px; border:1px solid var(--line); border-radius:10px;
+    background:var(--surface-1); color:var(--fg); cursor:pointer; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.ghost { background:transparent; }
+  .icon-btn { all: unset; cursor:pointer; padding:4px 8px; border-radius:8px; }
+  .grid2 { display:grid; grid-template-columns: 120px 1fr; gap:8px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
-    /* tabs */
-    .editor-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--line); padding:0 14px; background:var(--surface-1); border-top-left-radius:12px; border-top-right-radius:12px; }
-    .tab{ padding:8px 12px; border:1px solid transparent; border-bottom:0; border-radius:8px 8px 0 0; cursor:pointer; color:var(--muted); }
-    .tab.active{ background:var(--surface-1); border-color:var(--line); color:var(--fg); }
-    .tab-content{ display:none; }
-    .tab-content.active{ display:block; }
+  /* top nav */
+  nav.app-nav{
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+  }
+  .app-nav .nav-inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .nav-btn{
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--muted);
+    font-weight: 600;
+    transition: box-shadow .15s, transform .05s;
+  }
+  .nav-btn:hover{ transform: translateY(-1px); }
+  .nav-btn.active{
+    color: var(--fg);
+    box-shadow: 0 0 0 2px var(--ring);
+  }
 
-    /* layout helpers */
-    .row{ display:grid; grid-template-columns: 140px minmax(0, 1fr); gap:10px; margin:10px 0; align-items:start; }
-    .stack{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .muted{ color:var(--muted); }
-    .status-msg{ margin-left:auto; text-align:right; }
-    .ok{ color:#16a34a; font-size:12px; }
-    .error{ margin:16px; white-space:pre-wrap; color:#7f1d1d; background:#fef2f2; border:1px solid #fecaca; padding:10px; border-radius:8px; }
+  /* --- Editor sub-tabs (secondary) --- */
+  .subtabs{
+    z-index: 45;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .subtabs .subtabs-inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+  .subtab{
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0; /* Rounded top corners only */
+    background: transparent;    /* Make the background subtle */
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    margin-bottom: -1px; /* Helps the active tab blend into the panel */
+  }
+  .subtab.active{
+    color: var(--fg);
+    background: var(--surface-1); /* Match the panel background */
+    border-color: var(--line);
+    box-shadow: none; /* The border is enough emphasis */
+  }
 
-    #generateXlsx{ background:var(--brand-secondary); border-color:var(--brand-secondary); color:#1e1e1e; }
-    #generateXlsx:hover{ filter:brightness(.95); }
+  .app-grid > .right-panel > .card {
+    border-top: none;
+    border-top-left-radius: 0;
+  }
 
-    .app-grid { grid-template-columns: 360px minmax(0, 1fr); }
-    .left-panel { flex: 0 0 360px; min-width: 0; overflow-x: hidden; }
-    #question-list { min-width: 0; overflow-x: hidden; }
-    .q-item { max-width: 100%; }
-    .left-panel > .stack > * { min-width: 0; }
-    @media (max-width: 1280px) { .app-grid { grid-template-columns: clamp(260px, 24vw, 360px) minmax(0, 1fr); } }
+  /* ------------------------------
+    4) Layout Scaffolding & Cards
+    ------------------------------ */
+  .app-grid{
+    display:grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    gap:16px;
+    padding:16px;
+    flex-grow:1;
+    overflow:hidden;
+  }
+  .left-panel, .right-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; overflow-y:auto; overflow-x:hidden; }
+  .left-panel{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+    box-shadow: var(--shadow);
+  }
+  .right-panel-content{ flex-grow:1; }
 
-    /* dashboard */
-    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
-    .project-card .meta{ color:var(--muted); font-size:12px; }
-    .pill{ padding:2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; }
+  .card{
+    background:var(--surface-1);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .card-header{
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    font-weight:600;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .card-content{ padding:14px; }
 
-    /* preview */
-    .preview-wrap{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    .qre-paper{ background:#ffffff; border:1px solid var(--line); border-radius:12px; padding:16px; max-height:70vh; overflow:auto; }
-    .qre-paper h3{ margin:12px 0 4px; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
 
-    /* versions */
-    .diff del{ background:#fde2e2; text-decoration:none; }
-    .diff ins{ background:#e2f7e2; text-decoration:none; }
+  /* ------------------------------
+    5) Editor Headings & Workbench
+    ------------------------------ */
+  .editor-section-title{
+    text-align:left;
+    font-size:1.25rem;
+    font-weight:600;
+    color:var(--brand-primary);
+    margin: 20px 0 12px 20px; /* indented left */
+    letter-spacing:.3px;
+  }
+  .editor-section-helper{
+    margin: 0 0 16px 20px;
+    font-size:.9rem;
+    color:var(--muted);
+    font-style:italic;
+  }
+  .workbench{
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-    .preset-pane button { border-radius: 8px; }
+  /* ------------------------------
+    6) Stats (dashboard strip)
+    ------------------------------ */
+  .stats-row{
+    display:flex;
+    gap:20px;
+    padding:10px 20px;
+    background: var(--surface-1);
+    border-bottom:1px solid var(--line);
+  }
+  .stats-row .stat{ font-weight:600; color: var(--brand-primary); }
 
-    /* ---- Preset dropdown layout ---- */
+  .stats-wrap{
+    display:flex; gap:16px; padding:12px 16px;
+    border-bottom:1px solid var(--line);
+    background: var(--surface-3);
+  }
+  .stats-block, .client-stats{
+    background: var(--surface-1);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    box-shadow: var(--shadow);
+  }
+  .stats-block{ flex:1 1 60%; }
+  .client-stats{ flex:1 1 40%; }
+  .stat-title{ font-weight:700; margin-bottom:6px; }
+  .stats-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .client-stats ul{ list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+  .client-stats li{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 10px; border:1px solid var(--line); border-radius:10px;
+    background: var(--surface-1);
+  }
+  .client-name{ color: var(--fg); }
+  .client-count{
+    font-weight:700; padding:2px 8px; border-radius:999px;
+    border:1px solid var(--line); background: var(--surface-3);
+  }
 
-    .preset-panel {
-      position: relative;
-      top: 40px;             /* sits just under the Presets button row */
-      left: 0;
-      width: min(860px, calc(100vw - 64px));
-      max-height: 60vh;      /* internal scroll instead of page scroll */
-      overflow: auto;
-      z-index: 1000;
-      background: var(--surface-1);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      padding: 10px;
-      display: none;         /* toggled by JS */
-    }
-    .preset-panel .sticky-head {
-      position: sticky; top: 0;
-      background: var(--surface-1);
-      padding-bottom: 8px; margin-bottom: 8px;
-      border-bottom: 1px solid var(--line);
-    }
+  /* ------------------------------
+    7) Form Controls & Buttons
+    ------------------------------ */
+  input, select, textarea{
+    width:100%; max-width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--surface-1);
+    color:var(--fg);
+    outline:none;
+    transition: box-shadow .15s, border-color .15s, background .15s;
+  }
+  input:focus, select:focus, textarea:focus{
+    box-shadow:0 0 0 3px var(--ring);
+    border-color:transparent;
+  }
+  textarea{ min-height:70px; }
+  button{
+    font-size:14px;
+    padding:8px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface-1);
+    color:var(--fg);
+    cursor:pointer;
+    transition: filter .12s, background .12s, border-color .12s;
+    max-width:100%;
+  }
+  button:hover{ filter:brightness(0.98); }
+  button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.danger{ border-color:var(--danger); color:var(--danger); }
+  .actions button{ background:var(--cta); border-color:var(--cta); color:var(--cta-text); }
+  .actions button:hover{ filter:brightness(.95); }
+  body.gold-all button:not(.danger){
+    background:var(--cta) !important; border-color:var(--cta) !important; color:var(--cta-text) !important;
+  }
+  #generateXlsx{ background:var(--brand-secondary); border-color:var(--brand-secondary); color:#1e1e1e; }
+  #generateXlsx:hover{ filter:brightness(.95); }
 
-  </style>
-</head>
+  :focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); border-radius: 8px; }
+
+  /* ------------------------------
+    8) Left Panel (question list)
+    ------------------------------ */
+  #question-list { min-width: 0; overflow-x: hidden; }
+  .left-panel { flex: 0 0 360px; min-width: 0; overflow-x: hidden; }
+  .left-panel > .stack > * { min-width: 0; }
+
+  .q-item{
+    padding:10px 12px; border:1px solid var(--line);
+    border-radius:10px; background:var(--surface-1);
+    cursor:grab; transition: border-color .12s, background .12s, box-shadow .12s;
+    max-width:100%;
+  }
+  .q-item + .q-item{ margin-top:8px; }
+  .q-item:hover{ border-color:var(--accent-weak); }
+  .q-item.active{
+    background:var(--surface-3);
+    border-color:var(--accent-weak);
+    box-shadow:0 0 0 1px var(--accent-weak) inset;
+  }
+  .q-item .text{ color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .q-item .summary{ font-size:12px; color:var(--muted); margin-top:4px; }
+  .tag{
+    background: rgba(167,181,219,.25);
+    color: var(--accent-weak);
+    padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600;
+  }
+
+  /* ------------------------------
+    9) Editor Tabs & Empty State
+    ------------------------------ */
+  .editor-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--line); padding:0 14px; background:var(--surface-1); border-top-left-radius:12px; border-top-right-radius:12px; }
+  .tab{ padding:8px 12px; border:1px solid transparent; border-bottom:0; border-radius:8px 8px 0 0; cursor:pointer; color:var(--muted); }
+  .tab.active{ background:var(--surface-1); border-color:var(--line); color:var(--fg); }
+  .tab-content{ display:none; }
+  .tab-content.active{ display:block; }
+
+  #editor-panel:empty::before{
+    content:"Select a question from the left to edit it, or add a new one.";
+    color:var(--muted);
+    background:var(--surface-1);
+    border:2px dashed var(--line);
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    height:100%; text-align:center; padding:20px;
+  }
+
+  /* ------------------------------
+    10) Simple Flow/Layout helpers
+    ------------------------------ */
+  .row{ display:grid; grid-template-columns: 140px minmax(0, 1fr); gap:10px; margin:10px 0; align-items:start; }
+  .stack{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .status-msg{ margin-left:auto; text-align:right; }
+  .ok{ color:#16a34a; font-size:12px; }
+  .error{
+    margin:16px; white-space:pre-wrap; color:#7f1d1d;
+    background:#fef2f2; border:1px solid #fecaca; padding:10px; border-radius:8px;
+  }
+
+  /* ------------------------------
+    11) Dashboard grid & pills
+    ------------------------------ */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
+  .project-card .meta{ color:var(--muted); font-size:12px; }
+  .pill{ padding:2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; }
+
+  /* ------------------------------
+    12) Preview scaffolding
+    ------------------------------ */
+  .pv-wrap { padding: 16px 20px 28px; }
+  .pv-header h2 { margin: 0; font-size: 20px; }
+  .pv-sub { color: #666; margin-top: 2px; }
+
+  .pv-sec { margin-top: 18px; }
+  .pv-sec > h3 { margin: 12px 0 8px; font-size: 16px; }
+  .pv-empty {
+    padding: 10px 12px; color: #777; background:#f7f7fb;
+    border:1px solid #eee; border-radius:8px;
+  }
+
+  .preset-wrap { position: relative; }
+
+  .pv-row{
+    display: grid; grid-template-columns: 90px 1fr; gap: 10px 14px;
+    padding: 10px 12px; border: 1px solid #e5e8f1; border-radius: 12px; margin: 8px 0; background: #fff;
+  }
+  .pv-qid{ font-weight: 600; color: #212161; align-self: start; }
+  .pv-body{ display:flex; flex-direction:column; gap:6px; }
+  .pv-title{ font-weight: 600; }
+  .pv-meta{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+  .pv-chip{
+    display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px;
+    background:#E3EAF7; color:#335899; border:1px solid #A7B5DB;
+  }
+
+  /* --- Preview subtabs --- */
+  .pv-tabs{ display:flex; gap:6px; margin:12px 0; }
+  .pv-tab{
+    padding:8px 12px; border:1px solid var(--line);
+    border-radius:999px; background:var(--surface-1);
+    color:var(--muted); font-weight:600; cursor:pointer;
+  }
+  .pv-tab.active{ color:var(--fg); box-shadow:0 0 0 2px var(--ring); }
+
+  .pv-panel{ display:none; }
+  .pv-panel.active{ display:block; }
+
+  .pv-table{ width:100%; border-collapse:collapse; margin-top:8px; }
+  .pv-table th, .pv-table td{ border:1px solid #e5e8f1; padding:6px 8px; text-align:left; }
+  .pv-row.banner{ border:1px dashed var(--line); }
+  body.sidebar-mode .pv-tabs { display: none !important; }
+
+  /* ------------------------------
+  13) Banner preview grid
+  ------------------------------ */
+  .pv-banner-wrap {
+    overflow: auto;
+    max-width: 100%;
+  }
+
+  .pv-banner-grid {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: auto;
+    width: 100%;
+    /* NEW: make it a grid so blocks/dividers can align */
+    display: grid;
+    grid-template-columns: repeat(var(--pv-col-n, 1), minmax(var(--pv-col-min,112px), 1fr));
+    grid-template-rows: auto auto auto; /* H1, H2, Stats */
+  }
+
+  /* rows must span all columns and sit on fixed grid rows */
+  .pv-banner-h1,
+  .pv-banner-h2,
+  .pv-banner-stats{
+    grid-column: 1 / -1;    /* span all columns of the container grid */
+    display: grid;
+    grid-template-columns: inherit; /* reuse the same column tracks */
+    background:#fff;
+    border-bottom:1px solid var(--line);
+  }
+  .pv-banner-h1{ grid-row:1; }
+  .pv-banner-h2{ grid-row:2; }
+  .pv-banner-stats{ grid-row:3; }
+
+  /* cells */
+  .pv-banner-cell{
+    position: relative;               /* anchor for absolute controls */
+    z-index: 1;                       /* above blocks/dividers */
+    padding: 8px 10px;
+    border-right: 1px solid var(--line);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pv-banner-h1 .pv-banner-cell:last-child,
+  .pv-banner-h2 .pv-banner-cell:last-child,
+  .pv-banner-stats .pv-banner-cell:last-child{
+    border-right: 0;
+  }
+
+  /* H1: bold + centered label, keep edit/reset on right, thick separator */
+  .pv-banner-h1 .pv-banner-cell{
+    font-weight: 600;
+    border-bottom: 3px solid #333;
+    display: grid;
+    grid-template-columns: 1fr auto auto;  /* [label] [✎] [⟲] */
+    align-items: center;
+    gap: 6px;
+    padding-right: 56px;                   /* room for the ✕ button */
+  }
+
+  .pv-banner-h1 .pv-banner-cell .pv-editable{
+    grid-column: 1 / -1;
+    /* occupy full width so ellipsis can work */
+    inline-size: 100%;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    /* default: centered */
+    justify-self: center;
+    text-align: center;
+  }
+  .pv-banner-h1 .pv-banner-cell > .pv-edit-btn{  grid-column: 2; justify-self: end; }
+  .pv-banner-h1 .pv-banner-cell > .pv-reset-btn{ grid-column: 3; justify-self: end; }
+
+  /* vertical divider */
+  .pv-banner-divider{
+    grid-row: 1 / 4;
+    width: 0;                      /* <- only the border shows */
+    border-left: 3px solid #333;   /* match H1 bottom thickness */
+    margin-left: -1px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Background outline per group */
+  :root{
+    --ban-thick: 2px;
+    --ban-color: #2d2d2d;
+    --ban-radius: 8px;
+  }
+
+  /* background outline per group:
+  only top/bottom; outermost blocks also draw their outer side */
+  .pv-banner-block{
+    grid-row: 1 / 4;
+    z-index: 0;
+
+    background: #fff;
+
+    /* only top/bottom so middle seams don't double up */
+    border-top: 2px solid #2d2d2d;
+    border-bottom: 2px solid #2d2d2d;
+
+    /* no middle side borders; added on first/last via modifiers */
+    border-left: 0;
+    border-right: 0;
+
+    /* rounded outer corners only (first/last add side borders) */
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    margin-inline: 0;              /* no gap between blocks */
+  }
+
+  /* first block: left edge + left radii */
+  .pv-banner-block.is-first{
+    border-inline-start: var(--ban-thick) solid var(--ban-color);
+    border-start-start-radius: var(--ban-radius);
+    border-end-start-radius: var(--ban-radius);
+  }
+
+  /* last block: right edge + right radii */
+  .pv-banner-block.is-last{
+    border-inline-end: var(--ban-thick) solid var(--ban-color);
+    border-start-end-radius: var(--ban-radius);
+    border-end-end-radius: var(--ban-radius);
+  }
+
+
+  /* --- Editing + buttons --- */
+  .pv-editable {
+    cursor: text;
+    border-radius: 6px;
+    padding: 2px 4px;
+  }
+  .pv-editable:focus-within {
+    box-shadow: 0 0 0 2px var(--ring);
+    outline: none;
+  }
+  .pv-edit-btn,
+  .pv-reset-btn {
+    margin-left: 6px;
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-1);
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .pv-editing {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pv-editing input {
+    padding: 4px 8px;
+    border-radius: 8px;
+    width: min(220px, 40vw);
+  }
+
+  /* hover-only delete button */
+  .pv-del{
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-1);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    display: none;            /* show on hover/focus */
+    z-index: 4;
+  }
+  /* keep the delete tucked in the corner for H1 so it doesn't overlap the label */
+  .pv-banner-h1 .pv-del{
+    top: 8px;
+    transform: none;
+  }
+
+  .pv-banner-h1 .pv-banner-cell:hover > .pv-del,
+  .pv-banner-h2 .pv-banner-cell:hover > .pv-del,
+  .pv-del:focus,
+  .pv-del:focus-visible{
+    display: inline-flex;
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+    border-radius: 6px;
+  }
+
+  .pv-menu{
+    position: absolute;
+    right: 28px;            /* leave room for ✕ */
+    top: 6px;
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-1);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    display: none;          /* show on hover/focus */
+    z-index: 4;
+  }
+  .pv-banner-h2 .pv-banner-cell:hover > .pv-menu,
+  .pv-menu:focus,
+  .pv-menu:focus-visible{
+    display: inline-flex;
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+    border-radius: 6px;
+  }
+
+  /* little indicator dot if the cell has filters */
+  .pv-cond-dot{
+    position:absolute;
+    right: 52px;            /* sits left of the 3-dots */
+    top: 10px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 1px solid var(--surface-1);
+    display: none;
+  }
+  .pv-banner-h2 .pv-banner-cell.has-cond > .pv-cond-dot{ display:block; }
+
+  /* simple dropdown popover */
+  .pv-cell-menu{
+    position: fixed;
+    z-index: 1001;
+    min-width: 220px;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 6px;
+  }
+  .pv-cell-menu .mitem{ display:block; width:100%; text-align:left; padding:8px 10px; border-radius:8px; }
+  .pv-cell-menu .mitem:hover{ background: var(--surface-3); }
+  .pv-cell-menu .subhead{ font-size:12px; color: var(--muted); padding:6px 10px 2px; }
+
+  /* toast styling */
+  .toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-1);
+    box-shadow: var(--shadow);
+    max-width: min(520px, 92vw);
+  }
+  .toast button {
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+  #toastHost { pointer-events: none; }
+  #toastHost .toast { pointer-events: auto; }
+
+  /* legacy cleanup */
+  .pv-col-del, .pv-dim-del { display: none !important; }
+
+
+  /* ------------------------------
+    14) Modal (centered)
+    ------------------------------ */
+  .modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; }
+  .modal-panel{
+    width: min(720px, 92vw);
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transform: translateY(-6px);
+    animation: modalIn .18s ease-out;
+  }
+  @keyframes modalIn{ from {opacity:0; transform: translateY(-16px);} to {opacity:1; transform: translateY(0);} }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-body{
+    padding: 16px 20px; display: grid; gap: 12px;
+  }
+  .modal-footer{
+    display:flex; justify-content:flex-end; gap:10px;
+    padding: 12px 20px 16px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+  }
+  .modal-backdrop{
+    background: rgba(0,0,0,.35);
+    backdrop-filter: blur(2px);
+  }
+
+  /* =======================================================
+   NEW: Sidebar Navigation Styles
+   ======================================================= */
+   #app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 260px;
+    background: var(--surface-2);
+    border-right: 1px solid var(--line);
+    padding: 16px;
+    z-index: 100;
+    transform: translateX(-100%); /* Hidden by default */
+    transition: transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  body.sidebar-open #app-sidebar {
+    transform: translateX(0); /* Show sidebar */
+  }
+
+  /* Sidebar links - vertical layout */
+  #app-sidebar .nav-btn {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+  }
+
+  /* Backdrop to dim/blur content */
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
+  }
+
+  body.sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Make sure header toggle button is visible */
+  #sidebar-toggle {
+      display: inline-flex;
+  }
+
+  /* ===== Slide-out Side Drawer ===== */
+  .side-drawer{
+    position: fixed;
+    left: 0; top: 64px;           /* adjust top to your header height */
+    height: calc(100vh - 64px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    pointer-events: none;         /* let children control interaction */
+  }
+
+  /* Hamburger handle */
+  .sd-handle{
+    pointer-events: auto;
+    width: 44px; height: 44px;
+    margin: 8px 0 0 8px;
+    border: 1px solid #e1e4ea;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    display: grid; place-items: center;
+    cursor: pointer;
+  }
+  .sd-handle span{
+    display:block; width:18px; height:2px; background:#333; margin:3px 0; border-radius:2px;
+  }
+  .side-drawer.pinned .sd-handle{ border-color: var(--brand-primary, #212161); }
+
+  /* Slide-out panel */
+  .sd-panel{
+    pointer-events: auto;
+    width: 260px; max-width: 80vw;
+    margin-top: 8px; margin-left: 8px;
+    background: var(--panel-bg, #fff);
+    border: 1px solid #e1e4ea;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    transform: translateX(-16px) translateX(-100%);  /* fully hidden */
+    transition: transform .22s ease-out;
+    padding: 10px;
+  }
+
+  /* Open on hover, or when pinned */
+  .side-drawer:hover .sd-panel,
+  .side-drawer.pinned .sd-panel{
+    transform: translateX(0);
+  }
+
+  /* Inside nav */
+  .sd-title{
+    font-size: 12px; font-weight: 700; letter-spacing:.08em; text-transform: uppercase;
+    color: #5c6370; margin: 2px 6px 8px;
+  }
+  .sd-link{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .sd-link:hover{ background: rgba(33,33,97,.06); }
+  .sd-link.pv-tab.active{ 
+    background: rgba(33,33,97,.10);
+    color: var(--brand-primary, #212161);
+    font-weight: 600;
+  }
+
+  .sd-panel hr{
+    border: 0; border-top: 1px solid #eef0f5; margin: 8px 0;
+  }
+
+  /* Mobile: keep it tappable and not in the way */
+  @media (max-width: 900px){
+    .side-drawer{ top: 56px; height: calc(100vh - 56px); }
+    .sd-handle{ width:40px; height:40px; }
+    .sd-panel{ width: 80vw; }
+  }
+</style>
 <body>
-  <!-- HEADER -->
   <header>
     <div class="project-inputs">
+      <button id="sidebar-toggle" title="Toggle Sidebar" class="icon-btn">☰</button>
       <input id="projName" placeholder="Project Name" title="Project Name" />
       <input id="projClient" placeholder="Client" title="Client" />
       <input id="projVersion" placeholder="Version" title="Version" />
@@ -266,18 +959,64 @@
     </div>
   </header>
 
-  <!-- APP NAV (pages) -->
   <nav class="app-nav">
-    <button class="nav-btn" data-route="#/dashboard">🏠 Dashboard</button>
-    <button class="nav-btn" data-route="#/editor">✏️ Editor</button>
-    <button class="nav-btn" data-route="#/library">📚 Library</button>
-    <button class="nav-btn" data-route="#/rules">🧩 Rules</button>
-    <button class="nav-btn" data-route="#/validator">✅ Validator</button>
-    <button class="nav-btn" data-route="#/preview">👀 Preview</button>
-    <button class="nav-btn" data-route="#/versions">🗂️ Versions</button>
+    <div class="nav-inner">
+      <button class="nav-btn" data-route="#/dashboard">🏠 Dashboard</button>
+      <button class="nav-btn" data-route="#/editor">✏️ Editor</button>
+      <button class="nav-btn" data-route="#/library">📚 Library</button>
+      <button class="nav-btn" data-route="#/rules">🧩 Rules</button>
+      <button class="nav-btn" data-route="#/validator">✅ Validator</button>
+      <button class="nav-btn" data-route="#/versions">🗂️ Versions</button>
+    </div>
   </nav>
 
-  <!-- ROUTED VIEWS -->
+  <div id="editor-subtabs" class="subtabs is-hidden">
+    <div class="subtabs-inner">
+      <button data-subtab="pre"     onclick="goto('#/editor/pre')"     class="subtab">Pre-Field</button>
+      <button data-subtab="field"   onclick="goto('#/editor/field')"   class="subtab">Fielding</button>
+      <button data-subtab="report"  onclick="goto('#/editor/report')"  class="subtab">Reporting</button>
+      <button data-subtab="post"    onclick="goto('#/editor/post')"    class="subtab">Post-Survey</button>
+    </div>
+  </div>
+
+
+  <div id="createProjectModal" class="modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="cp-title">
+  <div class="modal-panel" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="cp-title">Create Project</h3>
+      <button class="icon-btn" onclick="closeCreateProjectModal()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="field">
+        <span>Project Name</span>
+        <input id="cp-name" type="text" placeholder="e.g., INFUSE Claims Test" />
+      </label>
+
+      <label class="field">
+        <span>Client</span>
+        <input id="cp-client" type="text" placeholder="e.g., Kenvue / JJIV" />
+      </label>
+
+      <label class="field">
+        <span>Important Dates (free text)</span>
+        <input id="cp-dates" type="text" placeholder="e.g., Field: Sep 12–16; Report: Sep 20" />
+      </label>
+
+      <label class="field">
+        <span>Notes</span>
+        <textarea id="cp-notes" rows="4" placeholder="Any context, constraints, deliverables…"></textarea>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="closeCreateProjectModal()">Cancel</button>
+      <button class="btn primary" onclick="createProjectFromModal()">Create Project</button>
+    </div>
+  </div>
+  <div class="modal-backdrop" onclick="closeCreateProjectModal()"></div>
+</div>
+
   <main id="view-root" style="flex:1; overflow:auto"></main>
 
   <div id="serverError" class="error" style="display:none; margin:12px"></div>
@@ -525,33 +1264,1323 @@ const state = {
   },
   questions: []
 };
-const ui_state = { active_question_index: null, active_tab: 'main', route: location.hash || '#/dashboard' };
+const ui_state = { active_question_index: null, active_tab: 'main', route: location.hash || '#/dashboard', active_prefield_tab: 'screener' };
 ui_state.base_builders = ui_state.base_builders || {};
+state.globals.banners = state.globals.banners || [{
+  id: "BNR_CORE",
+  label: "Core Demo & Cohorts",
+  mode: "concat",
+  dimensions: []
+}];
 
-/************* ROUTER *************/
+/************* ROUTER (robust) *************/
 const routes = new Map();
-window.addEventListener('hashchange', () => { ui_state.route = location.hash || '#/dashboard'; renderRoute(); highlightNav(); });
-function highlightNav(){ const r = ui_state.route; $$('.nav-btn').forEach(btn=> btn.classList.toggle('active', btn.dataset.route===r)); }
-$$('.nav-btn').forEach(btn => btn.addEventListener('click', () => { location.hash = btn.dataset.route; }));
+
+function mount(viewEl, html){
+  viewEl.innerHTML = html;
+  // activate any [data-action] buttons here if needed later
+}
+
+function highlightNav(){
+  const r = location.hash || '#/dashboard';
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.route === r);
+  });
+}
+
+// bind clicks on nav buttons
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => { location.hash = btn.dataset.route; });
+});
+
+// go live
+window.addEventListener('hashchange', renderRoute);
+window.addEventListener('DOMContentLoaded', renderRoute);
 
 /************* UTIL *************/
 function setStatus(msg, ok){ const el = $("#status"); el.innerHTML = msg? `<span class="${ok?'ok':''}">${msg}</span>`: ""; }
 function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;'}[m])); }
+function goto(hash){ location.hash = hash; }
+function getCoreBanner() {
+  const g = state.globals;
+  if (!g.banners?.length) g.banners = [{ id:"BNR_CORE", label:"Core Demo & Cohorts", mode:"concat", dimensions:[] }];
+  return g.banners[0];
+}
+function findQuestionById(qid){ return state.questions.find(q => (q.id||"").toUpperCase() === (qid||"").toUpperCase()); }
 
-/************* DASHBOARD *************/
-function getProjects(){ try{ return JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]'); } catch{return []} }
-function saveProjects(list){ localStorage.setItem(PROJECTS_KEY, JSON.stringify(list)); }
-function touchCurrentIntoProjects(){
-  const list = getProjects();
-  const idx = list.findIndex(p => p.id === state.project.id);
-  const entry = { id: state.project.id, name: state.project.name||'Untitled', client: state.project.client||'', version: state.project.version||'0.1.0', updated_at: new Date().toISOString(), favorite: !!(list[idx]?.favorite), status: list[idx]?.status||'Draft' };
-  if(idx>=0) list[idx] = entry; else list.unshift(entry);
-  saveProjects(list);
-  localStorage.setItem(`proj:${state.project.id}`, JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions }));
+// ===== PHASE 1: Tab Plan data model & nets core =====
+
+// Ensure the per-question Tab bucket exists
+function ensureTabBucket(q){
+  if (!q) return null;
+  if (!q.tab || typeof q.tab !== 'object'){
+    q.tab = { nets: [], instructions: "" };
+  }else{
+    q.tab.nets = Array.isArray(q.tab.nets) ? q.tab.nets : [];
+    q.tab.instructions = typeof q.tab.instructions === "string" ? q.tab.instructions : "";
+  }
+  return q.tab;
 }
 
-function renderDashboard(root){
+// Quick type helpers (used by UI later)
+function isNumericQuestion(q){ return String(q?.type||"").toLowerCase().startsWith("numeric"); }
+function isCodesQuestion(q){
+  // single/multi/list/table/likert/open-ends → anything with options/cols/scale labels
+  if (Array.isArray(q?.options) && q.options.length) return true;
+  if (Array.isArray(q?.grid?.cols) && q.grid.cols.length) return true;
+  if (Array.isArray(q?.scale?.labels) && q.scale.labels.length) return true;
+  return false;
+}
+
+// Constructors (normalized)
+function createCodesNet({ label=null, codes=[] }){
+  const uniq = Array.from(new Set((codes||[]).map(c => String(c))));
+  return { kind: "codes", label: label ? String(label) : null, codes: uniq };
+}
+function createRangeNet({ min, max }){
+  const mn = Number(min), mx = Number(max);
+  return { kind: "range", min: mn, max: mx };
+}
+
+// Keep all nets valid & current against the live question definition
+function syncNetsWithQuestion(q){
+  const tab = ensureTabBucket(q);
+  if (!tab) return null;
+
+  // For codes-nets, drop codes that no longer exist; for ranges, coerce & validate.
+  tab.nets = (tab.nets||[]).map(net => {
+    if (net?.kind === "codes"){
+      const labelOf = (code)=>getOptionLabel(q.id, code);  // already in your file
+      const kept = (net.codes||[]).map(String).filter(c => !!labelOf(c));
+      if (!kept.length) return null;
+      return { kind:"codes", label: (net.label||null), codes: Array.from(new Set(kept)) };
+    }
+    if (net?.kind === "range") {
+        // First, check for the new structure created by the modal
+        if (net.operator) {
+            const v1 = Number(net.value1);
+            // The first value must always be a valid number
+            if (!Number.isFinite(v1)) {
+                return null;
+            }
+            // If it's a range ('-'), the second value must also be valid
+            if (net.operator === '-') {
+                const v2 = Number(net.value2);
+                if (!Number.isFinite(v2) || v1 > v2) {
+                    return null; // A range requires a valid v2, and v1 must be <= v2
+                }
+            }
+            return net; // The net is valid, so we keep it
+        }
+
+        // Fallback for the old structure (min/max)
+        const mn = Number(net.min), mx = Number(net.max);
+        if (Number.isFinite(mn) && Number.isFinite(mx) && mn <= mx) {
+            return { kind: "range", min: mn, max: mx };
+        }
+        
+        return null; // The net is invalid in any format
+    }
+    return null; // unknown kinds are dropped
+  }).filter(Boolean);
+
+  return tab;
+}
+
+// Handy global: sync every question at once (use before painting UI or exporting)
+function syncAllNets(){
+  (state.questions||[]).forEach(syncNetsWithQuestion);
+}
+
+// (Optional) Safe constructors exposed for later UI
+window.QTab = { ensureTabBucket, createCodesNet, createRangeNet, syncNetsWithQuestion, syncAllNets };
+
+function ensureDimensionFromQuestion(qid) {
+  const q = findQuestionById(qid);
+  if (!q) return null;
+
+  const bnr = getCoreBanner();
+  const exists = bnr.dimensions.find(d => d.source?.qid === q.id);
+  if (exists) return exists;
+
+  // 1) normal single/multi questions
+  let srcLabels = [];
+  let srcCodes  = [];
+
+  if (Array.isArray(q.options) && q.options.length) {
+    srcLabels = q.options.map(o => String(o.label ?? ''));
+    srcCodes  = q.options.map((o, i) => String(o.code ?? (i + 1)));
+  }
+  // 2) table/likert: grid columns
+  else if (Array.isArray(q.grid?.cols) && q.grid.cols.length) {
+    srcLabels = q.grid.cols.map(c => String(c ?? ''));
+    srcCodes  = srcLabels.map((_, i) => String(i + 1));
+  }
+  // 3) simple likert (single/dual) with scale labels
+  else if (Array.isArray(q.scale?.labels) && q.scale.labels.length) {
+    srcLabels = q.scale.labels.map(l => String(l ?? ''));
+    srcCodes  = srcLabels.map((_, i) => String(i + 1));
+  }
+
+  // if still nothing, there’s nothing to render
+  if (!srcCodes.length) return null;
+
+  const groups = srcCodes.map((code, i) => ({
+    group_id: `${q.id}:${code}`,
+    ref: { qid: q.id, opt_id: code },
+    label_alias: null,
+    include: true,
+    order: i + 1
+  }));
+
+  const dim = {
+    dim_id: `DIM_${q.id}`,
+    source: { type: "question", qid: q.id },
+    label: q.text || q.id,
+    order: (bnr.dimensions.length + 1),
+    groups
+  };
+
+  bnr.dimensions.push(dim);
+  queueAutosave?.();
+  return dim;
+}
+
+function updateDimAlias(dim_id, alias){
+  const d = getCoreBanner().dimensions.find(x => x.dim_id === dim_id);
+  if (!d) return;
+  if (alias == null || String(alias).trim() === '') {
+    d.label = getDimDefaultLabel(d);   // ← now resolves to question text
+  } else {
+    d.label = String(alias);
+  }
+  queueAutosave?.();
+}
+function getDimDefaultLabel(dim){
+  const qid = dim?.source?.qid;
+  const q   = findQuestionById(qid);
+  // fallback order: question text → QID → empty
+  return (q?.text?.trim() || qid || '').trim();
+}
+function toggleGroupInclude(group_id, on){ const d = getCoreBanner().dimensions; for (const dim of d){ const g = dim.groups.find(x => x.group_id === group_id); if (g){ g.include = !!on; queueAutosave?.(); return; } } }
+function setGroupAlias(group_id, alias){ const d = getCoreBanner().dimensions; for (const dim of d){ const g = dim.groups.find(x => x.group_id === group_id); if (g){ g.label_alias = (alias||"").trim() || null; queueAutosave?.(); return; } } }
+function reorderGroups(dim_id, newOrder){ const d = getCoreBanner().dimensions.find(x => x.dim_id === dim_id); if (!d) return; d.groups = newOrder.map((gid, i) => ({...d.groups.find(g=>g.group_id===gid), order:i+1})); queueAutosave?.(); }
+function reorderDimensions(newDimIds){ const b = getCoreBanner(); b.dimensions = newDimIds.map((id,i)=>({...b.dimensions.find(d=>d.dim_id===id), order:i+1})); queueAutosave?.(); }
+function removeBannerColumn(dim_id, group_id){
+  const b = getCoreBanner();
+  const d = b.dimensions.find(x => x.dim_id === dim_id);
+  if (!d) return;
+  const g = d.groups.find(x => x.group_id === group_id);
+  if (!g) return;
+  // soft delete: hide from preview/exports but keep editable history
+  g.include = false;
+  queueAutosave?.();
+}
+/* ===== Delete banner header 1 ===== */
+function removeBannerDimension(dim_id, {soft=true} = {}){
+  const b = getCoreBanner();
+  const idx = b.dimensions.findIndex(d => d.dim_id === dim_id);
+  if (idx < 0) return;
+
+  if (soft) {
+    // keep the dimension object but hide all groups
+    b.dimensions[idx].groups?.forEach(g => g.include = false);
+  } else {
+    // hard delete the entire dimension
+    b.dimensions.splice(idx, 1);
+  }
+  // re-number order so future inserts look tidy
+  b.dimensions.forEach((d, i) => d.order = i + 1);
+  queueAutosave?.();
+}
+function getOptionLabel(qid, code){
+  const q = findQuestionById(qid);
+  if (!q) return null;
+
+  // prefer explicit options
+  const byOpt = (q.options || []).find(o => String(o.code ?? '') === String(code ?? ''));
+  if (byOpt) return byOpt.label ?? null;
+
+  // grid columns (tables / likerts)
+  const idx = Number(code) - 1;
+  if (Array.isArray(q.grid?.cols) && q.grid.cols[idx]) return q.grid.cols[idx];
+
+  // fallback to scale labels (single/dual likert)
+  if (Array.isArray(q.scale?.labels) && q.scale.labels[idx]) return q.scale.labels[idx];
+
+  return null;
+}
+
+function ensureGroupCond(g){
+  if (!g.cond) g.cond = { all: [], any: [] };
+  if (!Array.isArray(g.cond.all)) g.cond.all = [];
+  if (!Array.isArray(g.cond.any)) g.cond.any = [];
+  return g.cond;
+}
+
+function dedupeCond(g){
+  ensureGroupCond(g);
+  const key = c => `${c.qid}::${String((c.codes||[]).sort())}`;
+  const uniq = arr => {
+    const seen = new Set(); const out = [];
+    for (const c of arr){ const k=key(c); if(!seen.has(k)){ seen.add(k); out.push(c); } }
+    return out;
+  };
+  g.cond.all = uniq(g.cond.all||[]);
+  g.cond.any = uniq(g.cond.any||[]);
+}
+
+
+function hasCond(g){
+  return !!(g?.cond && (g.cond.all?.length || g.cond.any?.length));
+}
+
+function condSummary(g){
+  if (!hasCond(g)) return '';
+  const a = g.cond.all?.length || 0;
+  const o = g.cond.any?.length || 0;
+  return `AND: ${a}${o?` • OR: ${o}`:''}`;
+}
+
+/** Get selectable options for a question, returning [{code,label}] */
+function getQuestionOptions(q){
+  if (!q) return [];
+  if (Array.isArray(q.options) && q.options.length){
+    return q.options.map((o,i)=>({ code:String(o.code ?? (i+1)), label:String(o.label ?? '') }));
+  }
+  if (Array.isArray(q.grid?.cols) && q.grid.cols.length){
+    return q.grid.cols.map((lab,i)=>({ code:String(i+1), label:String(lab ?? '') }));
+  }
+  if (Array.isArray(q.scale?.labels) && q.scale.labels.length){
+    return q.scale.labels.map((lab,i)=>({ code:String(i+1), label:String(lab ?? '') }));
+  }
+  if ((q.type||'').startsWith('numeric')) {
+    const bands = parseNumericBands(q);
+    if (bands.length) return bands; // e.g., ["1-5","6-10",...]
+  }
+  return [];
+}
+
+/* ===== Sync banner with questions ===== */
+function syncBannerWithQuestions({prune=true, addNew=false} = {}) {
+  const b = getCoreBanner();
+  const dims = b.dimensions || [];
+  for (const d of dims) {
+    if (!d?.source?.qid) continue;
+    const q = findQuestionById(d.source.qid);
+    if (!q) {
+      // question gone → drop whole dimension
+      if (prune) b.dimensions = dims.filter(x => x !== d);
+      continue;
+    }
+    const liveCodes = new Set((q.options||[]).map(o => String(o.code ?? '')));
+    // remove groups whose option no longer exists
+    d.groups = (d.groups||[]).filter(g => liveCodes.has(String(g.ref?.opt_id ?? '')));
+    // optionally add any newly added options as visible columns
+    if (addNew) {
+      for (const opt of (q.options||[])) {
+        const code = String(opt.code ?? '');
+        if (!d.groups.find(g => String(g.ref?.opt_id ?? '') === code)) {
+          d.groups.push({
+            group_id: `${q.id}:${code}`,
+            ref: { qid: q.id, opt_id: code },
+            label_alias: null,
+            include: true,
+            order: (d.groups.length + 1)
+          });
+        }
+      }
+    }
+    // re-order numbers
+    d.groups.forEach((g,i)=> g.order = i+1);
+  }
+  // tidy dimension order
+  b.dimensions?.forEach((d,i)=> d.order = i+1);
+}
+
+let _toastTimer = null;
+function showToast(message, actionLabel, onAction, duration=5000){
+  const host = document.getElementById('toastHost');
+  if (!host) return;
+  host.innerHTML = `
+    <div class="toast">
+      <span>${message}</span>
+      ${actionLabel ? `<button class="btn" id="toastAction">${actionLabel}</button>` : ``}
+      <button class="btn ghost" id="toastClose">Close</button>
+    </div>`;
+  clearTimeout(_toastTimer);
+  if (actionLabel) {
+    document.getElementById('toastAction')?.addEventListener('click', ()=>{
+      host.innerHTML = '';
+      try { onAction && onAction(); } catch {}
+    });
+  }
+  document.getElementById('toastClose')?.addEventListener('click', ()=> host.innerHTML = '');
+  _toastTimer = setTimeout(()=> host.innerHTML = '', duration);
+}
+
+function startInlineEdit({container, initial, onCommit, onCancel}) {
+  if (!container) return;
+
+  container.classList.add('pv-editing');
+  const origHTML = container.innerHTML;
+  container.innerHTML = `
+    <input type="text" value="${escapeHTML(initial)}" />
+    <button class="pv-edit-btn">Save</button>
+    <button class="pv-reset-btn">Cancel</button>
+  `;
+  const input = container.querySelector('input');
+  const btnSave = container.querySelector('.pv-edit-btn');
+  const btnCancel = container.querySelector('.pv-reset-btn');
+
+  let committed = false, canceled = false;
+
+  input.focus(); input.select();
+
+  function cleanup(revert){
+    container.classList.remove('pv-editing');
+    if (revert) container.innerHTML = origHTML;
+    document.removeEventListener('pointerdown', onDocDown, true);
+  }
+  function commit(){
+    if (committed || canceled) return;
+    committed = true;
+    onCommit?.(input.value.trim());
+    cleanup(false);
+  }
+  function cancel(){
+    if (committed || canceled) return;
+    canceled = true;
+    onCancel?.();
+    cleanup(true);
+  }
+
+  // Save/Cancel buttons
+  btnSave?.addEventListener('click', commit);
+  btnCancel?.addEventListener('click', cancel);
+
+  // Keyboard: Enter=save, Esc=cancel
+  input.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter') commit();
+    if (e.key === 'Escape') cancel();
+  });
+
+  // CLICK-AWAY = SAVE
+  // If the next pointerdown is outside the editing container, commit.
+  function onDocDown(e){
+    // Ignore clicks inside the edit UI (input / buttons)
+    if (container.contains(e.target)) return;
+    commit();
+  }
+  document.addEventListener('pointerdown', onDocDown, true);
+
+  // Also catch simple blur (e.g., tabbing away)
+  input.addEventListener('blur', () => {
+    // If focus moves to Save/Cancel, don't auto-commit here; buttons will handle it.
+    const to = document.activeElement;
+    if (to === btnSave || to === btnCancel) return;
+    // Slight defer so button click handlers can run first if applicable
+    setTimeout(()=> commit(), 0);
+  });
+}
+// clear alias (back to original name)
+function resetGroupAlias(group_id){
+  const dims = getCoreBanner().dimensions || [];
+  for (const d of dims){
+    const g = d.groups?.find(x => x.group_id === group_id);
+    if (g){ g.label_alias = null; queueAutosave?.(); return; }
+  }
+}
+function resetDimAlias(dim_id){
+  const d = getCoreBanner().dimensions?.find(x => x.dim_id === dim_id);
+  if (d){ d.label = d.label; /* no-op; alias is the label itself for dims */ }
+}
+
+/* ===== NEW: Tab Sheet summary panel (basic for now) ===== */
+function renderPreviewTabSheet(host){
+  const totalQs = state.questions.length;
+  const likert = state.questions.filter(q =>
+    (q.type||'').toLowerCase().startsWith('likert') ||
+    (q.grid?.rows?.length && q.grid?.cols?.length)
+  ).length;
+
+  host.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <strong>Tab Sheet Summary</strong>
+      </div>
+      <div class="card-content">
+        <table class="pv-table">
+          <tr><th>Total questions</th><td>${totalQs}</td></tr>
+          <tr><th>Matrix / Likert questions</th><td>${likert}</td></tr>
+          <tr><th>Default base</th><td>${escapeHTML(state.globals?.default_base_verbiage || 'Total (qualified respondents)')}</td></tr>
+        </table>
+        <div class="pv-empty" style="margin-top:12px;">Final Excel headers will be built from the Banner Plan tab.</div>
+      </div>
+    </div>`;
+}
+
+/* ===== Banner panel (Header Row 1/2 + letters) ===== */
+function renderPreviewBanner(host){
+  // Phase 1: normalize per-question Tab buckets before we read anything
+  // (safe + idempotent; requires the Phase 1 helpers to be included)
+  if (typeof syncAllNets === "function") syncAllNets();
+
+  // --- keep banner mapped to live questions (prune missing)
+  function syncBannerWithQuestions({prune=true, addNew=false} = {}) {
+    const b = getCoreBanner();
+    const dims = b.dimensions || [];
+    for (const d of [...dims]) {
+      const qid = d?.source?.qid;
+      const q = findQuestionById(qid);
+      if (!q) {
+        if (prune) b.dimensions = b.dimensions.filter(x => x !== d);
+        continue;
+      }
+
+      // live option codes from any supported structure
+      let liveCodes = [];
+      if (Array.isArray(q.options) && q.options.length) {
+        liveCodes = q.options.map(o => String(o.code ?? ''));
+      } else if (Array.isArray(q.grid?.cols) && q.grid.cols.length) {
+        liveCodes = q.grid.cols.map((_, i) => String(i + 1));
+      } else if (Array.isArray(q.scale?.labels) && q.scale.labels.length) {
+        liveCodes = q.scale.labels.map((_, i) => String(i + 1));
+      }
+      const live = new Set(liveCodes);
+
+      // prune groups whose option no longer exists
+      d.groups = (d.groups||[]).filter(g => live.has(String(g.ref?.opt_id ?? '')));
+
+      // optionally add newly added options
+      if (addNew) {
+        for (let i = 0; i < liveCodes.length; i++){
+          const code = String(liveCodes[i] ?? '');
+          if (!d.groups.find(g => String(g.ref?.opt_id ?? '') === code)) {
+            d.groups.push({
+              group_id: `${q.id}:${code}`,
+              ref: { qid: q.id, opt_id: code },
+              label_alias: null,
+              include: true,
+              order: (d.groups.length + 1)
+            });
+          }
+        }
+      }
+      d.groups.forEach((g,i)=> g.order = i+1);
+    }
+    (b.dimensions||[]).forEach((d,i)=> d.order = i+1);
+  }
+
+  // --- inline edit helper (scoped)
+  function startInlineEdit({container, initial, onCommit, onCancel}) {
+    if (!container) return;
+    container.classList.add('pv-editing');
+    const origHTML = container.innerHTML;
+    container.innerHTML = `
+      <input type="text" value="${escapeHTML(initial)}" />
+      <button class="pv-edit-btn">Save</button>
+      <button class="pv-reset-btn">Cancel</button>
+    `;
+    const input = container.querySelector('input');
+    input.focus(); input.select();
+    function cleanup(revert){
+      container.classList.remove('pv-editing');
+      if (revert) container.innerHTML = origHTML;
+    }
+    function commit(){ onCommit?.(input.value.trim()); cleanup(false); }
+    function cancel(){ onCancel?.(); cleanup(true); }
+    container.querySelector('.pv-edit-btn')?.addEventListener('click', commit);
+    container.querySelector('.pv-reset-btn')?.addEventListener('click', cancel);
+    input.addEventListener('keydown', e => {
+      if (e.key==='Enter') commit();
+      if (e.key==='Escape') cancel();
+    });
+  }
+
+  // sync once before render
+  syncBannerWithQuestions({prune:true, addNew:false});
+
+  const banner = getCoreBanner() || { dimensions: [] };
+  const dims   = (banner.dimensions || []).slice().sort((a,b)=>(a.order||0)-(b.order||0));
+
+  // flatten visible groups → columns
+  const cols = [];
+  for (const d of dims){
+    const vis = (d.groups || [])
+      .filter(g => g.include !== false)
+      .sort((a,b)=>(a.order||0)-(b.order||0));
+    for (const g of vis) cols.push({ dim: d, g });
+  }
+
+  // --- build per-dimension spans and per-column meta (for thick borders)
+  const dimSpans = [];  // [{ dimId, start, end, visible }]
+  {
+    let cursor = 0;
+    for (const d of dims){
+      const visible = (d.groups||[]).filter(g => g.include !== false).length;
+      if (!visible) continue;
+      dimSpans.push({ dimId: d.dim_id, start: cursor, end: cursor + visible - 1, visible });
+      cursor += visible;
+    }
+  }
+
+  const colMeta = cols.map((_, i) => {
+    const span = dimSpans.find(s => i >= s.start && i <= s.end);
+    if (!span) return { dimId: null, firstInDim: false, lastInDim: false };
+    return {
+      dimId: span.dimId,
+      firstInDim: i === span.start,
+      lastInDim:  i === span.end
+    };
+  });
+
+  const getSpan = (dimId) => dimSpans.find(s => s.dimId === dimId);
+
+  // build “unused” list = questions not already visible in banner
+  const usedQids = new Set(
+    (dims || [])
+      .filter(d => (d.groups || []).some(g => g.include !== false))
+      .map(d => d.source?.qid)
+  );
+
+  const unusedQs = state.questions.filter(q => !usedQids.has(q.id));
+  const dd = unusedQs.map(q =>
+    `<option value="${q.id}">${escapeHTML(q.id)} — ${escapeHTML(q.text||'')}</option>`
+  ).join("");
+
+  // Excel column letters A..Z, AA, AB...
+  const colTag = (idx) => {
+    let n = idx + 1, s = "";
+    while (n > 0){ n--; s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n/26); }
+    return s;
+  };
+
+  host.innerHTML = `
+    <section class="pv-sec">
+      <h3>Banner Plan Builder</h3>
+
+      <div class="pv-banner-controls">
+        <label>+ Add category
+          <select id="banAddSel" ${unusedQs.length ? "" : "disabled"}>
+            <option value="">Select question…</option>${dd}
+          </select>
+        </label>
+        <button id="banAddBtn" ${unusedQs.length ? "" : "disabled"}>Add</button>
+      </div>
+
+      <div class="pv-banner-wrap">
+        <div class="pv-banner-grid" id="pvBannerGrid">
+
+          ${dimSpans.map((s, i, arr) => `
+            <div class="pv-banner-block ${i===0 ? 'is-first' : ''} ${i===arr.length-1 ? 'is-last' : ''}"
+                style="grid-column:${s.start + 1} / ${s.end + 2};"></div>
+          `).join("")}
+
+          ${dimSpans.slice(0, -1).map(s => `
+            <div class="pv-banner-divider" style="grid-column:${s.end + 2} / ${s.end + 2};"></div>
+          `).join("")}
+
+          <div class="pv-banner-h1">
+            ${dims.map(d=>{
+              const visible = (d.groups||[]).filter(g => g.include !== false).length || 0;
+              if (!visible) return "";
+              const text = d.label || d.source?.qid || "";
+              return `
+                <div class="pv-banner-cell thick-bottom"
+                    style="grid-column: span ${visible};"
+                    title="${escapeHTML(text)}">
+                  <span class="pv-editable" data-edit-type="dim" data-dimid="${d.dim_id}">
+                    ${escapeHTML(text)}
+                  </span>
+                  <button class="pv-edit-btn"  data-edit-type="dim"   data-dimid="${d.dim_id}" title="Edit category label">✎</button>
+                  <button class="pv-reset-btn" data-reset-type="dim"  data-dimid="${d.dim_id}" title="Reset to original">⟲</button>
+                  <button class="pv-del" data-dimid="${d.dim_id}" aria-label="Remove category ${escapeHTML(text)}">✕</button>
+                </div>`;
+            }).join("")}
+          </div>
+
+          <div class="pv-banner-h2">
+            ${cols.map(({dim, g})=>{
+              const code = g.ref?.opt_id;
+              const lab  = g.label_alias
+                        || getOptionLabel(dim.source?.qid, code)
+                        || (code ?? g.group_id);
+              const has = hasCond(g);
+              return `
+                <div class="pv-banner-cell ${has?'has-cond':''}"
+                     data-dim="${dim.dim_id}" data-g="${g.group_id}"
+                     title="${escapeHTML(lab)}">
+                  <span class="pv-editable" data-edit-type="group" data-dimid="${dim.dim_id}" data-gid="${g.group_id}">
+                    ${escapeHTML(lab)} <small class="muted">(${escapeHTML(String(code||""))})</small>
+                  </span>
+                  <span class="pv-cond-dot" title="${escapeHTML(condSummary(g))}"></span>
+                  <button class="pv-menu"
+                          data-menu="cell"
+                          data-dimid="${dim.dim_id}"
+                          data-gid="${g.group_id}"
+                          title="More">⋯</button>
+                  <button class="pv-edit-btn"  data-edit-type="group" data-dimid="${dim.dim_id}" data-gid="${g.group_id}" title="Edit short label">✎</button>
+                  <button class="pv-reset-btn" data-reset-type="group" data-dimid="${dim.dim_id}" data-gid="${g.group_id}" title="Reset short label">⟲</button>
+                  <button class="pv-del"       data-dimid="${dim.dim_id}" data-gid="${g.group_id}" aria-label="Remove ${escapeHTML(lab)}">✕</button>
+                </div>`;
+            }).join("")}
+          </div>
+
+          <div class="pv-banner-stats">
+            ${cols.map((_, i)=> `<div class="pv-banner-cell">${colTag(i)}</div>`).join("")}
+          </div>
+        </div>
+      </div>
+
+      ${cols.length ? "" : `<div class="pv-empty" style="margin-top:10px;">No banner categories yet. Add one from a question above.</div>`}
+    </section>
+  `;
+
+  // grid sizing
+  const grid = document.getElementById('pvBannerGrid');
+  if (grid){
+    grid.style.setProperty('--pv-col-n', String(cols.length || 1));
+    grid.style.setProperty('--pv-col-min', '112px');
+  }
+
+  // mark H1 labels that overflow so CSS can left-align + ellipsis them
+  function markH1Overflow() {
+    const cells = host.querySelectorAll('.pv-banner-h1 .pv-banner-cell');
+    cells.forEach(cell => {
+      const label = cell.querySelector('.pv-editable');
+      if (!label) return;
+      const isOverflow = label.scrollWidth > label.clientWidth + 1;
+      cell.classList.toggle('is-overflow', isOverflow);
+    });
+  }
+
+  // run once after render
+  markH1Overflow();
+
+  // re-check on container resize (more reliable than window resize)
+  const gridEl = document.getElementById('pvBannerGrid');
+  if (gridEl && 'ResizeObserver' in window) {
+    const ro = new ResizeObserver(() => markH1Overflow());
+    ro.observe(gridEl);
+  } else {
+    // fallback
+    window.addEventListener('resize', markH1Overflow);
+  }
+
+  // Add category (with clear feedback for no-op cases)
+  const sel = document.getElementById('banAddSel');
+  const add = document.getElementById('banAddBtn');
+  add?.addEventListener('click', () => {
+    const qid = sel?.value || '';
+    if (!qid) { setStatus('Pick a question first.', false); sel?.focus(); return; }
+
+    const before = (getCoreBanner().dimensions || []).length;
+    const dim = ensureDimensionFromQuestion?.(qid);
+
+    if (!dim) {
+      setStatus('That question has no options/scale to add.', false);
+      return;
+    }
+
+    const after = (getCoreBanner().dimensions || []).length;
+    if (after === before) {
+      // already existed → make sure it’s visible (user thought “it didn’t add”)
+      (dim.groups||[]).forEach(g => g.include = true);
+      queueAutosave?.();
+      setStatus('Category already existed — showing all options.', true);
+    } else {
+      setStatus('Added banner category.', true);
+    }
+
+    renderPreviewBanner(host);
+  });
+
+  // DELETE handlers
+  grid?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pv-del');
+    if (!btn) return;
+
+    const dimId   = btn.dataset.dimid;
+    const groupId = btn.dataset.gid;
+
+    const banner = getCoreBanner();
+    const dim = banner.dimensions.find(d => d.dim_id === dimId);
+    if (!dim) return;
+
+    if (groupId) {
+      const g = dim.groups.find(x => x.group_id === groupId);
+      if (!g) return;
+      const prevInclude = g.include !== false;
+
+      if (!confirm('Remove this banner column from preview?')) return;
+      removeBannerColumn?.(dimId, groupId);
+      setStatus('Removed a banner column.', true);
+      renderPreviewBanner(host);
+
+      showToast('Column removed.', 'Undo', () => {
+        const d2 = getCoreBanner().dimensions.find(d => d.dim_id === dimId);
+        const g2 = d2?.groups.find(x => x.group_id === groupId);
+        if (g2) g2.include = prevInclude;
+        queueAutosave?.();
+        renderPreviewBanner(host);
+        setStatus('Restored column.', true);
+      });
+
+    } else {
+      const visibleGroups = (dim.groups||[]).map(g => ({ group_id: g.group_id, include: g.include !== false }));
+      const name = (dim.label || dim.source?.qid || 'this category').trim();
+
+      if (!confirm(`Remove the entire category "${name}" and all its options from the banner?`)) return;
+      removeBannerDimension?.(dimId, { soft: true });
+      setStatus('Removed a banner category.', true);
+      renderPreviewBanner(host);
+
+      showToast(`Category "${name}" removed.`, 'Undo', () => {
+        const d2 = getCoreBanner().dimensions.find(d => d.dim_id === dimId);
+        if (!d2) return;
+        for (const snap of visibleGroups) {
+          const g2 = d2.groups.find(x => x.group_id === snap.group_id);
+          if (g2) g2.include = snap.include;
+        }
+        queueAutosave?.();
+        renderPreviewBanner(host);
+        setStatus('Restored category.', true);
+      });
+    }
+  });
+
+  // EDIT / RESET handlers
+  grid?.addEventListener('click', (e) => {
+    const editBtn  = e.target.closest('.pv-edit-btn');
+    const resetBtn = e.target.closest('.pv-reset-btn');
+    if (!editBtn && !resetBtn) return;
+
+    const node    = editBtn || resetBtn;
+    const type    = node.dataset.editType || node.dataset.resetType; // "dim" | "group"
+    const dimId   = node.dataset.dimid;
+    const groupId = node.dataset.gid;
+
+    if (resetBtn) {
+      if (type === 'group' && groupId) {
+        setGroupAlias(groupId, null);
+        queueAutosave?.();
+        setStatus('Reset short label.', true);
+        renderPreviewBanner(host);
+        return;
+      }
+      if (type === 'dim' && dimId) {
+        updateDimAlias(dimId, null);
+        queueAutosave?.();
+        setStatus('Reset category label.', true);
+        renderPreviewBanner(host);
+        return;
+      }
+    }
+
+    if (editBtn) {
+      const cell   = e.target.closest('.pv-banner-cell');
+      const holder = cell?.querySelector('.pv-editable');
+
+      if (type === 'group' && groupId) {
+        const d   = getCoreBanner().dimensions.find(d => d.dim_id === dimId);
+        const g   = d?.groups.find(x => x.group_id === groupId);
+        const code= g?.ref?.opt_id;
+        const current = g?.label_alias || getOptionLabel(d?.source?.qid, code) || '';
+
+        startInlineEdit({
+          container: holder,
+          initial: current,
+          onCommit: (txt) => {
+            setGroupAlias(groupId, txt || null);
+            queueAutosave?.();
+            renderPreviewBanner(host);
+            setStatus('Saved short label.', true);
+          },
+          onCancel: ()=>{}
+        });
+        return;
+      }
+
+      if (type === 'dim' && dimId) {
+        const d = getCoreBanner().dimensions.find(d => d.dim_id === dimId);
+        const current = d?.label || d?.source?.qid || '';
+        startInlineEdit({
+          container: holder,
+          initial: current,
+          onCommit: (txt) => {
+            updateDimAlias(dimId, txt || null);
+            queueAutosave?.();
+            renderPreviewBanner(host);
+            setStatus('Saved category label.', true);
+          },
+          onCancel: ()=>{}
+        });
+      }
+    }
+  });
+
+  // dbl-click to edit
+  grid?.addEventListener('dblclick', (e) => {
+    const span = e.target.closest('.pv-editable');
+    if (!span) return;
+    const type    = span.dataset.editType;
+    const dimId   = span.dataset.dimid;
+    const groupId = span.dataset.gid;
+    const cell    = span.closest('.pv-banner-cell');
+    const editBtn = cell?.querySelector(
+      type === 'group'
+        ? `.pv-edit-btn[data-edit-type="group"][data-dimid="${dimId}"][data-gid="${groupId}"]`
+        : `.pv-edit-btn[data-edit-type="dim"][data-dimid="${dimId}"]`
+    );
+    editBtn?.click();
+  });
+
+  // === 3-dot cell menu (Edit text, Add condition, Edit equation, Delete) ===
+  let _openMenuEl = null;
+  function closeCellMenu(){ _openMenuEl?.remove(); _openMenuEl = null; document.removeEventListener('pointerdown', onAway, true); }
+  function onAway(e){ if (_openMenuEl && !e.composedPath().includes(_openMenuEl)) closeCellMenu(); }
+
+  function openCellMenu(evt, dimId, groupId){
+    closeCellMenu();
+
+    const menu = document.createElement('div');
+    menu.className = 'pv-cell-menu';
+    menu.innerHTML = `
+      <button class="mitem" data-act="edit-text"   data-dimid="${dimId}" data-gid="${groupId}">Edit text</button>
+      <div class="subhead">Add condition</div>
+      <button class="mitem" data-act="add-and"     data-dimid="${dimId}" data-gid="${groupId}">ADD criteria (AND)</button>
+      <button class="mitem" data-act="add-or"      data-dimid="${dimId}" data-gid="${groupId}">OR criteria</button>
+      <button class="mitem" data-act="edit-eqn"    data-dimid="${dimId}" data-gid="${groupId}">Create/Edit equation</button>
+      <button class="mitem" data-act="delete"      data-dimid="${dimId}" data-gid="${groupId}">Delete</button>
+    `;
+
+    document.body.appendChild(menu);
+    _openMenuEl = menu;
+
+    // position near click
+    const r = evt.target.getBoundingClientRect();
+    menu.style.left = Math.min(window.innerWidth - 8 - menu.offsetWidth, r.right - 220) + 'px';
+    menu.style.top  = (r.bottom + 6) + 'px';
+
+    document.addEventListener('pointerdown', onAway, true);
+
+    menu.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.mitem'); if (!btn) return;
+      const act = btn.dataset.act;
+      const dimId = btn.dataset.dimid, gid = btn.dataset.gid;
+
+      if (act === 'edit-text') {
+        const cellEl = grid.querySelector(`.pv-banner-h2 .pv-banner-cell[data-dim="${dimId}"][data-g="${gid}"]`);
+        cellEl?.querySelector('.pv-edit-btn')?.click();
+      } else if (act === 'add-and') {
+        openCondWizard('AND', dimId, gid);
+      } else if (act === 'add-or') {
+        openCondWizard('OR', dimId, gid);
+      } else if (act === 'edit-eqn') {
+        openCondEditor(dimId, gid);
+      } else if (act === 'delete') {
+        const cellEl = grid.querySelector(`.pv-banner-h2 .pv-banner-cell[data-dim="${dimId}"][data-g="${gid}"]`);
+        cellEl?.querySelector('.pv-del')?.click();
+      }
+      closeCellMenu();
+    });
+  }
+
+  grid?.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.pv-menu');
+    if (!btn) return;
+    openCellMenu(e, btn.dataset.dimid, btn.dataset.gid);
+  });
+}
+
+function openCondWizard(kind /* 'AND' | 'OR' */, dimId, groupId){
+  const banner = getCoreBanner();
+  const dim = banner.dimensions.find(d => d.dim_id === dimId);
+  const g = dim?.groups.find(x => x.group_id === groupId);
+  if (!g) return;
+  ensureGroupCond(g);
+
+  // Build question list (use anything already in the project)
+  const qOpts = state.questions.map(q => `<option value="${q.id}">${escapeHTML(q.id)} — ${escapeHTML(q.text||'')}</option>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal';
+  overlay.innerHTML = `
+    <div class="modal-panel" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>${kind === 'AND' ? 'Add AND criteria' : 'Add OR criteria'}</h3>
+        <button class="icon-btn" id="cwClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>Pick a question
+          <select id="cwQ">${qOpts}</select>
+        </label>
+        <div id="cwOpts" class="stack" style="flex-wrap:wrap; gap:8px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cwCancel">Cancel</button>
+        <button class="btn primary" id="cwSave">Add</button>
+      </div>
+    </div>
+    <div class="modal-backdrop"></div>`;
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#cwClose').onclick = close;
+  overlay.querySelector('#cwCancel').onclick = close;
+  document.body.appendChild(overlay);
+
+  const $q = overlay.querySelector('#cwQ');
+  const $box = overlay.querySelector('#cwOpts');
+
+  function drawOpts(){
+    const q = findQuestionById($q.value);
+    const opts = getQuestionOptions(q);
+    $box.innerHTML = opts.length
+      ? opts.map(o => `
+          <label class="pill">
+            <input type="checkbox" value="${escapeHTML(o.code)}" />
+            ${escapeHTML(o.label)} <span class="muted">(${escapeHTML(o.code)})</span>
+          </label>`).join('')
+      : `<div class="muted">This question has no selectable options.</div>`;
+  }
+  $q.onchange = drawOpts; drawOpts();
+
+  overlay.querySelector('#cwSave').onclick = ()=>{
+    const qid = $q.value;
+    const codes = Array.from($box.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    if (!qid || !codes.length){ alert('Pick at least one option.'); return; }
+
+    const clause = { qid, codes };
+    if (kind === 'AND') g.cond.all.push(clause);
+    else g.cond.any.push(clause);
+
+    queueAutosave?.();
+    renderPreviewBanner(document.getElementById('prefield-content-host'));
+    setStatus('Condition added.', true);
+    close();
+  };
+}
+
+function openCondEditor(dimId, groupId){
+  const banner = getCoreBanner();
+  const dim = banner.dimensions.find(d => d.dim_id === dimId);
+  const g = dim?.groups.find(x => x.group_id === groupId);
+  if (!g) return;
+  ensureGroupCond(g);
+
+  function labelForClause(c){
+    const q = findQuestionById(c.qid);
+    const opts = getQuestionOptions(q);
+    const map = new Map(opts.map(o=>[String(o.code), o.label]));
+    const labs = c.codes.map(cd => `${map.get(String(cd)) ?? cd} (${cd})`);
+    return `${c.qid}: ${labs.join(', ')}`;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal';
+  overlay.innerHTML = `
+    <div class="modal-panel" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create/Edit equation</h3>
+        <button class="icon-btn" id="eqClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="subhead">MUST match all (AND)</div>
+          <div id="eqAll"></div>
+        </div>
+        <div>
+          <div class="subhead" style="margin-top:8px;">Match any (OR)</div>
+          <div id="eqAny"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="eqClear">Clear all</button>
+        <button class="btn primary" id="eqDone">Done</button>
+      </div>
+    </div>
+    <div class="modal-backdrop"></div>`;
+
+  const $all = overlay.querySelector('#eqAll');
+  const $any = overlay.querySelector('#eqAny');
+
+  function redraw(){
+    $all.innerHTML = g.cond.all.length
+      ? g.cond.all.map((c,i)=>`
+          <div class="stack" style="justify-content:space-between; margin:6px 0;">
+            <span>${escapeHTML(labelForClause(c))}</span>
+            <span class="stack">
+              <button class="btn" data-move="to-or" data-i="${i}">→ OR</button>
+              <button class="btn" data-edit="all" data-i="${i}">✎ Edit</button>
+              <button class="btn danger" data-del="all" data-i="${i}">🗑️</button>
+            </span>
+          </div>`).join('')
+      : `<div class="muted">None</div>`;
+
+    $any.innerHTML = g.cond.any.length
+      ? g.cond.any.map((c,i)=>`
+          <div class="stack" style="justify-content:space-between; margin:6px 0;">
+            <span>${escapeHTML(labelForClause(c))}</span>
+            <span class="stack">
+              <button class="btn" data-move="to-and" data-i="${i}">
+                ${(c.codes && c.codes.length > 1) ? 'Split → AND' : '→ AND'}
+              </button>
+              <button class="btn" data-edit="any" data-i="${i}">✎ Edit</button>
+              <button class="btn danger" data-del="any" data-i="${i}">🗑️</button>
+            </span>
+          </div>`).join('')
+      : `<div class="muted">None</div>`;
+  }
+
+  overlay.addEventListener('click', (e)=>{
+    const mv = e.target.closest('[data-move]');
+    const del= e.target.closest('[data-del]');
+    const ed = e.target.closest('[data-edit]');
+    if (mv){
+      const dir = mv.dataset.move, i = +mv.dataset.i;
+      if (dir === 'to-or') {
+        const moved = g.cond.all.splice(i, 1)[0];
+        if (!moved) return;
+        const existing = g.cond.any.find(c => c.qid === moved.qid);
+        if (existing) {
+          const set = new Set([...(existing.codes||[]), ...(moved.codes||[])]);
+          existing.codes = Array.from(set);
+        } else {
+          g.cond.any.push(moved);
+        }
+      }
+      if (dir === 'to-and') {
+        const moved = g.cond.any.splice(i, 1)[0];          // { qid, codes: [...] }
+        if (!moved) return;
+        const { qid, codes = [] } = moved;
+        if (codes.length <= 1) {
+          g.cond.all.push({ qid, codes: codes.slice() });
+        } else {
+          // split OR codes into separate AND clauses
+          codes.forEach(cd => g.cond.all.push({ qid, codes: [cd] }));
+        }
+      }
+
+      redraw(); queueAutosave?.(); renderPreviewBanner(document.getElementById('prefield-content-host'));
+    }
+    if (del){
+      const which = del.dataset.del, i = +del.dataset.i;
+      if (which === 'all') g.cond.all.splice(i,1);
+      else g.cond.any.splice(i,1);
+      redraw(); queueAutosave?.(); renderPreviewBanner(document.getElementById('prefield-content-host'));
+    }
+    if (ed){
+      const which = ed.dataset.edit, i = +ed.dataset.i;
+      if (which === 'all') openCondWizard('AND', dimId, groupId);
+      else openCondWizard('OR', dimId, groupId);
+    }
+  });
+
+  function openClauseEditor(slot, idx){
+    const clause = g.cond[slot][idx];
+    if (!clause) return;
+
+    // Build question list (allow switching if you want; or lock it by hiding the select)
+    const qOpts = state.questions.map(q => `<option value="${q.id}">${escapeHTML(q.id)} — ${escapeHTML(q.text||'')}</option>`).join('');
+    const overlay = document.createElement('div');
+    overlay.className = 'modal';
+    overlay.innerHTML = `
+      <div class="modal-panel" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Edit condition</h3>
+          <button class="icon-btn" id="ceClose">✕</button>
+        </div>
+        <div class="modal-body">
+          <label>Pick a question
+            <select id="ceQ">${qOpts}</select>
+          </label>
+          <div id="ceOpts" class="stack" style="flex-wrap:wrap; gap:8px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="ceCancel">Cancel</button>
+          <button class="btn primary" id="ceSave">Save</button>
+        </div>
+      </div>
+      <div class="modal-backdrop"></div>`;
+    document.body.appendChild(overlay);
+
+    const $q = overlay.querySelector('#ceQ');
+    const $box = overlay.querySelector('#ceOpts');
+    $q.value = clause.qid; // preselect current qid
+
+    function drawOpts(){
+      const q = findQuestionById($q.value);
+      const opts = getQuestionOptions(q);
+      const selected = new Set((clause.codes||[]).map(String));
+      $box.innerHTML = opts.length
+        ? opts.map(o => `
+            <label class="pill">
+              <input type="checkbox" value="${escapeHTML(o.code)}" ${selected.has(String(o.code))?'checked':''}/>
+              ${escapeHTML(o.label)} <span class="muted">(${escapeHTML(o.code)})</span>
+            </label>`).join('')
+        : `<div class="muted">This question has no selectable options.</div>`;
+    }
+    $q.onchange = drawOpts;
+    drawOpts();
+
+    function close(){ overlay.remove(); }
+    overlay.querySelector('#ceClose').onclick = close;
+    overlay.querySelector('#ceCancel').onclick = close;
+
+    overlay.querySelector('#ceSave').onclick = ()=>{
+      const qid = $q.value;
+      const codes = Array.from($box.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+      if (!codes.length){
+        // if nothing selected, remove the clause
+        g.cond[slot].splice(idx,1);
+      } else {
+        // update/replace the clause
+        g.cond[slot][idx] = { qid, codes: Array.from(new Set(codes)) };
+      }
+      dedupeCond?.(g);
+      queueAutosave?.();
+      renderPreviewBanner(document.getElementById('prefield-content-host'));
+      redraw();  // refresh the editor lists
+      close();
+    };
+  }
+
+  function openClauseEditor(slot, idx){
+    const clause = g.cond[slot][idx];
+    if (!clause) return;
+
+    // Build question list (allow switching if you want; or lock it by hiding the select)
+    const qOpts = state.questions.map(q => `<option value="${q.id}">${escapeHTML(q.id)} — ${escapeHTML(q.text||'')}</option>`).join('');
+    const overlay = document.createElement('div');
+    overlay.className = 'modal';
+    overlay.innerHTML = `
+      <div class="modal-panel" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Edit condition</h3>
+          <button class="icon-btn" id="ceClose">✕</button>
+        </div>
+        <div class="modal-body">
+          <label>Pick a question
+            <select id="ceQ">${qOpts}</select>
+          </label>
+          <div id="ceOpts" class="stack" style="flex-wrap:wrap; gap:8px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="ceCancel">Cancel</button>
+          <button class="btn primary" id="ceSave">Save</button>
+        </div>
+      </div>
+      <div class="modal-backdrop"></div>`;
+    document.body.appendChild(overlay);
+
+    const $q = overlay.querySelector('#ceQ');
+    const $box = overlay.querySelector('#ceOpts');
+    $q.value = clause.qid; // preselect current qid
+
+    function drawOpts(){
+      const q = findQuestionById($q.value);
+      const opts = getQuestionOptions(q);
+      const selected = new Set((clause.codes||[]).map(String));
+      $box.innerHTML = opts.length
+        ? opts.map(o => `
+            <label class="pill">
+              <input type="checkbox" value="${escapeHTML(o.code)}" ${selected.has(String(o.code))?'checked':''}/>
+              ${escapeHTML(o.label)} <span class="muted">(${escapeHTML(o.code)})</span>
+            </label>`).join('')
+        : `<div class="muted">This question has no selectable options.</div>`;
+    }
+    $q.onchange = drawOpts;
+    drawOpts();
+
+    function close(){ overlay.remove(); }
+    overlay.querySelector('#ceClose').onclick = close;
+    overlay.querySelector('#ceCancel').onclick = close;
+
+    overlay.querySelector('#ceSave').onclick = ()=>{
+      const qid = $q.value;
+      const codes = Array.from($box.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+      if (!codes.length){
+        // if nothing selected, remove the clause
+        g.cond[slot].splice(idx,1);
+      } else {
+        // update/replace the clause
+        g.cond[slot][idx] = { qid, codes: Array.from(new Set(codes)) };
+      }
+      dedupeCond?.(g);
+      queueAutosave?.();
+      renderPreviewBanner(document.getElementById('prefield-content-host'));
+      redraw();  // refresh the editor lists
+      close();
+    };
+  };
+
+
+  overlay.querySelector('#eqClear').onclick = ()=>{
+    g.cond.all = []; g.cond.any = [];
+    redraw(); queueAutosave?.(); renderPreviewBanner(document.getElementById('prefield-content-host'));
+  };
+  overlay.querySelector('#eqDone').onclick = ()=> overlay.remove();
+  overlay.querySelector('#eqClose').onclick = ()=> overlay.remove();
+
+  document.body.appendChild(overlay);
+  redraw();
+}
+
+/************* DASHBOARD *************/
+function getProjects() {
+  try { return JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveProjects(list) {
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(list));
+}
+
+/** Ensure the current in-memory project is present in the Projects list + saved */
+function touchCurrentIntoProjects() {
   const list = getProjects();
+  const idx  = list.findIndex(p => p.id === state.project.id);
+
+  const entry = {
+    id: state.project.id,
+    name: state.project.name || 'Untitled',
+    client: state.project.client || '',
+    version: state.project.version || '0.1.0',
+    updated_at: new Date().toISOString(),
+    favorite: !!(list[idx]?.favorite),
+    status: list[idx]?.status || 'Draft'
+  };
+
+  if (idx >= 0) list[idx] = entry;
+  else list.unshift(entry);
+
+  saveProjects(list);
+  localStorage.setItem(
+    `proj:${state.project.id}`,
+    JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions })
+  );
+}
+
+/* ----- Core render ----- */
+function renderDashboard(root){
+  const list = getProjects(); // always read fresh
+
+  // --- status counts ---
+  const total    = list.length;
+  const draft    = list.filter(p => p.status === 'Draft').length;
+  const active   = list.filter(p => p.status === 'Active').length;
+  const archived = list.filter(p => p.status === 'Archived').length;
+
+  // --- client counts (normalized) ---
+  const clientCounts = {};
+  for (const p of list) {
+    const key = (p.client || '').trim() || 'Unspecified';
+    clientCounts[key] = (clientCounts[key] || 0) + 1;
+  }
+  // stable-ish order: alphabetical, with “Unspecified” last
+  const byClient = Object.entries(clientCounts)
+    .sort((a, b) => (a[0] === 'Unspecified') - (b[0] === 'Unspecified') || a[0].localeCompare(b[0]));
+
   root.innerHTML = `
     <section class="app-grid" style="grid-template-columns: 1fr;">
       <div class="card">
@@ -559,13 +2588,43 @@ function renderDashboard(root){
           <div class="stack">
             <strong>Projects</strong>
             <input id="dashSearch" placeholder="Search by name/client..." style="width:240px"/>
-            <select id="dashFilter"><option value="">All</option><option>Draft</option><option>Active</option><option>Archived</option></select>
+            <select id="dashFilter">
+              <option value="">All</option><option>Draft</option><option>Active</option><option>Archived</option>
+            </select>
           </div>
           <div class="stack">
             <button id="dashNew" class="primary">+ New Project</button>
             <button id="dashOpenCurrent">Open Current</button>
           </div>
         </div>
+
+        <div class="stats-wrap">
+          <div class="stats-block">
+            <div class="stat-title">Overview</div>
+            <div class="stats-pills">
+              <span class="pill strong">Total: ${total}</span>
+              <span class="pill">Draft: ${draft}</span>
+              <span class="pill">Active: ${active}</span>
+              <span class="pill">Archived: ${archived}</span>
+            </div>
+          </div>
+
+          <div class="client-stats">
+            <div class="stat-title">Client Projects Totals</div>
+            <ul>
+              ${byClient.length
+                ? byClient.map(([name, count]) => `
+                    <li>
+                      <span class="client-name">${escapeHTML(name)}</span>
+                      <span class="client-count">${count}</span>
+                    </li>
+                  `).join('')
+                : `<li><span class="muted">No projects yet.</span></li>`
+              }
+            </ul>
+          </div>
+        </div>
+
         <div class="card-content">
           <div class="grid" id="projGrid"></div>
         </div>
@@ -573,6 +2632,7 @@ function renderDashboard(root){
     </section>`;
 
   const grid = $('#projGrid');
+
   const draw = (rows)=>{
     grid.innerHTML = rows.map(p=>`
       <div class="card project-card">
@@ -589,7 +2649,11 @@ function renderDashboard(root){
             <button data-genq="${p.id}">📝 QRE</button>
             <button data-genx="${p.id}">⚙️ Tab</button>
             <button data-del="${p.id}" class="danger">🗑️ Delete</button>
-            <select data-status="${p.id}"><option ${p.status==='Draft'?'selected':''}>Draft</option><option ${p.status==='Active'?'selected':''}>Active</option><option ${p.status==='Archived'?'selected':''}>Archived</option></select>
+            <select data-status="${p.id}">
+              <option ${p.status==='Draft'?'selected':''}>Draft</option>
+              <option ${p.status==='Active'?'selected':''}>Active</option>
+              <option ${p.status==='Archived'?'selected':''}>Archived</option>
+            </select>
           </div>
         </div>
       </div>`).join('');
@@ -601,64 +2665,306 @@ function renderDashboard(root){
     $$('[data-genx]').forEach(b=> b.onclick = ()=> openAndGen(b.dataset.genx, 'tab'));
     $$('[data-fav]').forEach(b=> b.onclick = ()=> toggleFav(b.dataset.fav));
     $$('[data-status]').forEach(sel=> sel.onchange = ()=> setStatusFor(sel.dataset.status, sel.value));
+
+    // delete → redraw everything (cards + stats + client list)
     $$('[data-del]').forEach(b => b.onclick = () => {
       const id = b.dataset.del;
       const projName = getProjects().find(p => p.id === id)?.name || 'this project';
-      if (!confirm(`Are you sure you want to permanently delete "${projName}"? This cannot be undone.`)) {
-        return;
-      }
+      if (!confirm(`Are you sure you want to permanently delete "${projName}"? This cannot be undone.`)) return;
 
-      // Remove the main project data
       localStorage.removeItem(`proj:${id}`);
-
-      // Remove the project from the master list
-      const updatedProjects = getProjects().filter(p => p.id !== id);
-      saveProjects(updatedProjects);
-
-      // Re-draw the dashboard to show the change
-      draw(updatedProjects);
+      const updated = getProjects().filter(p => p.id !== id);
+      saveProjects(updated);
+      // re-render the entire dashboard so stats & client list refresh
+      renderDashboard(root);
     });
   };
 
+  // initial draw of cards
   draw(list);
-  $('#dashNew').onclick = ()=>{ newProject(); location.hash = '#/editor'; };
+
+  // controls
+  $('#dashNew').onclick = openCreateProjectModal;
   $('#dashOpenCurrent').onclick = ()=>{ location.hash = '#/editor'; };
+
   $('#dashSearch').oninput = (e)=>{
-    const q = e.target.value.toLowerCase(); const f = $('#dashFilter').value; draw(list.filter(p => (!f||p.status===f) && (p.name.toLowerCase().includes(q) || (p.client||'').toLowerCase().includes(q))));
+    const q = e.target.value.toLowerCase();
+    const f = $('#dashFilter').value;
+    const rows = list.filter(p =>
+      (!f || p.status === f) &&
+      (p.name.toLowerCase().includes(q) || (p.client||'').toLowerCase().includes(q))
+    );
+    draw(rows);
   };
   $('#dashFilter').onchange = ()=> $('#dashSearch').oninput({target:$('#dashSearch')});
 }
 
-function openProjectById(id){
-  const stash = JSON.parse(localStorage.getItem(`proj:${id}`)||'null');
-  if(stash){ state.project = stash.project; state.globals = stash.globals; state.questions = stash.questions; autosaveNow(); }
+/* ----- Project helpers ----- */
+function openProjectById(id) {
+  const stash = JSON.parse(localStorage.getItem(`proj:${id}`) || 'null');
+  if (stash) {
+    state.project   = stash.project;
+    state.globals   = stash.globals;
+    state.questions = stash.questions;
+    autosaveNow();
+  }
   location.hash = '#/editor';
 }
-function duplicateProjectById(id){ const stash = JSON.parse(localStorage.getItem(`proj:${id}`)||'null'); if(!stash) return; const copy = JSON.parse(JSON.stringify(stash)); copy.project.id = "proj-" + Math.random().toString(16).slice(2,10); copy.project.name += ' (Copy)'; localStorage.setItem(`proj:${copy.project.id}`, JSON.stringify(copy)); const list = getProjects(); list.unshift({ id: copy.project.id, name: copy.project.name, client: copy.project.client, version: copy.project.version, updated_at: new Date().toISOString(), favorite:false, status:'Draft' }); saveProjects(list); renderRoute(); }
-function exportProjectById(id){ const stash = JSON.parse(localStorage.getItem(`proj:${id}`)||'null'); if(!stash) return; const data = JSON.stringify(stash, null, 2); const blob = new Blob([data], {type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`${(stash.project.name||'project').replace(/[^\w\-]+/g,'_')}.json`; a.click(); URL.revokeObjectURL(a.href); }
-function toggleFav(id){ const list = getProjects(); const i = list.findIndex(p=>p.id===id); if(i<0) return; list[i].favorite = !list[i].favorite; saveProjects(list); renderRoute(); }
-function setStatusFor(id, status){ const list = getProjects(); const i = list.findIndex(p=>p.id===id); if(i<0) return; list[i].status = status; saveProjects(list); }
-function openAndGen(id, which){ openProjectById(id); setTimeout(()=>{ if(which==='qre') $('#generateDocx').click(); else $('#generateXlsx').click(); }, 150); }
-function newProject(){ state.project = { id: "proj-" + Math.random().toString(16).slice(2,10), name:"", client:"", version:"0.1.0", created_at:new Date().toISOString(), updated_at:new Date().toISOString(), notes:"" }; state.questions = []; ui_state.active_question_index = null; autosaveNow(); touchCurrentIntoProjects(); }
+
+function duplicateProjectById(id) {
+  const stash = JSON.parse(localStorage.getItem(`proj:${id}`) || 'null');
+  if (!stash) return;
+
+  const copy = JSON.parse(JSON.stringify(stash));
+  copy.project.id = 'proj-' + Math.random().toString(16).slice(2,10);
+  copy.project.name = (copy.project.name || 'Project') + ' (Copy)';
+  localStorage.setItem(`proj:${copy.project.id}`, JSON.stringify(copy));
+
+  const list = getProjects();
+  list.unshift({
+    id: copy.project.id,
+    name: copy.project.name,
+    client: copy.project.client,
+    version: copy.project.version,
+    updated_at: new Date().toISOString(),
+    favorite: false,
+    status: 'Draft'
+  });
+  saveProjects(list);
+  renderRoute();
+}
+
+function exportProjectById(id) {
+  const stash = JSON.parse(localStorage.getItem(`proj:${id}`) || 'null');
+  if (!stash) return;
+  const data = JSON.stringify(stash, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(stash.project.name || 'project').replace(/[^\w\-]+/g, '_')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function toggleFav(id) {
+  const list = getProjects();
+  const i = list.findIndex(p => p.id === id);
+  if (i < 0) return;
+  list[i].favorite = !list[i].favorite;
+  saveProjects(list);
+  renderRoute();
+}
+
+function setStatusFor(id, status) {
+  const list = getProjects();
+  const i = list.findIndex(p => p.id === id);
+  if (i < 0) return;
+  list[i].status = status;
+  saveProjects(list);
+}
+
+function openAndGen(id, which) {
+  openProjectById(id);
+  setTimeout(() => {
+    if (which === 'qre') $('#generateDocx').click();
+    else $('#generateXlsx').click();
+  }, 150);
+}
+
+/* Creates a fresh, empty project in memory and persists it */
+function newProject() {
+  state.project = {
+    id: 'proj-' + Math.random().toString(16).slice(2,10),
+    name: '',
+    client: '',
+    version: '0.1.0',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    notes: ''
+  };
+  state.questions = [];
+  ui_state.active_question_index = null;
+  autosaveNow();
+  touchCurrentIntoProjects();
+}
+
+/* ========================================================
+   Modal Control + Create handler
+   ======================================================== */
+function openCreateProjectModal() {
+  // clear fields
+  const f = (id) => document.getElementById(id);
+  f('cp-name').value   = '';
+  f('cp-client').value = '';
+  f('cp-dates').value  = '';
+  f('cp-notes').value  = '';
+
+  const modal = document.getElementById('createProjectModal');
+  if (!modal) return;
+
+  // allow Enter to submit (no Shift)
+  modal.onkeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      createProjectFromModal();
+    }
+  };
+
+  modal.classList.remove('is-hidden');
+  f('cp-name').focus();
+}
+
+function closeCreateProjectModal() {
+  const modal = document.getElementById('createProjectModal');
+  if (modal) {
+    modal.onkeydown = null;
+    modal.classList.add('is-hidden');
+  }
+}
+
+/** Called by the footer button in the modal */
+function createProjectFromModal() {
+  const name   = (document.getElementById('cp-name')?.value || '').trim();
+  const client = (document.getElementById('cp-client')?.value || '').trim();
+  const dates  = (document.getElementById('cp-dates')?.value || '').trim();
+  const notes  = (document.getElementById('cp-notes')?.value || '').trim();
+
+  // new project object
+  state.project = {
+    id: 'proj-' + Math.random().toString(16).slice(2,10),
+    name: name || 'Untitled',
+    client,
+    version: '0.1.0',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    notes
+  };
+  if (dates) state.project.important_dates = dates;
+
+  // reset questions and persist
+  state.questions = [];
+  ui_state.active_question_index = null;
+  autosaveNow();
+  touchCurrentIntoProjects();
+
+  // close modal + go to editor
+  closeCreateProjectModal();
+  location.hash = '#/editor';
+}
 
 /************* EDITOR *************/
 function renderEditor(root){
-  root.innerHTML = `
-    <section class="app-grid">
-      <div class="left-panel">
-        <div id="question-list" class="stack" style="flex-direction:column; align-items:stretch;"></div>
-        <div class="stack">
-          <button id="addScreener" style="flex:1;">+ Screener</button>
-          <button id="addMain" style="flex:1;">+ Main</button>
-          <button id="addHidden" style="flex:1;">+ Hidden</button>
-          <button id="addQC" style="flex:1;">+ Red Herring</button>
-        </div>
+  const tab = (ui_state.active_prefield_tab || 'screener');       // 'screener' | 'main' | 'tabplan' | 'banner'
+  const isTwoPanel = (tab === 'screener' || tab === 'main');
+
+  // Left column (only for Screener/Main)
+  const leftPanelHTML = isTwoPanel ? `
+    <div class="left-panel">
+      <div id="question-list" class="stack" style="flex-direction:column; align-items:stretch;"></div>
+      <div class="stack">
+        ${tab==='screener'
+          ? `<button id="addScreener" style="flex:1;">+ Screener</button>`
+          : `<button id="addMain" style="flex:1;">+ Main Survey</button>
+             <button id="addHidden" style="flex:1;">+ Hidden</button>
+             <button id="addQC" style="flex:1;">+ Red Herring</button>`
+        }
       </div>
+    </div>
+  ` : ``;
+
+  // Right column host:
+  // - Always include the .pv-tabs + #pv-* panels (even though pills are hidden in sidebar mode)
+  // - For two-panel tabs, #editor-panel is where question editor renders
+  // - For single-panel tabs, #prefield-content-host is where Tab/Banner previews render
+  const rightPanelContentHTML = `
+    <div class="right-panel-content">
+      <!-- Hidden pills row (used by sidebar logic; CSS hides in sidebar-mode) -->
+      <div class="pv-tabs">
+        <button class="pv-tab ${tab==='screener'?'active':''}" data-pvtab="scr">Screener</button>
+        <button class="pv-tab ${tab==='main'?'active':''}"     data-pvtab="main">Main Survey</button>
+        <button class="pv-tab ${tab==='tabplan'?'active':''}"  data-pvtab="tab">Tab Sheet</button>
+        <button class="pv-tab ${tab==='banner'?'active':''}"   data-pvtab="ban">Banner</button>
+      </div>
+
+      <!-- Panels the sidebar toggles -->
+      <section id="pv-scr"  class="pv-panel ${tab==='screener'?'active':''}"></section>
+      <section id="pv-main" class="pv-panel ${tab==='main'?'active':''}"></section>
+      <section id="pv-tab"  class="pv-panel ${tab==='tabplan'?'active':''}"></section>
+      <section id="pv-ban"  class="pv-panel ${tab==='banner'?'active':''}"></section>
+
+      ${isTwoPanel
+        ? `<div id="editor-panel"></div>`
+        : `<div id="prefield-content-host"></div>`
+      }
+    </div>
+  `;
+
+  // If single-column, collapse grid
+  const gridStyle = isTwoPanel ? '' : 'style="grid-template-columns:1fr;"';
+  const mainContentHTML = `
+    <section class="app-grid" ${gridStyle}>
+      ${leftPanelHTML}
       <div class="right-panel">
-        <div id="editor-panel" class="right-panel-content"></div>
+        ${rightPanelContentHTML}
       </div>
-    </section>`;
-  renderProjectHeader(); renderQuestionList(); renderEditorPanel(); wireEditorShortcuts();
+    </section>
+  `;
+
+  root.innerHTML = mainContentHTML;
+
+  // ---- Render content for current tab ----
+  if (isTwoPanel){
+    const filter = (tab === 'screener') ? 'screener' : 'main';
+    renderQuestionList(filter);
+    renderEditorPanel(); // writes into #editor-panel
+
+    // add buttons
+    const $ = (sel)=>document.querySelector(sel);
+    $('#addScreener') && ($('#addScreener').onclick = () => addQuestion('S'));
+    $('#addMain')     && ($('#addMain').onclick     = () => addQuestion('Q'));
+    $('#addHidden')   && ($('#addHidden').onclick   = () => addQuestion('H'));
+    $('#addQC')       && ($('#addQC').onclick       = () => addQuestion('R'));
+  } else {
+    // Single panel previews
+    const host = document.getElementById('prefield-content-host');
+    if (tab === 'banner')  renderPreviewBanner(host);
+    if (tab === 'tabplan') renderPreviewTabSheet(host);
+  }
+
+  renderProjectHeader();
+  wireEditorShortcuts();
+
+  // ---- Wire tertiary tab clicks (Screener/Main/Tab/Banner) ----
+  document.querySelectorAll('[data-prefield-tab]').forEach(btn => {
+    btn.onclick = (e) => {
+      const next = e.currentTarget.dataset.prefieldTab;
+      if (!next) return;
+      ui_state.active_prefield_tab = next;
+
+      // Maintain pv-panel active class in sync with our state so sidebar + pills stay aligned
+      const map = { screener:'scr', main:'main', tabplan:'tab', banner:'ban' };
+      const key = map[next];
+      if (key){
+        document.querySelectorAll('.pv-tab').forEach(b=>b.classList.toggle('active', b.dataset.pvtab === key));
+        document.querySelectorAll('.pv-panel').forEach(p=>p.classList.toggle('active', p.id === `pv-${key}`));
+      }
+
+      renderEditor(root);
+    };
+  });
+
+  // ---- Bridge: when a hidden pill is clicked (or sidebar syncs them), update our active tab ----
+  document.querySelectorAll('.pv-tab').forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      const v = pill.dataset.pvtab;       // 'scr' | 'main' | 'tab' | 'ban'
+      const map = { scr:'screener', main:'main', tab:'tabplan', ban:'banner' };
+      const next = map[v];
+      if (next && next !== ui_state.active_prefield_tab){
+        ui_state.active_prefield_tab = next;
+        renderEditor(root);
+      }
+    });
+  });
 }
 
 function renderProjectHeader(){
@@ -670,30 +2976,62 @@ $("#projName").addEventListener("input", e=>{ state.project.name=e.target.value;
 $("#projClient").addEventListener("input", e=>{ state.project.client=e.target.value; queueAutosave(); });
 $("#projVersion").addEventListener("input", e=>{ state.project.version=e.target.value; queueAutosave(); });
 
-// ---------- SUMMARIES (updated for numeric & table)
+// ---------- SUMMARIES (numeric, table, open end)
 function numericSummary(q){
   const N = q.numeric || {};
-  const range = (N.min!=null || N.max!=null) ? ` ${N.min??''}–${N.max??''}` : '';
-  if (q.type === 'numeric_time')  return `time${range} ${N.time_unit||''}`.trim();
-  if (q.type === 'numeric_count') return `count${range} ${N.unit||''}`.trim();
-  if (q.type === 'numeric_open')  return `num${range} ${N.unit||''}`.trim();
+  const hasRange = (N.min != null || N.max != null);
+  const range = hasRange ? ` ${N.min ?? ''}–${N.max ?? ''}` : '';
+  if (q.type === 'numeric_time')  return `time${range} ${N.time_unit || ''}`.trim();
+  if (q.type === 'numeric_count') return `count${range} ${N.unit || ''}`.trim();
+  if (q.type === 'numeric_open')  return `num${range} ${N.unit || ''}`.trim();
   return '';
 }
+
+function openSummary(q){
+  if (q.type !== 'open_end') return '';
+  const O = q.open || {};
+  const k = O.limit_kind || '';
+  const a = O.min, b = O.max;
+  // base label always; details only if kind chosen AND at least one bound set
+  const detail = (k && (a != null || b != null)) ? ` ${a ?? ''}–${b ?? ''} ${k}` : '';
+  return ` • open${detail}`;
+}
+
 function summaryFor(q){
   const base = `${q.type || 'single'}`;
   const scal = q.scale?.points ? ` • ${q.scale.points}pt` : '';
-  const opts = (q.options?.length||0) ? ` • ${q.options.length} opt` : '';
-  const stm  = (q.statements?.length||0) ? ` • ${q.statements.length} stmts` : '';
-  const num  = /^numeric_/.test(q.type||'') ? ` • ${numericSummary(q)}` : '';
-  const tbl  = (q.grid?.rows?.length||0) || (q.grid?.cols?.length||0)
-                ? ` • table ${q.grid.rows.length}×${q.grid.cols.length}` : '';
-  return base + scal + opts + stm + num + tbl;
+  const opts = (q.options?.length || 0) ? ` • ${q.options.length} opt` : '';
+  const stm  = (q.statements?.length || 0) ? ` • ${q.statements.length} stmts` : '';
+  const num  = /^numeric_/.test(q.type || '') ? ` • ${numericSummary(q)}` : '';
+  const tbl  = (q.grid?.rows?.length || 0) || (q.grid?.cols?.length || 0)
+    ? ` • table ${q.grid.rows.length}×${q.grid.cols.length}` : '';
+  const open = openSummary(q);
+
+  return base + scal + opts + stm + num + tbl + open;
 }
 
-function renderQuestionList(){
-  const list = $("#question-list"); if(!list) return; list.innerHTML = "";
-  state.questions.forEach((q, idx)=>{
-    const item = document.createElement("div"); item.className = "q-item" + (idx===ui_state.active_question_index? " active":""); item.dataset.index = idx; item.draggable = true;
+function renderQuestionList(filter = 'all'){
+  const list = $("#question-list");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const questionsToRender = state.questions
+    .map((q, originalIndex) => ({ q, originalIndex }))
+    .filter(({ q }) => {
+      if (filter === 'screener') {
+        return String(q.id || '').toUpperCase().startsWith('S');
+      }
+      if (filter === 'main') {
+        return !String(q.id || '').toUpperCase().startsWith('S');
+      }
+      return true; // 'all' or default
+    });
+
+  questionsToRender.forEach(({ q, originalIndex }) => {
+    const item = document.createElement("div");
+    item.className = "q-item" + (originalIndex === ui_state.active_question_index ? " active" : "");
+    item.dataset.index = originalIndex;
+    item.draggable = true;
     item.innerHTML = `
       <div class="stack">
         <span class="tag">${q.id}</span>
@@ -701,13 +3039,45 @@ function renderQuestionList(){
       </div>
       <div class="summary">${summaryFor(q)}</div>`;
 
-    item.onclick = ()=>{ ui_state.active_question_index=idx; ui_state.active_tab='main'; renderEditorPanel(); };
-    item.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", idx); });
-    item.addEventListener("dragover", e=> e.preventDefault());
-    item.addEventListener("drop", e=>{ e.preventDefault(); e.stopPropagation(); const from = +e.dataTransfer.getData("text/plain"); const to = idx; if (isNaN(from)||isNaN(to)||from===to) return; const [m] = state.questions.splice(from,1); state.questions.splice(to,0,m); ui_state.active_question_index = to; renderQuestionList(); renderEditorPanel(); queueAutosave(); });
+    item.onclick = () => {
+      ui_state.active_question_index = originalIndex;
+      ui_state.active_tab = 'main';
+      renderEditorPanel();
+      renderQuestionList(filter); // Re-render list to update active class
+    };
+    item.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", originalIndex); });
+    item.addEventListener("dragover", e => e.preventDefault());
+    item.addEventListener("drop", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const from = +e.dataTransfer.getData("text/plain");
+      const to = originalIndex;
+      if (isNaN(from) || isNaN(to) || from === to) return;
+
+      const [movedItem] = state.questions.splice(from, 1);
+      
+      // Find the correct insertion point in the original array
+      const targetIndexInState = state.questions.findIndex(question => question.id === q.id);
+      
+      if (from < to) {
+          // If moving down, the target index might have shifted
+           state.questions.splice(targetIndexInState, 0, movedItem);
+      } else {
+          // If moving up
+           state.questions.splice(targetIndexInState, 0, movedItem);
+      }
+      
+      // Update active index to the new position of the moved item
+      ui_state.active_question_index = state.questions.findIndex(question => question.id === movedItem.id);
+
+      renderQuestionList(filter);
+      renderEditorPanel();
+      queueAutosave();
+    });
     list.appendChild(item);
   });
 }
+
 
 /* -----------------------
    MODE <-> TYPE MAPPING
@@ -800,6 +3170,9 @@ function renderEditorPanel(){
 
   const q = state.questions[i];
 
+  ensureTabBucket(q); 
+  syncNetsWithQuestion(q);
+
   // Keep type consistent with chosen mode & sync grid facets
   harmonizeTypeFromMode(q);
   syncTableFacets(q);
@@ -873,6 +3246,14 @@ function renderEditorPanel(){
     renderEditorPanel(); queueAutosave();
   }
 
+  function parseNumericBands(q){
+    const txt = q?.exports?.tab_plan?.nets_text || '';
+    // Accept things like "Net: 1-5, 6-10, 11-15, 16-24"
+    const bands = Array.from(txt.matchAll(/(\d+)\s*-\s*(\d+)/g))
+      .map(m => ({ code: `${m[1]}-${m[2]}`, label: `${m[1]}–${m[2]}` }));
+    return bands;
+  }
+
   overlay.querySelector('#pmInsert').onclick = ()=>{
     const labels = parseLabels();
     if(labels.length < 2){ alert("Please provide at least 2 labels."); return; }
@@ -888,6 +3269,21 @@ function renderEditorPanel(){
     saveCustomPreset(labels.length, name, labels, desc);
     apply(labels); close();
   };
+
+  // Render the initial list of net previews
+  renderNetPreviews(i);
+
+  // Wire up the "Add Net" button
+  const addBtn = document.getElementById(`addNetBtn-${i}`);
+  if (addBtn) {
+    addBtn.onclick = () => {
+      if (isNumericQuestion(q)) {
+        openRangeNetEditor(i);
+      } else {
+        openCodesNetEditor(i);
+      }
+    };
+  }
 }
 
 // Build UI
@@ -912,29 +3308,29 @@ panel.innerHTML = `
     </div>
 
     <div class="card-content">
-      <!-- MAIN TAB -->
       <div class="tab-content ${ui_state.active_tab==='main'?'active':''}">
         <div class="row"><div class="k">Question ID</div>
           <input value="${q.id}" oninput="updateQ(${i}, 'id', event.target.value)"/>
         </div>
 
-        <!-- MODE SELECTOR -->
         <div class="row"><div class="k">Mode</div>
           <div class="stack">
             <label><input type="radio" name="mode-${i}" value="list"   ${mode==='list'?'checked':''}
-              onchange="state.questions[${i}].mode='list'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Item or list</label>
+              onchange="state.questions[${i}].mode='list';   harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Item or list</label>
             <label><input type="radio" name="mode-${i}" value="numeric" ${mode==='numeric'?'checked':''}
-              onchange="state.questions[${i}].mode='numeric'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Numeric</label>
+              onchange="state.questions[${i}].mode='numeric';harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Numeric</label>
             <label><input type="radio" name="mode-${i}" value="table"  ${mode==='table'?'checked':''}
               onchange="state.questions[${i}].mode='table'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Table</label>
+            <label><input type="radio" name="mode-${i}" value="open"   ${mode==='open'?'checked':''}
+              onchange="state.questions[${i}].mode='open';  harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/> Open End</label>
           </div>
         </div>
+
 
         <div class="row"><div class="k">Question Text</div>
           <textarea oninput="updateQ(${i}, 'text', event.target.value)">${q.text || ""}</textarea>
         </div>
 
-        <!-- LIST MODE -->
         ${mode==='list' ? `
           <div class="row"><div class="k">Selection</div>
             <div class="stack">
@@ -994,7 +3390,6 @@ panel.innerHTML = `
           </div>
         ` : ''}
 
-        <!-- NUMERIC MODE -->
         ${mode==='numeric' ? `
           <div class="row"><div class="k">Numeric settings</div>
             <div>
@@ -1027,8 +3422,34 @@ panel.innerHTML = `
             </div>
           </div>
         ` : ''}
+        
+        ${mode==='open' ? `
+          <div class="row"><div class="k">Use encouragement tool</div>
+            <label class="stack">
+              <input type="checkbox"
+                ${q.open?.encourage ? 'checked' : ''}
+                onchange="(state.questions[${i}].open ||= {}), state.questions[${i}].open.encourage = this.checked; queueAutosave();"/>
+              <span class="muted">Enable gentle prompts if the response is empty/very short</span>
+            </label>
+          </div>
 
-        <!-- TABLE MODE -->
+          <div class="row"><div class="k">Min / Max</div>
+            <div class="stack" style="flex-wrap:wrap;">
+              <select
+                onchange="(state.questions[${i}].open ||= {}), state.questions[${i}].open.limit_kind = this.value || null; queueAutosave();">
+                <option value="" ${!q.open?.limit_kind ? 'selected' : ''} disabled hidden>-- choose --</option>
+                ${['words','characters','sentences'].map(k=>`<option value="${k}" ${q.open?.limit_kind===k?'selected':''}>${k}</option>`).join('')}
+              </select>
+              <input type="number" placeholder="Min (optional)" style="width:140px"
+                value="${q.open?.min ?? ''}"
+                oninput="(state.questions[${i}].open ||= {}), state.questions[${i}].open.min = this.value===''?null:+this.value; queueAutosave();"/>
+              <input type="number" placeholder="Max (optional)" style="width:140px"
+                value="${q.open?.max ?? ''}"
+                oninput="(state.questions[${i}].open ||= {}), state.questions[${i}].open.max = this.value===''?null:+this.value; queueAutosave();"/>
+            </div>
+          </div>
+        ` : ``}
+
         ${mode==='table' ? (() => {
           // ensure grid object
           if (!q.grid) q.grid = { rows: (q.statements || []).slice(), cols: (q.scale?.labels || []).slice() };
@@ -1070,10 +3491,7 @@ panel.innerHTML = `
           `;
         })() : ''}
 
-      </div> <!-- /MAIN TAB -->
-
-      <!-- LOGIC & BASE TAB -->
-      <div class="tab-content ${ui_state.active_tab==='logic'?'active':''}">
+      </div> <div class="tab-content ${ui_state.active_tab==='logic'?'active':''}">
         <div class="row"><div class="k">Base Verbiage</div>
           <input value="${q.base && q.base.verbiage != null ? q.base.verbiage : ''}"
                 oninput="updateBase(${i}, 'verbiage', event.target.value)"
@@ -1087,7 +3505,6 @@ panel.innerHTML = `
                   oninput="updateBase(${i}, 'definition', event.target.value)"
                   placeholder="e.g., S1 in [2]" />
 
-            <!-- Multi-clause Helper -->
             <div class="stack muted" style="margin-top:8px; align-items:flex-start; flex-direction:column; gap:6px;">
               <small>Helper:</small>
               <div id="bbHost-${i}" class="stack" style="flex-direction:column; gap:8px; width:100%;"></div>
@@ -1105,23 +3522,43 @@ panel.innerHTML = `
       </div>
 
 
-      <!-- TAB PLAN TAB -->
       <div class="tab-content ${ui_state.active_tab==='tabplan'?'active':''}">
-        <div class="row"><div class="k">Nets Text</div>
-          <input value="${tp.nets_text || ''}"
-                 oninput="updateTabPlan(${i}, 'nets_text', this.value)"
-                 placeholder="Default: ${state.globals.default_nets || 'Net: T2B, B2B'}" />
+        <div class="row">
+          <div class="k">Nets</div>
+          <div>
+            <div id="netsPreviewHost-${i}" class="stack" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 8px;">
+              </div>
+            
+            <button id="addNetBtn-${i}" class="btn primary">+ Add Net</button>
+          </div>
         </div>
         <div class="row"><div class="k">Instructions</div>
           <textarea oninput="updateTabPlan(${i}, 'additional_instructions', this.value)"
                     placeholder="Add any specific instructions for the tabulation team.">${tp.additional_instructions || ''}</textarea>
         </div>
       </div>
+    </div> `;
+  drawBaseBuilder(i);
+  renderNetPreviews(i);
 
-    </div> <!-- /.card-content -->
-  </div> <!-- /.card -->
-`;
-drawBaseBuilder(i);
+  const addBtn = document.getElementById(`addNetBtn-${i}`);
+  if (addBtn) {
+    addBtn.onclick = () => {
+      if (isNumericQuestion(q)) {
+        openRangeNetEditor(i);
+      } else {
+        openCodesNetEditor(i);
+      }
+    };
+  }
+
+  function updateTabPlan(i, key, value){
+    if (!state.questions[i]) return;
+    if (!state.questions[i].exports) state.questions[i].exports = {};
+    if (!state.questions[i].exports.tab_plan) state.questions[i].exports.tab_plan = {};
+    state.questions[i].exports.tab_plan[key] = value;
+    queueAutosave();
+  }
 } 
 
 /* -------- Small editor helpers (hardened) -------- */
@@ -1134,7 +3571,10 @@ function setActiveTab(tab){
 function updateQ(i, k, v){
   if (!state.questions[i]) return;
   state.questions[i][k] = v;
-  if (k === 'id' || k === 'text' || k === 'type') renderQuestionList();
+  if (k === 'id' || k === 'text' || k === 'type') {
+      const activeFilter = ui_state.active_prefield_tab === 'screener' ? 'screener' : 'main';
+      renderQuestionList(activeFilter);
+  }
   queueAutosave();
 }
 
@@ -1144,14 +3584,6 @@ function updateBase(i, k, v){
   // empty string means "use default" → store null
   var val = (v == null ? '' : String(v)).trim();
   state.questions[i].base[k] = val === '' ? null : val;
-  queueAutosave();
-}
-
-function updateTabPlan(i, key, value){
-  if (!state.questions[i]) return;
-  if (!state.questions[i].exports) state.questions[i].exports = {};
-  if (!state.questions[i].exports.tab_plan) state.questions[i].exports.tab_plan = {};
-  state.questions[i].exports.tab_plan[key] = value;
   queueAutosave();
 }
 
@@ -1311,8 +3743,12 @@ function addQuestion(prefix){
     state.questions.push({ id: id, type: 'single', text: '', notes: 'Red herring', options: [] });
   }
   ui_state.active_question_index = state.questions.length - 1;
-  renderQuestionList(); renderEditorPanel(); queueAutosave();
+  const activeFilter = ui_state.active_prefield_tab === 'screener' ? 'screener' : 'main';
+  renderQuestionList(activeFilter);
+  renderEditorPanel();
+  queueAutosave();
 }
+
 
 function delQ(i){
   if (!state.questions[i]) return;
@@ -1320,7 +3756,10 @@ function delQ(i){
   state.questions.splice(i, 1);
   ui_state.active_question_index = Math.min(i, state.questions.length - 1);
   if (state.questions.length === 0) ui_state.active_question_index = null;
-  renderQuestionList(); renderEditorPanel(); queueAutosave();
+  const activeFilter = ui_state.active_prefield_tab === 'screener' ? 'screener' : 'main';
+  renderQuestionList(activeFilter);
+  renderEditorPanel();
+  queueAutosave();
 }
 
 function dupQ(i){
@@ -1332,35 +3771,322 @@ function dupQ(i){
   copy.id = pref + nextNumber(pref) + suffix;
   state.questions.splice(i + 1, 0, copy);
   ui_state.active_question_index = i + 1;
-  renderQuestionList(); renderEditorPanel(); queueAutosave();
+  const activeFilter = ui_state.active_prefield_tab === 'screener' ? 'screener' : 'main';
+  renderQuestionList(activeFilter);
+  renderEditorPanel();
+  queueAutosave();
+}
+
+function deleteNet(i, netIndex) {
+  const q = state.questions[i];
+  if (!q || !q.tab || !q.tab.nets) return;
+  
+  if (confirm('Are you sure you want to delete this net?')) {
+    q.tab.nets.splice(netIndex, 1);
+    renderEditorPanel(); // Re-render to show the change
+    queueAutosave();
+  }
+}
+
+function renderNetPreviews(i) {
+  const q = state.questions[i];
+  const host = document.getElementById(`netsPreviewHost-${i}`);
+  if (!host) return;
+
+  const nets = q.tab?.nets || [];
+  if (!nets.length) {
+    host.innerHTML = `<div class="muted">No nets defined yet.</div>`;
+    return;
+  }
+
+  host.innerHTML = nets.map((net, index) => {
+    let summaryText = '';
+    
+    if (net.kind === 'codes') {
+      const labels = net.codes.map(code => getOptionLabel(q.id, code) || `Code ${code}`).join(', ');
+      summaryText = `<b>Net:</b> ${escapeHTML(labels)}`;
+    } 
+    else if (net.kind === 'range') {
+      // NEW logic to handle different operators
+      switch (net.operator) {
+        case '+':
+          summaryText = `<b>Net:</b> ${net.value1}+`;
+          break;
+        case '>':
+          summaryText = `<b>Net:</b> > ${net.value1}`;
+          break;
+        case '>=':
+          summaryText = `<b>Net:</b> ≥ ${net.value1}`;
+          break;
+        case '<':
+          summaryText = `<b>Net:</b> < ${net.value1}`;
+          break;
+        case '<=':
+          summaryText = `<b>Net:</b> ≤ ${net.value1}`;
+          break;
+        case 'exact':
+          summaryText = `<b>Net:</b> ${net.value1} (exact)`;
+          break;
+        case '-':
+        default: // Default to the standard min-max range
+          summaryText = `<b>Net:</b> ${net.value1} - ${net.value2}`;
+          break;
+      }
+    }
+    
+    const netLabel = net.label ? `<span class="muted" style="margin-left: auto;">- ${escapeHTML(net.label)}</span>` : '';
+
+    return `
+      <div class="stack" style="padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; width: 100%; justify-content: space-between;">
+        <div class="stack" style="flex-grow: 1; justify-content: flex-start; gap: 12px;">
+          <span>${summaryText}</span>
+          ${netLabel}
+        </div>
+        <div class="stack">
+          <button class="btn" onclick="editNet(${i}, ${index})">Edit</button>
+          <button class="btn danger" onclick="deleteNet(${i}, ${index})">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function editNet(i, netIndex) {
+  const q = state.questions[i];
+  const net = q.tab.nets[netIndex];
+  
+  if (net.kind === 'range' || isNumericQuestion(q)) {
+    openRangeNetEditor(i, netIndex);
+  } else {
+    openCodesNetEditor(i, netIndex);
+  }
+}
+
+function openCodesNetEditor(i, netIndex = null) {
+  const q = state.questions[i];
+  const isEditing = netIndex !== null;
+  const net = isEditing ? q.tab.nets[netIndex] : { label: '', codes: [] }; // Default for new net
+
+  const options = getQuestionOptions(q);
+  const selectedCodes = new Set(net.codes.map(String));
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-panel" onclick="event.stopPropagation()">
+      <div class="modal-header"><h3>${isEditing ? 'Edit Codes Net' : 'Add Codes Net'}</h3><button class="icon-btn" id="netClose">✕</button></div>
+      <div class="modal-body">
+        <label>
+          <span>Net Label (Optional, e.g., "Manufacturer 1")</span>
+          <input id="netLabel" type="text" value="${escapeHTML(net.label || '')}" />
+        </label>
+        <div>
+          <span>Select Options to Include in Net</span>
+          <div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; padding: 8px; margin-top: 4px;">
+            ${options.map(o => `
+              <label class="stack">
+                <input type="checkbox" class="net-opt-cb" value="${o.code}" ${selectedCodes.has(o.code) ? 'checked' : ''}/>
+                ${escapeHTML(o.label)} <span class="muted">(${o.code})</span>
+              </label>`).join('') || '<div class="muted">This question has no options to select.</div>'}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn ghost" id="netCancel">Cancel</button>
+        <button class="btn primary" id="netSave">Save Net</button>
+      </div>
+    </div>
+    <div class="modal-backdrop"></div>
+  `;
+  document.body.appendChild(modal);
+  const closeModal = () => modal.remove();
+  modal.querySelector('#netCancel').onclick = closeModal;
+  modal.querySelector('.modal-backdrop').onclick = closeModal;
+
+  modal.querySelector('#netSave').onclick = () => {
+    const newLabel = modal.querySelector('#netLabel').value.trim() || null;
+    const newCodes = Array.from(modal.querySelectorAll('.net-opt-cb:checked')).map(cb => cb.value);
+
+    if (newCodes.length === 0) {
+      alert('Please select at least one option.');
+      return;
+    }
+
+    const newNet = createCodesNet({ label: newLabel, codes: newCodes });
+
+    if (isEditing) {
+      q.tab.nets[netIndex] = newNet;
+    } else {
+      q.tab.nets.push(newNet);
+    }
+
+    closeModal();
+    renderEditorPanel();
+    queueAutosave();
+  };
+}
+
+function openRangeNetEditor(i, netIndex = null) {
+  const q = state.questions[i];
+  const isEditing = netIndex !== null;
+  // Set defaults for a new net or use existing net data
+  const net = isEditing ? q.tab.nets[netIndex] : { operator: '-', value1: '', value2: '' };
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-panel" style="width: min(500px, 92vw);" onclick="event.stopPropagation()">
+      <div class="modal-header"><h3>${isEditing ? 'Edit Numeric Net' : 'Add Numeric Net'}</h3><button class="icon-btn" id="netClose">✕</button></div>
+      <div class="modal-body">
+        <label>
+          <span>Net Label (Optional, e.g., "Ages 18-34")</span>
+          <input id="netLabel" type="text" value="${escapeHTML(net.label || '')}" />
+        </label>
+        <div class="stack" style="gap: 10px; align-items: center; justify-content: center; margin-top: 16px;">
+          <input id="netValue1" type="number" placeholder="Value" value="${net.value1 ?? ''}" style="width: 120px;" />
+          
+          <select id="netOperator" style="width: 60px;">
+            <option value="-" ${net.operator === '-' ? 'selected' : ''}>-</option>
+            <option value="exact" ${net.operator === 'exact' ? 'selected' : ''}>(exact)</option>
+            <option value="+" ${net.operator === '+' ? 'selected' : ''}>+</option>
+            <option value="<" ${net.operator === '<' ? 'selected' : ''}><</option>
+            <option value=">" ${net.operator === '>' ? 'selected' : ''}>></option>
+            <option value="<=" ${net.operator === '<=' ? 'selected' : ''}>≤</option>
+            <option value=">=" ${net.operator === '>=' ? 'selected' : ''}>≥</option>
+          </select>
+
+          <input id="netValue2" type="number" placeholder="Max" value="${net.value2 ?? ''}" style="width: 120px;" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn ghost" id="netCancel">Cancel</button>
+        <button class="btn primary" id="netSave">Save Net</button>
+      </div>
+    </div>
+    <div class="modal-backdrop"></div>
+  `;
+  document.body.appendChild(modal);
+
+  const value1Input = modal.querySelector('#netValue1');
+  const value2Input = modal.querySelector('#netValue2');
+  const operatorSelect = modal.querySelector('#netOperator');
+
+  // Function to toggle the second input box
+  const toggleSecondInput = () => {
+    // Only show the second input for the standard range operator '-'
+    const show = operatorSelect.value === '-';
+    value2Input.style.display = show ? '' : 'none';
+  };
+
+  // Set initial visibility and add event listener
+  toggleSecondInput();
+  operatorSelect.addEventListener('change', toggleSecondInput);
+
+  const closeModal = () => modal.remove();
+  modal.querySelector('#netClose').onclick = closeModal;
+  modal.querySelector('#netCancel').onclick = closeModal;
+  modal.querySelector('.modal-backdrop').onclick = closeModal;
+
+  modal.querySelector('#netSave').onclick = () => {
+    const newLabel = modal.querySelector('#netLabel').value.trim() || null;
+    const operator = operatorSelect.value;
+    const val1 = value1Input.value;
+    const val2 = value2Input.value;
+
+    if (val1 === '') {
+      alert('Please enter at least one value.');
+      return;
+    }
+    if (operator === '-' && val2 === '') {
+      alert('Please enter both a minimum and maximum value for a range.');
+      return;
+    }
+    
+    // Create the new net object based on the operator
+    const newNet = {
+      kind: 'range', // Still a range kind, just more complex
+      label: newLabel,
+      operator: operator,
+      value1: Number(val1),
+      value2: operator === '-' ? Number(val2) : null
+    };
+
+    if (isEditing) {
+      q.tab.nets[netIndex] = newNet;
+    } else {
+      q.tab.nets.push(newNet);
+    }
+
+    closeModal();
+    renderEditorPanel();
+    queueAutosave();
+  };
 }
 
 function wireEditorShortcuts(){
   document.onkeydown = function(e){
+    // Don't interfere if an input, textarea, or select is focused
+    if (e.target.matches('input, textarea, select')) {
+      return;
+    }
+
     var i = (ui_state.active_question_index == null) ? -1 : ui_state.active_question_index;
     if (e.ctrlKey || e.metaKey){
       if (e.key.toLowerCase() === 's'){ e.preventDefault(); downloadJSON(); }
       if (e.key.toLowerCase() === 'd'){ e.preventDefault(); if (i >= 0) dupQ(i); }
     } else {
-      if (e.key === 'ArrowUp'   && i > 0){ ui_state.active_question_index = i - 1; renderQuestionList(); renderEditorPanel(); }
-      if (e.key === 'ArrowDown' && i < state.questions.length - 1){ ui_state.active_question_index = i + 1; renderQuestionList(); renderEditorPanel(); }
-      if (e.key === 'Enter'     && i < 0 && state.questions.length){ ui_state.active_question_index = 0; renderEditorPanel(); }
+      if (e.key === 'ArrowUp'   && i > 0){
+        ui_state.active_question_index = i - 1;
+        const activeFilter = ui_state.active_prefield_tab === 'screener' ? 'screener' : 'main';
+        renderQuestionList(activeFilter);
+        renderEditorPanel();
+      }
+      if (e.key === 'ArrowDown' && i < state.questions.length - 1){
+        ui_state.active_question_index = i + 1;
+        const activeFilter = ui_state.active_prefield_tab === 'screener' ? 'screener' : 'main';
+        renderQuestionList(activeFilter);
+        renderEditorPanel();
+      }
+      if (e.key === 'Enter'     && i < 0 && state.questions.length){
+        ui_state.active_question_index = 0;
+        renderEditorPanel();
+      }
     }
   };
-  document.getElementById('addScreener').onclick = function(){ addQuestion('S'); };
-  document.getElementById('addMain').onclick     = function(){ addQuestion('Q'); };
-  document.getElementById('addHidden').onclick   = function(){ addQuestion('H'); };
-  document.getElementById('addQC').onclick       = function(){ addQuestion('R'); };
 }
 
 /* ====== Multi-clause Base Builder ====== */
 // Ensure a builder for question i exists with at least one empty clause
 function bbEnsure(i){
-  ui_state.base_builders = ui_state.base_builders || {};
-  if (!ui_state.base_builders[i]) {
-    ui_state.base_builders[i] = [{ op: null, qid: "", opt: "" }]; // first clause has no leading op
-  }
-  return ui_state.base_builders[i];
+    ui_state.base_builders = ui_state.base_builders || {};
+    const currentDefinition = state.questions[i]?.base?.definition || '';
+    
+    // Always re-parse the definitive source of truth
+    ui_state.base_builders[i] = bbParseDefinition(currentDefinition);
+
+    return ui_state.base_builders[i];
+}
+
+function bbParseDefinition(def = "") {
+    const clauses = [];
+    // Regex to find all clauses like (QID in [CODE]), optionally led by AND/OR
+    const regex = /(AND|OR)?\s*\((\w+)\s+in\s+\[(\w+)\]\)/g;
+    
+    let match;
+    while ((match = regex.exec(def)) !== null) {
+        clauses.push({
+            op: match[1] || null, // The first clause won't have a leading operator
+            qid: match[2],
+            opt: match[3]
+        });
+    }
+
+    // If parsing fails or the string is empty, return a single default clause
+    if (clauses.length === 0) {
+        return [{ op: null, qid: "", opt: "" }];
+    }
+
+    return clauses;
 }
 
 // Build "(Q in [x]) OP (Q2 in [y]) ..." string from the current clauses
@@ -1435,10 +4161,11 @@ function drawBaseBuilder(i){
     var oOpts = ['<option value="">Pick option</option>']
       .concat(opts.map(function(o){
         var code = (o && o.code != null) ? o.code : '';
-        var sel = (String(code) === String(c.opt)) ? ' selected' : '';
-        var lbl = escapeHTML(o && o.label ? o.label : '');
+        var sel  = (String(code) === String(c.opt)) ? ' selected' : '';
+        var lbl  = escapeHTML(o && o.label ? o.label : '');
         return '<option value="'+ code +'"' + sel + '>'+ code +': '+ lbl +'</option>';
-      })).join('');
+      }))
+      .join('');
 
     // Leading connector (not shown for first row)
     var opSel = (idx === 0)
@@ -1739,100 +4466,6 @@ function renderValidator(root){
 }
 
 /* =========================================================
-   PREVIEW
-   ========================================================= */
-function renderPreview(root){
-  root.innerHTML = `
-    <section class="app-grid" style="grid-template-columns: 1fr;">
-      <div class="card">
-        <div class="card-header"><strong>Preview</strong></div>
-        <div class="card-content">
-          <div class="preview-wrap">
-            <div class="qre-paper" id="qrePreview">
-              <h3>Questionnaire (preview)</h3>
-              <div class="muted">Lightweight in-app preview of the .docx</div>
-              <div id="qreBody"></div>
-            </div>
-            <div class="qre-paper">
-              <h3>Tab Plan (preview)</h3>
-              <div class="muted">Sanity check nets/instructions and bases</div>
-              <table id="tabPrev" style="width:100%; border-collapse:collapse;">
-                <thead>
-                  <tr>
-                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">QID</th>
-                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Type/Mode</th>
-                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Nets</th>
-                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Instructions</th>
-                    <th style="text-align:left; border-bottom:1px solid var(--line); padding:6px;">Base</th>
-                  </tr>
-                </thead>
-                <tbody id="tabPrevBody"></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="stack" style="margin-top:12px;">
-            <button onclick="location.hash='#/editor'">Back to Editor</button>
-            <button class="primary" onclick="snapshotCurrent('Pre-generate snapshot')">📸 Snapshot</button>
-          </div>
-        </div>
-      </div>
-    </section>`;
-
-  // QRE preview body
-  const qre = document.getElementById('qreBody');
-  qre.innerHTML = state.questions.map(q => {
-    const opts   = (q.options||[]).map(o => `<div>- [ ] ${o.code ?? ''} ${escapeHTML(o.label||'')}</div>`).join('');
-    const stmts  = (q.statements||[]).map((s,i)=> `<div class="mono">(${i+1}) ${escapeHTML(s)}</div>`).join('');
-    const scale  = q.scale?.points
-      ? `<div class="muted">${q.scale.points}-pt scale${q.scale.labels?.length ? ` — ${escapeHTML(q.scale.labels.join(' | '))}`:''}</div>` : '';
-
-    // numeric line (placeholder + rules fallback)
-    const isNumeric = q.mode === 'numeric' || (q.type || '').startsWith('numeric');
-    const n = isNumeric ? (q.numeric||{}) : null;
-    const rulesUnit = state.globals?.rules?.numeric?.default_unit || '';
-    const unit = (n.unit || n.time_unit || rulesUnit || '').trim();
-    const placeholder = (n.placeholder && n.placeholder.trim()) || (unit ? `____ ${unit}` : '____');
-
-    const numLine = isNumeric ? `
-      <div class="mono">${escapeHTML(placeholder)}</div>
-      <div class="muted">
-        ${n.min!=null ? 'min ' + n.min + ' • ' : ''}${n.max!=null ? 'max ' + n.max + ' • ' : ''}
-        ${n.integer_only ? 'whole numbers only' : 'decimals allowed'}${n.zero_pad ? ' • zero-pad ' + n.zero_pad : ''}
-      </div>
-    ` : '';
-
-    const baseText = q.base?.verbiage || state.globals.default_base_verbiage;
-    const baseDef  = q.base?.definition ? ` • ${escapeHTML(q.base.definition)}` : '';
-
-    return `
-      <section style="margin:10px 0; padding:8px; border-bottom:1px dashed var(--line);">
-        <div><span class="tag">${q.id}</span> <strong>${escapeHTML(q.text||'')}</strong></div>
-        ${scale}
-        ${numLine}
-        ${opts? `<div style="margin-left:10px; margin-top:6px;">${opts}</div>`:''}
-        ${stmts? `<div style="margin-left:10px; margin-top:6px;">${stmts}</div>`:''}
-        ${(q.base?.verbiage || q.base?.definition) ? `<div class="muted" style="margin-top:6px;">Base: ${escapeHTML(baseText)}${baseDef}</div>`:''}
-      </section>`;
-  }).join('') || `<div class="muted">No questions yet.</div>`;
-
-  // Tab plan preview table
-  const tb = document.getElementById('tabPrevBody');
-  tb.innerHTML = state.questions.map(q => `
-    <tr>
-      <td style="padding:6px; border-bottom:1px solid var(--line);">${q.id}</td>
-      <td style="padding:6px; border-bottom:1px solid var(--line);">${escapeHTML(q.mode || q.type || 'single')}</td>
-      <td style="padding:6px; border-bottom:1px solid var(--line);">${escapeHTML(q.exports?.tab_plan?.nets_text || '')}</td>
-      <td style="padding:6px; border-bottom:1px solid var(--line); white-space:pre-wrap;">
-        ${escapeHTML(q.exports?.tab_plan?.additional_instructions || '')}
-      </td>
-      <td style="padding:6px; border-bottom:1px solid var(--line);">
-        ${escapeHTML(q.base?.verbiage || state.globals.default_base_verbiage)}${q.base?.definition? `; ${escapeHTML(q.base.definition)}`:''}
-      </td>
-    </tr>
-  `).join('');
-}
-
-/* =========================================================
    VERSIONS / SNAPSHOTS
    ========================================================= */
 function getSnapshotsMap(){ try{ return JSON.parse(localStorage.getItem(SNAP_KEY)||'{}'); } catch{ return {}; } }
@@ -2012,40 +4645,176 @@ function loadAutosave(){
   return true;
 }
 
-/* =========================================================
-   ROUTING & BOOTSTRAP
-   ========================================================= */
+// ---------------- ROUTING TABLE + RENDERER (hardened) ----------------
+
+// 1) Register pages
+routes.clear?.(); // clean slate if a previous bundle populated it
 routes.set('#/dashboard', renderDashboard);
 routes.set('#/editor',    renderEditor);
+
+// simple stubs (wire later)
 routes.set('#/library',   renderLibrary);
 routes.set('#/rules',     renderRules);
 routes.set('#/validator', renderValidator);
-routes.set('#/preview',   renderPreview);
 routes.set('#/versions',  renderVersions);
 
-function renderRoute(){
-  const root  = $('#view-root');
-  const route = ui_state.route || '#/dashboard';
-  (routes.get(route) || renderDashboard)(root);
-  highlightNav();
+// 2) Helpers
+function normalizeHash(h) {
+  const hash = h || location.hash || '#/dashboard';
+  // collapse editor subtabs to #/editor (keep subtab separately)
+  if (hash.startsWith('#/editor/')) return '#/editor';
+  return hash;
+}
+function getSubtabFromHash(h) {
+  const parts = (h || location.hash || '').split('/');
+  return parts[2] || null; // e.g., '#/editor/pre' -> 'pre'
 }
 
+// 3) Subtab controller (visibility + active state)
+function updateSubtabsVisibilityAndState() {
+  const bar = document.getElementById('editor-subtabs');
+  if (!bar) return;
+
+  const onEditor = (normalizeHash() === '#/editor');
+  const hasProject = !!state?.project?.id;
+
+  // Show/hide the sticky bar
+  bar.classList.toggle('is-hidden', !(onEditor && hasProject));
+
+  // Handle L2 sub-panel visibility
+  const editorPanelsContainer = document.getElementById('editor-panels');
+  if (editorPanelsContainer) {
+      if (!(onEditor && hasProject)) {
+          editorPanelsContainer.classList.add('is-hidden');
+          return;
+      }
+      editorPanelsContainer.classList.remove('is-hidden');
+
+      const valid = new Set(['pre','field','report','post']);
+      const sub = valid.has(getSubtabFromHash()) ? getSubtabFromHash() : 'pre';
+
+      bar.querySelectorAll('.subtab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.subtab === sub);
+      });
+
+      ['pre','field','report','post'].forEach(p => {
+        const el = document.getElementById('panel-' + p);
+        if (el) el.classList.toggle('is-hidden', p !== sub);
+      });
+  }
+}
+
+
+// 4) Main router
+function renderRoute() {
+  const root = document.getElementById('view-root');
+  const err  = document.getElementById('serverError');
+  if (!root) return;
+
+  try {
+    const key  = normalizeHash(location.hash);
+    const view = routes.get(key) || renderDashboard;
+
+    // This handles the L2 subtabs (Pre-field, Fielding, etc.)
+    updateSubtabsVisibilityAndState();
+
+    if (err) { err.style.display = 'none'; err.textContent = ''; }
+    // The view function (e.g., renderEditor) is now responsible for populating `root`.
+    view(root);
+    highlightNav?.();
+  } catch (e) {
+    console.error(e);
+    if (err) {
+      err.style.display = 'block';
+      err.textContent = (e && e.stack) ? e.stack : String(e);
+    }
+    try { renderDashboard(root); } catch(_) {}
+  }
+}
+
+// 5) Bootstrap (safe; don’t blow up if ensureRules was nuked)
 (function bootstrap(){
-  ensureRules(); // make defaults available before any view uses them
+  if (typeof ensureRules === 'function') ensureRules();
   const s = localStorage.getItem(AUTOSAVE_KEY);
-  if(s && confirm("Restore your last autosaved session?")) loadAutosave();
+  if (s && typeof loadAutosave === 'function' && confirm('Restore your last autosaved session?')) {
+    loadAutosave();
+  }
   renderRoute();
 })();
 
+// 6) Events
+window.addEventListener('hashchange', renderRoute);
+window.addEventListener('DOMContentLoaded', renderRoute);
+
+// optional: editor inner tabs fallback
 document.addEventListener('click', (e) => {
-  const tabsBar = e.target.closest('.editor-tabs');
-  if (!tabsBar) return;
-
-  const btn = e.target.closest('[data-tab]');
+  const btn = e.target.closest('.editor-tabs [data-tab]');
   if (!btn) return;
-
-  setActiveTab(btn.dataset.tab);
+  if (typeof setActiveTab === 'function') {
+    setActiveTab(btn.dataset.tab);
+  } else {
+    // minimal fallback if helper isn’t defined
+    ui_state.active_tab = btn.dataset.tab;
+    renderEditorPanel?.();
+  }
 });
+</script>
+<div id="toastHost" aria-live="polite" style="position:fixed; inset:auto 16px 16px auto; z-index:1100;"></div>
+<script>
+// Side Drawer → Preview panel switching
+// Side Drawer → Preview panel switching
+(function(){
+  const drawer = document.getElementById('sideDrawer');
+
+  // NEW, CORRECTED click handler for drawer links
+  drawer?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.sd-link');
+    if (!btn) return;
+
+    // route jumps (Editor / Rules / Validator etc.)
+    const goto = btn.getAttribute('data-goto');
+    if (goto){
+      location.hash = goto;
+      return;
+    }
+
+    // preview tab switching
+    const id = btn.getAttribute('data-pvtab'); // "scr" | "main" | "tab" | "ban"
+    if (!id) return;
+
+    // --- THIS IS THE FIX ---
+    // 1. Map the short ID to the state variable's value
+    const map = { scr: 'screener', main: 'main', tab: 'tabplan', ban: 'banner' };
+    const nextTab = map[id];
+
+    if (nextTab && window.ui_state) {
+      // 2. Update the application's state
+      ui_state.active_prefield_tab = nextTab;
+
+      // 3. Trigger a full re-render of the editor view
+      // This ensures the layout changes correctly (e.g., from 2-panel to 1-panel)
+      if (typeof renderEditor === 'function' && isEditorRoute()) {
+        const root = document.getElementById('view-root');
+        if (root) renderEditor(root);
+      }
+    }
+
+    // Highlight the drawer selection
+    drawer.querySelectorAll('.sd-link[data-pvtab]').forEach(d => {
+      d.classList.toggle('active', d.dataset.pvtab === id);
+    });
+  });
+
+  // If user clicks the old top pills, mirror state into drawer
+  document.addEventListener('click', (e)=>{
+    const t = e.target.closest('.pv-tab');
+    if (!t) return;
+    const id = t.dataset.pvtab;
+    drawer?.querySelectorAll('.sd-link[data-pvtab]').forEach(d => {
+      d.classList.toggle('active', d.dataset.pvtab === id);
+    });
+  });
+})();
 </script>
 </body>
 </html>

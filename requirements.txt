@@ -1,12 +1,24 @@
-# Web server
-flask
+# Flask Web Framework
+Flask
 
-# Data processing and Excel export
+# Data Handling and Manipulation
 pandas
-xlsxwriter
+numpy
+openpyxl
 
-# Word document generation
+# Document Generation
 python-docx
+python-pptx
 
-# JSON validation
+# Statistical Analysis & Data Reading
+scipy
+pyreadstat
+
+# Charting
+matplotlib
+
+# JSON Schema Validation
 jsonschema
+
+# Executable Builder
+pyinstaller

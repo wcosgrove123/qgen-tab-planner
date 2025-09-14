@@ -1,42 +1,36 @@
-# --- Python ---
+# Python artifacts
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.egg-info/
-.venv/
+
+# Virtual Environment
 venv/
 env/
+.venv/
+.env
 
-# --- Build / Dist (PyInstaller, etc.) ---
-/dist/
-/build/
-/_output/
-/_build/
+# Build and distribution artifacts
+build/
+dist/
 *.spec
+*.egg-info/
 
-# --- OS / IDE ---
+# OS-generated files
 .DS_Store
 Thumbs.db
-.vscode/
+
+# IDE configuration files
 .idea/
+.vscode/
 
-# --- Logs & temp ---
-*.log
-*.tmp
-*.swp
+# Temporary files from UI development
+ui/temp.index.html
+ui/backups/
 
-# --- Project-generated outputs ---
-# Questionnaire & tab plan exports
+# Output files (optional, but good practice)
+/output/
 *.docx
 *.xlsx
-
-# JSON exports (user data, autosaves)
+*.csv
 *.json
-
-# HTML/Pandoc intermediate builds
-*.html
-*.htm
-
-# Media generated during runs
-/media/
