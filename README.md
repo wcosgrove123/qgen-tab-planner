@@ -2,9 +2,6 @@
 
 QGen is a web-based tool designed to streamline the market research workflow by automatically generating survey questionnaires and tabulation plans from a simple, structured input file.
 
-QGen User Interface Screenshot:<img width="1919" height="878" alt="image" src="https://github.com/user-attachments/assets/7b283078-6412-479a-b6ce-0862203e6346" />
-
-
 ## 🌟 Key Features
 
 -   **Automated Questionnaire Generation**: Creates a formatted Microsoft Word questionnaire from a tab plan.
@@ -23,9 +20,6 @@ The application takes a structured CSV file as a **Tab Plan**. This file defines
     -   A **Questionnaire** (`.docx` file) ready for fieldwork.
     -   An expanded **Tab Plan** (`.xlsx` file) with detailed banners for data analysis.
 4.  **Download**: The user can download the generated files directly from the browser.
-
-QGen Workflow Diagram:<img width="1917" height="897" alt="image" src="https://github.com/user-attachments/assets/94ce0d9c-9cd3-4356-b4e8-b9768ea57829" />
-
 
 ## 🚀 Getting Started
 
@@ -48,7 +42,7 @@ You can run this project in two ways: by using the pre-built executable or by ru
 
 1.  **Clone the repository (or download the source):**
     ```sh
-    git clone <your-repository-url>
+    git clone (https://github.com/wcosgrove123/qgen-tab-planner)
     cd tab-banner-plan
     ```
 
