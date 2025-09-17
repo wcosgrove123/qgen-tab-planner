@@ -1,8 +1,10 @@
-# generate_tab_plan.py
 #!/usr/bin/env python3
-import argparse, json
+import argparse
+import json
 from pathlib import Path
+from copy import deepcopy
 from tabplan_writer import build_workbook
+from generate_tab_plan_infer_likert import enrich
 
 def main():
     ap = argparse.ArgumentParser()
@@ -10,8 +12,14 @@ def main():
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
-    data = json.loads(Path(args.project).read_text(encoding="utf-8"))
-    wb = build_workbook(data)
+    # Load the project data from the JSON file
+    project_data = json.loads(Path(args.project).read_text(encoding="utf-8"))
+
+    # Enrich the project data with inferred Likert scale information
+    enriched_project_data = enrich(project_data)
+
+    # Build the workbook using the enriched data
+    wb = build_workbook(enriched_project_data)
     wb.save(args.out)
     print(f"Wrote {args.out}")
 

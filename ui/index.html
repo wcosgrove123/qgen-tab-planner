@@ -3,33 +3,52 @@
 <head>
   <meta charset="utf-8" />
   <title>Q-Gen -- Questionnaire & Tab Plan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <style>
-  /* =======================================================
-    Q-GEN DESIGN TOKENS & BASE LAYOUT (Step 1 clean refactor)
-    - Brand base (stable)
-    - Theme tokens (cue-light / cue-dark / cue-gold)
-    - Global resets & page chrome (header/nav scaffolding)
-    - Non-breaking: same selectors, deduped helpers
-    ======================================================= */
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/icons/Cue Logo 2.png" type="image/png" sizes="24x24">
 
-  /* ------------------------------
-    0) Brand Palette (stable base)
-    ------------------------------ */
-  :root{
+  <style>
+  /* ===================================================================
+      Q-GEN STYLESHEET (REORGANIZED)
+      ===================================================================
+      This stylesheet has been refactored for clarity and organization.
+      It follows a logical progression from foundational settings to
+      specific component styles.
+
+      -- CONTENTS --
+      1.  Design Tokens (Brand Colors, Theme Variables, etc.)
+      2.  Global Styles (Resets, Typography, Base Body Layout)
+      3.  Generic Utilities (Helpers like .is-hidden, .muted, etc.)
+      4.  Layout Primitives (Containers like .app-grid, .stack, etc.)
+      5.  Base Element Styles (Default styles for button, input, etc.)
+      6.  App Chrome (Header, Main Navigation, Sidebar)
+      7.  Core Components (Cards, Modals, Pills, Menus, etc.)
+      8.  Page-Specific Styles (Dashboard, Project Manager, Editor)
+      9.  Legacy or Feature-Specific Styles (Preview & Banner Builder)
+      10. Accessibility & Overrides
+    =================================================================== */
+
+  /* ===================================================================
+    1. DESIGN TOKENS
+    - Brand Palette (Stable Base)
+    - Theme Variables (Light, Dark, Gold)
+    - Sizing & Spacing
+    =================================================================== */
+
+  /* --- Brand Palette (Core Colors) --- */
+  :root {
     --brand-primary:   #212161;  /* deep navy */
     --brand-secondary: #F2B800;  /* gold */
     --brand-yellow:    #F4E412;
     --brand-blue-1:    #3F6AB7;
     --brand-blue-2:    #335899;
-
     --brand-accent-1:  #A7B5DB;  /* soft periwinkle */
     --brand-accent-2:  #8197D0;
     --brand-accent-3:  #E3EAF7;  /* light panel */
-
     --danger:          #C62828;
+  }
 
-    /* spacing / radius tokens used by components down the tree */
+  /* --- Sizing & Spacing Tokens --- */
+  :root {
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 12px;
@@ -42,129 +61,311 @@
     --space-6: 16px;
   }
 
-  /* ---------------------------------------
-    1) Theme Tokens (override by data-theme)
-    --------------------------------------- */
-
-  /* Cue Light (DEFAULT) */
-  :root[data-theme="cue-light"]{
+  /* --- Theme: Cue Light (Default) --- */
+  :root,
+  :root[data-theme="cue-light"] {
     --accent:       var(--brand-primary);
     --accent-weak:  #3b3b7d;
-
     --cta:          var(--brand-secondary);
     --cta-text:     #1a1a1a;
-
-    /* layered surfaces (distant → near) */
-    --bg:           #EEF2FB;   /* canvas */
-    --surface-3:    #F1F4FB;   /* subtle elevation */
-    --surface-2:    #F6F8FD;   /* header / rail */
-    --surface-1:    #FFFFFF;   /* cards / inputs */
-
-    --fg:           #0F172A;
-    --muted:        #637189;
-    --line:         #D9E0EF;
-    --ring:         rgba(51,88,153,.35);
-    --shadow:       0 8px 24px rgba(15, 23, 42, .06);
-  }
-
-  /* Cue Dark */
-  :root[data-theme="cue-dark"]{
-    --accent:       #A7B5DB;
-    --accent-weak:  #8ea1da;
-
-    --cta:          var(--brand-secondary);
-    --cta-text:     #101010;
-
-    --bg:           #0A0F24;
-    --surface-3:    #101631;
-    --surface-2:    #131A35;
-    --surface-1:    #151F41;
-
-    --fg:           #E7ECFF;
-    --muted:        #A8B2CC;
-    --line:         rgba(231,236,255,.10);
-    --ring:         rgba(167,181,219,.45);
-    --shadow:       0 10px 28px rgba(0,0,0,.35);
-  }
-
-  /* Cue Gold (light neutrals; gold CTAs) */
-  :root[data-theme="cue-gold"]{
-    --accent:       var(--brand-primary);
-    --accent-weak:  #3b3b7d;
-
-    --cta:          var(--brand-secondary);
-    --cta-text:     #1a1a1a;
-
     --bg:           #EEF2FB;
     --surface-3:    #F1F4FB;
     --surface-2:    #F6F8FD;
     --surface-1:    #FFFFFF;
-
     --fg:           #0F172A;
     --muted:        #637189;
     --line:         #D9E0EF;
-    --ring:         rgba(51,88,153,.35);
+    --ring:         rgba(51, 88, 153, .35);
     --shadow:       0 8px 24px rgba(15, 23, 42, .06);
   }
 
-  /* ------------------------------
-    2) Global Reset & Typography
-    ------------------------------ */
-  *, *::before, *::after { box-sizing: border-box; }
-  html, body { height: 100%; overflow-x: hidden; }
+  /* --- Theme: Cue Dark --- */
+  :root[data-theme="cue-dark"] {
+    --accent:       #A7B5DB;
+    --accent-weak:  #8ea1da;
+    --cta:          var(--brand-secondary);
+    --cta-text:     #101010;
+    --bg:           #0A0F24;
+    --surface-3:    #101631;
+    --surface-2:    #131A35;
+    --surface-1:    #151F41;
+    --fg:           #E7ECFF;
+    --muted:        #A8B2CC;
+    --line:         rgba(231, 236, 255, .10);
+    --ring:         rgba(167, 181, 219, .45);
+    --shadow:       0 10px 28px rgba(0, 0, 0, .35);
+  }
+
+  /* --- Theme: Cue Gold --- */
+  :root[data-theme="cue-gold"] {
+    --cta:        var(--brand-secondary);
+    --cta-text:   #1a1a1a;
+  }
+
+
+  /* ===================================================================
+    2. GLOBAL STYLES
+    - CSS Resets
+    - Body & Typography Defaults
+    =================================================================== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
   body {
-    margin:0;
-    font: 14px/1.45 'Aptos', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; /* Changed here */
+    margin: 0;
+    font: 14px/1.45 'Aptos', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     color: var(--fg);
     background: var(--bg);
     display: flex;
     flex-direction: column;
-  }   
+  }
 
-  /* shared utility helpers (deduped) */
-  .is-hidden { display: none !important; }
-  .muted { color:var(--muted); }
+  /* Special body class for the Gold theme to override buttons */
+  body.gold-all button:not(.danger) {
+    background: var(--cta) !important;
+    border-color: var(--cta) !important;
+    color: var(--cta-text) !important;
+  }
 
-  .content-blur { filter: blur(4px); transition: filter .2s ease-out; }
 
-  #view-root { padding-top: 8px; } /* breathing room below sticky bars */
+  /* ===================================================================
+    3. GENERIC UTILITIES
+    - Common helper classes for visibility, color, etc.
+    =================================================================== */
+  .is-hidden {
+    display: none !important;
+  }
 
-  /* ------------------------------
-    3) App Chrome (Header / Nav)
-    ------------------------------ */
+  .muted {
+    color: var(--muted);
+  }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .content-blur {
+    filter: blur(4px);
+    transition: filter .2s ease-out;
+  }
+
+  .ok {
+    color: #16a34a;
+    font-size: 12px;
+  }
+
+  .error {
+    margin: 16px;
+    white-space: pre-wrap;
+    color: #7f1d1d;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+
+  /* ===================================================================
+    4. LAYOUT PRIMITIVES
+    - Reusable layout containers like grids and stacks.
+    =================================================================== */
+  main#view-root {
+    flex: 1;
+    overflow: auto;
+    padding-top: 8px; /* Breathing room below sticky bars */
+  }
+
+  /* Main 2-column layout for the editor */
+  .app-grid {
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .left-panel,
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .left-panel {
+    flex: 0 0 360px; /* Explicit size for left panel */
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .right-panel-content {
+    flex-grow: 1;
+  }
+
+  /* General purpose flexbox row */
+  .stack {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* General purpose grid for cards, etc. */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  /* For simple key-value rows in the editor */
+  .row {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 10px;
+    margin: 10px 0;
+    align-items: start;
+  }
+
+
+  /* ===================================================================
+    5. BASE ELEMENT STYLES
+    - Default styling for forms, buttons, etc.
+    =================================================================== */
+  input,
+  select,
+  textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-1);
+    color: var(--fg);
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    transition: box-shadow .15s, border-color .15s, background .15s;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    box-shadow: 0 0 0 3px var(--ring);
+    border-color: transparent;
+  }
+
+  textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface-1);
+    color: var(--fg);
+    cursor: pointer;
+    transition: filter .12s, background .12s, border-color .12s;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  button:hover {
+    filter: brightness(0.98);
+  }
+
+  button.primary,
+  .btn.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  button.danger,
+  .btn.danger {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .btn.ghost {
+    background: transparent;
+  }
+
+  .icon-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  /* ===================================================================
+    6. APP CHROME
+    - Header, Main Navigation, Sidebar/Drawer
+    =================================================================== */
+
+  /* --- Main Header --- */
   header {
     background: var(--surface-2);
     border-bottom: 1px solid var(--line);
     padding: 12px 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* keep from prior patch */
+    justify-content: space-between;
     flex-shrink: 0;
     box-shadow: var(--shadow);
+    position: relative;
+    z-index: 101; /* Above sidebar backdrop */
   }
-  header .logo{ font-size:20px; font-weight:700; }
-  header .project-inputs{ display:flex; gap:8px; align-items:center; }
-  header .project-inputs input{ padding:6px 10px; width:auto; }
-  header .actions{ display:flex; gap:8px; align-items:center; }
 
-  /* Utilities missing but referenced */
-  .btn { all: unset; display:inline-flex; align-items:center; gap:6px;
-    padding:8px 12px; border:1px solid var(--line); border-radius:10px;
-    background:var(--surface-1); color:var(--fg); cursor:pointer; }
-  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .btn.ghost { background:transparent; }
-  .icon-btn { all: unset; cursor:pointer; padding:4px 8px; border-radius:8px; }
-  .grid2 { display:grid; grid-template-columns: 120px 1fr; gap:8px; }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  header .logo {
+    font-size: 20px;
+    font-weight: 700;
+  }
 
-  /* top nav */
-  nav.app-nav{
-    position: sticky; top: 0; z-index: 50;
+  header .project-inputs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  header .actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* --- Main Navigation (Legacy, centered pill buttons) --- */
+  nav.app-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     background: var(--surface-2);
     border-bottom: 1px solid var(--line);
     padding: 12px 0;
   }
-  .app-nav .nav-inner{
+  .app-nav .nav-inner {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 16px;
@@ -173,7 +374,7 @@
     justify-content: center;
     gap: 10px;
   }
-  .nav-btn{
+  .nav-btn {
     padding: 8px 14px;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -182,719 +383,52 @@
     font-weight: 600;
     transition: box-shadow .15s, transform .05s;
   }
-  .nav-btn:hover{ transform: translateY(-1px); }
-  .nav-btn.active{
+  .nav-btn:hover {
+    transform: translateY(-1px);
+  }
+  .nav-btn.active {
     color: var(--fg);
     box-shadow: 0 0 0 2px var(--ring);
   }
 
-  /* --- Editor sub-tabs (secondary) --- */
-  .subtabs{
-    z-index: 45;
+  /* --- Project Shell Navigation (Tabs below header) --- */
+  .project-shell-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     background: var(--surface-2);
     border-bottom: 1px solid var(--line);
-    margin-bottom: 16px;
+    padding: 0 16px;
   }
-  .subtabs .subtabs-inner{
+  .project-shell-nav-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 16px;
     display: flex;
-    justify-content: center;
-    gap: 8px;
   }
-  .subtab{
-    padding: 8px 12px;
-    border: 1px solid transparent;
-    border-bottom: 0;
-    border-radius: 8px 8px 0 0; /* Rounded top corners only */
-    background: transparent;    /* Make the background subtle */
+  .shell-tab {
+    padding: 14px 16px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
     color: var(--muted);
     font-weight: 600;
     cursor: pointer;
-    transition: all .15s;
-    margin-bottom: -1px; /* Helps the active tab blend into the panel */
   }
-  .subtab.active{
-    color: var(--fg);
-    background: var(--surface-1); /* Match the panel background */
-    border-color: var(--line);
-    box-shadow: none; /* The border is enough emphasis */
+  .shell-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
   }
 
-  .app-grid > .right-panel > .card {
-    border-top: none;
-    border-top-left-radius: 0;
-  }
-
-  /* ------------------------------
-    4) Layout Scaffolding & Cards
-    ------------------------------ */
-  .app-grid{
-    display:grid;
-    grid-template-columns: 360px minmax(0, 1fr);
-    gap:16px;
-    padding:16px;
-    flex-grow:1;
-    overflow:hidden;
-  }
-  .left-panel, .right-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; overflow-y:auto; overflow-x:hidden; }
-  .left-panel{
-    background:var(--surface-2);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:12px;
-    box-shadow: var(--shadow);
-  }
-  .right-panel-content{ flex-grow:1; }
-
-  .card{
-    background:var(--surface-1);
-    border:1px solid var(--line);
-    border-radius:var(--radius-lg);
-    box-shadow: var(--shadow);
-  }
-  .card-header{
-    padding:10px 14px;
-    border-bottom:1px solid var(--line);
-    font-weight:600;
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-  }
-  .card-content{ padding:14px; }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-  }
-
-  /* ------------------------------
-    5) Editor Headings & Workbench
-    ------------------------------ */
-  .editor-section-title{
-    text-align:left;
-    font-size:1.25rem;
-    font-weight:600;
-    color:var(--brand-primary);
-    margin: 20px 0 12px 20px; /* indented left */
-    letter-spacing:.3px;
-  }
-  .editor-section-helper{
-    margin: 0 0 16px 20px;
-    font-size:.9rem;
-    color:var(--muted);
-    font-style:italic;
-  }
-  .workbench{
-    background: var(--surface-1);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    padding: 16px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  /* Target only the mode radio buttons */
-  .mode-row label {
-    display: flex;              /* make label a flexbox */
-    flex-direction: column;     /* stack input above text */
-    align-items: center;        /* center horizontally */
-    justify-content: center;    /* center vertically */
-    text-align: center;         /* center the text itself */
-    gap: 4px;                   /* space between input and text */
-  }
-
-  /* optional: make all labels the same width */
-  .mode-row label {
-    width: 100px;               /* adjust to your liking */
-  }
-
-
-  /* ------------------------------
-    6) Stats (dashboard strip)
-    ------------------------------ */
-  .stats-row{
-    display:flex;
-    gap:20px;
-    padding:10px 20px;
-    background: var(--surface-1);
-    border-bottom:1px solid var(--line);
-  }
-  .stats-row .stat{ font-weight:600; color: var(--brand-primary); }
-
-  .stats-wrap{
-    display:flex; gap:16px; padding:12px 16px;
-    border-bottom:1px solid var(--line);
-    background: var(--surface-3);
-  }
-  .stats-block, .client-stats{
-    background: var(--surface-1);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:12px 14px;
-    box-shadow: var(--shadow);
-  }
-  .stats-block{ flex:1 1 60%; }
-  .client-stats{ flex:1 1 40%; }
-  .stat-title{ font-weight:700; margin-bottom:6px; }
-  .stats-pills{ display:flex; flex-wrap:wrap; gap:8px; }
-  .client-stats ul{ list-style:none; margin:0; padding:0; display:grid; gap:6px; }
-  .client-stats li{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:8px 10px; border:1px solid var(--line); border-radius:10px;
-    background: var(--surface-1);
-  }
-  .client-name{ color: var(--fg); }
-  .client-count{
-    font-weight:700; padding:2px 8px; border-radius:999px;
-    border:1px solid var(--line); background: var(--surface-3);
-  }
-
-  /* ------------------------------
-    7) Form Controls & Buttons
-    ------------------------------ */
-  input, select, textarea{
-    width:100%; max-width:100%;
-    padding:10px 12px;
-    border:1px solid var(--line);
-    border-radius:10px;
-    background:var(--surface-1);
-    color:var(--fg);
-    outline:none;
-    transition: box-shadow .15s, border-color .15s, background .15s;
-  }
-  input:focus, select:focus, textarea:focus{
-    box-shadow:0 0 0 3px var(--ring);
-    border-color:transparent;
-  }
-  textarea{ min-height:70px; }
-  button{
-    font-size:14px;
-    padding:8px 12px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:var(--surface-1);
-    color:var(--fg);
-    cursor:pointer;
-    transition: filter .12s, background .12s, border-color .12s;
-    max-width:100%;
-  }
-  button:hover{ filter:brightness(0.98); }
-  button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
-  button.danger{ border-color:var(--danger); color:var(--danger); }
-  .actions button{ background:var(--cta); border-color:var(--cta); color:var(--cta-text); }
-  .actions button:hover{ filter:brightness(.95); }
-  body.gold-all button:not(.danger){
-    background:var(--cta) !important; border-color:var(--cta) !important; color:var(--cta-text) !important;
-  }
-  #generateXlsx{ background:var(--brand-secondary); border-color:var(--brand-secondary); color:#1e1e1e; }
-  #generateXlsx:hover{ filter:brightness(.95); }
-
-  :focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); border-radius: 8px; }
-
-  /* ------------------------------
-    8) Left Panel (question list)
-    ------------------------------ */
-  #question-list { min-width: 0; overflow-x: hidden; }
-  .left-panel { flex: 0 0 360px; min-width: 0; overflow-x: hidden; }
-  .left-panel > .stack > * { min-width: 0; }
-
-  .q-item{
-    padding:10px 12px; border:1px solid var(--line);
-    border-radius:10px; background:var(--surface-1);
-    cursor:grab; transition: border-color .12s, background .12s, box-shadow .12s;
-    max-width:100%;
-  }
-  .q-item + .q-item{ margin-top:8px; }
-  .q-item:hover{ border-color:var(--accent-weak); }
-  .q-item.active{
-    background:var(--surface-3);
-    border-color:var(--accent-weak);
-    box-shadow:0 0 0 1px var(--accent-weak) inset;
-  }
-  .q-item .text{ color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .q-item .summary{ font-size:12px; color:var(--muted); margin-top:4px; }
-  .tag{
-    background: rgba(167,181,219,.25);
-    color: var(--accent-weak);
-    padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600;
-  }
-
-  /* ------------------------------
-    9) Editor Tabs & Empty State
-    ------------------------------ */
-  .editor-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--line); padding:0 14px; background:var(--surface-1); border-top-left-radius:12px; border-top-right-radius:12px; }
-  .tab{ padding:8px 12px; border:1px solid transparent; border-bottom:0; border-radius:8px 8px 0 0; cursor:pointer; color:var(--muted); }
-  .tab.active{ background:var(--surface-1); border-color:var(--line); color:var(--fg); }
-  .tab-content{ display:none; }
-  .tab-content.active{ display:block; }
-
-  #editor-panel:empty::before{
-    content:"Select a question from the left to edit it, or add a new one.";
-    color:var(--muted);
-    background:var(--surface-1);
-    border:2px dashed var(--line);
-    border-radius:12px;
-    display:flex; align-items:center; justify-content:center;
-    height:100%; text-align:center; padding:20px;
-  }
-
-  /* ------------------------------
-    10) Simple Flow/Layout helpers
-    ------------------------------ */
-  .row{ display:grid; grid-template-columns: 140px minmax(0, 1fr); gap:10px; margin:10px 0; align-items:start; }
-  .stack{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .status-msg{ margin-left:auto; text-align:right; }
-  .ok{ color:#16a34a; font-size:12px; }
-  .error{
-    margin:16px; white-space:pre-wrap; color:#7f1d1d;
-    background:#fef2f2; border:1px solid #fecaca; padding:10px; border-radius:8px;
-  }
-
-  /* ------------------------------
-    11) Dashboard grid & pills
-    ------------------------------ */
-  .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
-  .project-card .meta{ color:var(--muted); font-size:12px; }
-  .pill{ padding:2px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; }
-
- /* ------------------------------
-   12) Preview scaffolding
-  ------------------------------ */
-  .pv-wrap { padding: 16px 20px 28px; }
-  .pv-header h2 { margin: 0; font-size: 20px; }
-  .pv-sub { color: #666; margin-top: 2px; }
-
-  .pv-sec { margin-top: 18px; }
-  .pv-sec > h3 { margin: 12px 0 8px; font-size: 16px; }
-  .pv-empty {
-    padding: 10px 12px; color: #777; background:#f7f7fb;
-    border:1px solid #eee; border-radius:8px;
-  }
-
-  .preset-wrap { position: relative; }
-
-  .pv-row{
-    display: grid; grid-template-columns: 90px 1fr; gap: 10px 14px;
-    padding: 10px 12px; border: 1px solid #e5e8f1; border-radius: 12px; margin: 8px 0; background: #fff;
-  }
-  .pv-qid{ font-weight: 600; color: #212161; align-self: start; }
-  .pv-body{ display:flex; flex-direction:column; gap:6px; }
-  .pv-title{ font-weight: 600; }
-  .pv-meta{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
-  .pv-chip{
-    display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px;
-    background:#E3EAF7; color:#335899; border:1px solid #A7B5DB;
-  }
-
-  /* Preview subtabs */
-  .pv-tabs{ display:flex; gap:6px; margin:12px 0; padding-left: 6px; }
-  .pv-tab{
-    padding:8px 12px; border:1px solid var(--line);
-    border-radius:999px; background:var(--surface-1);
-    color:var(--muted); font-weight:600; cursor:pointer;
-  }
-  .pv-tab.active{ color:var(--fg); box-shadow:0 0 0 2px var(--ring); }
-  .pv-panel{ display:none; }
-  .pv-panel.active{ display:block; }
-  .pv-table{ width:100%; border-collapse:collapse; margin-top:8px; }
-  .pv-table th, .pv-table td{ border:1px solid #e5e8f1; padding:6px 8px; text-align:left; }
-  .pv-row.banner{ border:1px dashed var(--line); }
-  body.sidebar-mode .pv-tabs { display: none !important; }
-
-  /* ------------------------------
-    13) Banner preview grid
-  ------------------------------ */
-  .pv-banner-wrap { 
-    overflow-x: auto; 
-    -webkit-overflow-scrolling: touch; 
-  }
-  /* Container grid */
-  .pv-banner-grid{
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(var(--pv-col-n, 1), minmax(140px, 1fr));
-    grid-auto-rows: auto;
-  }
-
-  .pv-banner-grid { --pv-col-min: 160px; --pv-col-add: 60px; } /* Reduced from 72px */
-
-  /* optional visual tweaks so the small tile still looks nice */
-  .pv-cell--add { padding: 8px 6px; }
-  .pv-cell--add .pv-plus { transform: scale(.9); }
-
-  /* Row wrappers (content rows only; no borders/backgrounds) */
-  .pv-banner-h1,
-  .pv-banner-h2,
-  .pv-banner-stats{
-    display: contents !important;
-    background: transparent !important;
-    border: 0 !important;
-    grid-column: auto !important;
-  }
-
-  /* Background blocks per H1 (sit behind cells) */
-  .pv-banner-block{
-    z-index: 0;
-    pointer-events: none;
-    background: var(--pv-surface-1, #fff);
-    border-top: 1px solid var(--pv-border, #d9dbe0);
-    border-bottom: 1px solid var(--pv-border, #d9dbe0);
-    border-radius: 8px;
-  }
-
-  /* Vertical divider between H1 blocks */
-  .pv-banner-divider{
-    grid-row: 1 / span 3;
-    border-left: 1px solid var(--pv-border-strong, #c8cad0);
-    opacity: .6;
-  }
-
-  /* Generic cell */
-  .pv-banner-cell{
-    position: relative;
-    display: flex; align-items: center; justify-content: flex-start;
-    padding: 10px 12px;
-    background: var(--pv-surface, #fff);
-    border: 1px solid var(--pv-border, #d9dbe0);
-    border-top: none;
-  }
-
-  /* Letters row */
-  .pv-banner-stats .pv-banner-cell{
-    background: var(--pv-stats-bg, #fafbfe);
-    font-size: 12px; color: #6b7280;
-    text-align: center; justify-content: center;
-    border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
-  }
-
-  /* H1 header cell */
-  .pv-banner-cell.pv-h1{
-    background: var(--pv-h1-bg, #f6f7fb);
-    border-top: 1px solid var(--pv-border, #d9dbe0);
-    border-bottom: 2px solid var(--pv-accent, #222);   /* accent underline */
-    font-weight: 600;
-    justify-content: space-between;
-    border-top-left-radius: 8px; border-top-right-radius: 8px;
-  }
-  /* thin rule for other H1 borders (keeps one accent underline style) */
-  .pv-banner-h1 .pv-banner-cell{ border-bottom: 1px solid var(--line) !important; }
-  .pv-h1-text{ padding-right: 8px; }
-  .pv-banner-h1 .pv-banner-cell,
-  .pv-banner-h2 .pv-banner-cell,
-  .pv-banner-stats .pv-banner-cell{ z-index: 1; }  /* ensure they sit above blocks */
-
-  /* H2 cells */
-  .pv-banner-cell.pv-h2{ min-height: 56px; }
-  .pv-h2-inner{
-    display: flex; align-items: center; gap: 6px; width: 100%;
-  }
-
-  /* 3-dot menu */
-  .pv-menu{
-    margin-left: auto;
-    background: transparent; border: none; cursor: pointer;
-    padding: 2px 6px; opacity: .6; border-radius: 6px;
-  }
-  .pv-menu:hover{ opacity:1; background: rgba(0,0,0,.04); }
-  @media (hover: none){ .pv-menu{ display: inline-flex; } } /* touch friendly */
-
-  /* Keep the H1 band continuous (no color change in the middle) */
-  .pv-banner-grid .pv-add-per-h1{
-    background: var(--pv-surface, #fff);
-    border-top: 1px solid var(--pv-border, #d9dbe0);
-    border-left-color: var(--pv-border, #d9dbe0);
-  }
-
-  /* Far-right spacer under the final H1 “+” (no borders, no bg) */
-  .pv-banner-grid .pv-add-final-spacer{
-    background: transparent;
-    border: 0;
-    min-height: 56px;        /* keep row height consistent */
-    pointer-events: none;    /* no accidental clicks */
-  }
-
-
-  /* (Optional) ensure the background bands sit under cells */
-  .pv-banner-grid .pv-banner-block{ z-index: 0; }
-  .pv-banner-grid .pv-banner-h1,
-  .pv-banner-grid .pv-banner-h2,
-  .pv-banner-grid .pv-banner-stats{ z-index: 1; }
-  
-  /* Inline delete (H1 or optional H2) */
-  .pv-del{
-    position: absolute; right: 6px; top: 8px;
-    padding: 2px 8px; border: 1px solid var(--line);
-    border-radius: 8px; background: var(--surface-1);
-    font-weight: 700; line-height: 1; color: var(--muted);
-    cursor: pointer; display: none; z-index: 4;
-  }
-  .pv-banner-h1 .pv-banner-cell:hover > .pv-del,
-  .pv-banner-h2 .pv-banner-cell:hover > .pv-del,
-  .pv-del:focus, .pv-del:focus-visible{
-    display: inline-flex; outline: none; box-shadow: 0 0 0 2px var(--ring);
-    border-radius: 6px;
-  }
-
-  /* Add-cell (pill button inside; no dashed cell borders) */
-  .pv-banner-cell.pv-add-cell{
-    background: var(--pv-surface, #fff);
-    border: 1px solid var(--pv-border, #d9dbe0);
-    border-top: none;         /* match regular H2 cells */
-    min-height: 56px;         /* same height as .pv-h2 */
-    justify-content: center;  /* keep the + pill centered */
-  }
-  .pv-add-btn{ border: none; background: transparent; cursor: pointer; }
-  .pv-add-pill{
-    border: 1px dashed var(--line);
-    background: var(--surface-1);
-    opacity: .95;
-  }
-  .pv-add-pill:hover{ opacity: 1; }
-
-
-  .pv-banner-cell.pv-h1.pv-add-cell{
-    background: var(--pv-h1-bg, #f6f7fb);
-    border-top: 1px solid var(--pv-border, #d9dbe0);
-    border-bottom: 2px solid var(--pv-accent, #222);
-  }
-
-  .pv-banner-cell.pv-add-per-h1 {
-    grid-row: span 2;      /* Span H2 and Stats rows */
-    align-items: center;   /* Vertically center the '+' */
-  }
-
-  /* Make the final H1 '+' look like a single column and match H1 styling */
-  .pv-add-h1-final{
-    background: var(--pv-h1-bg, #f6f7fb);
-    border-top: 1px solid var(--pv-border, #d9dbe0);
-    border-bottom: 2px solid var(--pv-accent, #222);
-    justify-content: center;
-    grid-row: span 3;      /* Span all 3 header rows */
-    height: 100%;            /* Fill the vertical space */
-    align-items: center;     /* Vertically center the '+' button */
-  }
-
-
-  /* Inline editor */
-  .pv-editable{ cursor: text; border-radius: 6px; padding: 2px 4px; }
-  .pv-editable:focus-within{ box-shadow: 0 0 0 2px var(--ring); outline: none; }
-  .pv-inline-input{
-    width: 100%; font: inherit; padding: 4px 6px;
-    border: 1px solid var(--pv-border, #d9dbe0); border-radius: 6px; background: #fff;
-  }
-
-  /* Condition dot */
-  .pv-cond-dot{
-    position: absolute; right: 8px; bottom: 8px;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--pv-accent, #222); opacity: 0;
-  }
-  .pv-banner-cell.has-cond .pv-cond-dot{ opacity: .9; }
-
-  /* Cell action menu (popover) */
-  .pv-cell-menu{
-    position: fixed; z-index: 1001; min-width: 220px;
-    background: var(--surface-1); border: 1px solid var(--line);
-    border-radius: 10px; box-shadow: var(--shadow); padding: 6px;
-  }
-  .pv-cell-menu .mitem{ display:block; width:100%; text-align:left; padding:8px 10px; border-radius:8px; }
-  .pv-cell-menu .mitem:hover{ background: var(--surface-3); }
-  .pv-cell-menu .subhead{ font-size:12px; color: var(--muted); padding:6px 10px 2px; }
-
-  /* Helpers & legacy */
-  .muted{ color: #6b7280; }
-  .pv-col-del, .pv-dim-del{ display: none !important; }
-
-  /* Toast */
-  .toast{
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border: 1px solid var(--line);
-    border-radius: 12px; background: var(--surface-1); box-shadow: var(--shadow);
-    max-width: min(520px, 92vw);
-  }
-  .toast button{ padding: 6px 10px; border-radius: 10px; }
-  #toastHost{ pointer-events: none; }
-  #toastHost .toast{ pointer-events: auto; }
-
-
-
-  /* ------------------------------
-    14) Modal (centered)
-    ------------------------------ */
-  .modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; }
-  .modal-panel{
-    width: min(720px, 92vw);
-    background: var(--surface-1);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    transform: translateY(-6px);
-    animation: modalIn .18s ease-out;
-  }
-  @keyframes modalIn{ from {opacity:0; transform: translateY(-16px);} to {opacity:1; transform: translateY(0);} }
-  .modal-header{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 20px;
-    background: var(--surface-2);
-    border-bottom: 1px solid var(--line);
-  }
-  .modal-body{
-    padding: 16px 20px; display: grid; gap: 12px;
-  }
-  .modal-footer{
-    display:flex; justify-content:flex-end; gap:10px;
-    padding: 12px 20px 16px;
-    background: var(--surface-2);
-    border-top: 1px solid var(--line);
-  }
-  .modal-backdrop{
-    background: rgba(0,0,0,.35);
-    backdrop-filter: blur(2px);
-  }
-
-  /* =======================================================
-   NEW: Sidebar Navigation Styles
-   ======================================================= */
-   #app-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 260px;
-    background: var(--surface-2);
-    border-right: 1px solid var(--line);
-    padding: 16px;
-    z-index: 100;
-    transform: translateX(-100%); /* Hidden by default */
-    transition: transform 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  body.sidebar-open #app-sidebar {
-    transform: translateX(0); /* Show sidebar */
-  }
-
-  /* Sidebar links - vertical layout */
-  #app-sidebar .nav-btn {
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
-    border-radius: var(--radius-md);
-    padding: 12px 16px;
-  }
-
-  /* Backdrop to dim/blur content */
-  .sidebar-backdrop {
+  /* --- Sidebar / Drawer --- */
+  .side-drawer {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(2px);
-    z-index: 99;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease-out;
-  }
-
-  body.sidebar-open .sidebar-backdrop {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Make sure header toggle button is visible */
-  #sidebar-toggle {
-      display: inline-flex;
-  }
-
-  /* ===== Slide-out Side Drawer ===== */
-  .side-drawer{
-    position: fixed;
-    left: 0; top: 64px;           /* adjust top to your header height */
-    height: calc(100vh - 64px);
-    z-index: 1000;
-    display: flex;
-    align-items: flex-start;
-    pointer-events: none;         /* let children control interaction */
-  }
-
-  /* Hamburger handle */
-  .sd-handle{
-    pointer-events: auto;
-    width: 44px; height: 44px;
-    margin: 8px 0 0 8px;
-    border: 1px solid #e1e4ea;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    display: grid; place-items: center;
-    cursor: pointer;
-  }
-  .sd-handle span{
-    display:block; width:18px; height:2px; background:#333; margin:3px 0; border-radius:2px;
-  }
-  .side-drawer.pinned .sd-handle{ border-color: var(--brand-primary, #212161); }
-
-  /* Slide-out panel */
-  .sd-panel{
-    pointer-events: auto;
-    width: 260px; max-width: 80vw;
-    margin-top: 8px; margin-left: 8px;
-    background: var(--panel-bg, #fff);
-    border: 1px solid #e1e4ea;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.12);
-    transform: translateX(-16px) translateX(-100%);  /* fully hidden */
-    transition: transform .22s ease-out;
-    padding: 10px;
-  }
-
-  /* Open on hover, or when pinned */
-  .side-drawer:hover .sd-panel,
-  .side-drawer.pinned .sd-panel{
-    transform: translateX(0);
-  }
-
-  /* Inside nav */
-
-  .sd-title {
-    margin: 8px 8px 4px;       /* more top margin above section titles */
-  }
-  .sd-link {
-    padding: 12px 14px;        /* was 10px 12px */
-    margin: 2px 0;             /* add a little vertical gap */
-    border-radius: 10px;
-  }
-  .sd-link:hover{ background: rgba(33,33,97,.06); }
-  .sd-link.pv-tab.active{
-    background: rgba(33,33,97,.10);
-    color: var(--brand-primary);
-    font-weight:600;
-  }
-
-  .sd-panel hr{ border:0; border-top:1px solid var(--line); margin:8px 0; }
-
-  /* Mobile: keep it tappable and not in the way */
-  @media (max-width: 900px){
-    .side-drawer{ top: 56px; height: calc(100vh - 56px); }
-    .sd-handle{ width:40px; height:40px; }
-    .sd-panel{ width: 80vw; }
-  }
-
-  /* Hide the little floating handle (we already have a header hamburger) */
-  .sd-handle{ display:none !important; }
-
-  /* Turn the slide-out into a dropdown panel under the header button */
-  .side-drawer{
-    position: fixed;
-    inset: 0;            /* we’ll position the panel via JS; backdrop lives here */
     pointer-events: none;
     z-index: 1000;
   }
-  .side-drawer .sd-panel{
+  .side-drawer .sd-panel {
     position: absolute;
-    transform: none !important;    /* disable slide transform */
+    transform: none !important;
     width: 280px;
     max-height: min(70vh, 560px);
     overflow: auto;
@@ -903,162 +437,732 @@
     border-radius: 14px;
     box-shadow: var(--shadow);
     pointer-events: auto;
-    display: none;                  /* hidden by default */
+    display: none;
     padding: 10px;
   }
-
-  /* Show when body has the open class */
-  body.sidebar-open .side-drawer .sd-panel{ display:block; }
-
-  /* Backdrop for clicks outside */
-  .sidebar-backdrop{ backdrop-filter: blur(2px); }
-
+  body.sidebar-open .side-drawer .sd-panel {
+    display: block;
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
+  }
+  body.sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .sd-title {
+    margin: 8px 8px 4px;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  .sd-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    margin: 2px 0;
+    border-radius: 10px;
+    width: 100%;
+    text-align: left;
+  }
+  .sd-link:hover {
+    background: rgba(33, 33, 97, .06);
+  }
+  .sd-link.active {
+    background: rgba(33, 33, 97, .10);
+    color: var(--brand-primary);
+    font-weight: 600;
+  }
   .sd-link .icon {
     margin-right: 8px;
     flex-shrink: 0;
   }
-
-  .select-row .select-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 4px;
-    min-width: 80px;  /* adjust as needed */
+  .sd-panel hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 8px 0;
+  }
+  @media (max-width: 900px) {
+    .side-drawer .sd-panel { width: 80vw; }
   }
 
-  .option-row .chk { display:inline-flex; align-items:center; gap:6px; }
+
+  /* ===================================================================
+    7. CORE COMPONENTS
+    - Cards, Modals, Pills, Menus, etc.
+    =================================================================== */
+
+  /* --- Cards --- */
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .card-content {
+    padding: 14px;
+  }
+
+  /* --- Modals --- */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+  }
+  .modal-panel {
+    width: min(720px, 92vw);
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    animation: modalIn .18s ease-out;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-header {
+    padding: 16px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .modal-header h3 { margin: 0; }
+  .modal-body {
+    padding: 16px 20px;
+    display: grid;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px 20px 16px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    backdrop-filter: blur(2px);
+    z-index: -1;
+  }
+
+  /* --- Pills & Tags --- */
+  .pill {
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .tag {
+    background: rgba(167, 181, 219, .25);
+    color: var(--accent-weak);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* --- Dropdown Menus --- */
+  .more-menu {
+    position: relative;
+  }
+  .more-menu-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    min-width: 200px;
+    padding: 8px;
+    z-index: 51;
+  }
+  .more-menu:hover .more-menu-content {
+    display: block;
+  }
+  .more-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.15s ease-out;
+  }
+  .more-menu-item:hover {
+    background: var(--surface-3);
+    color: var(--fg);
+  }
+  .more-menu-content hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--line);
+    margin: 8px 0;
+  }
+
+  /* --- Input Groups --- */
+  .input-group {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .input-group label {
+    padding: 8px 14px;
+    background-color: var(--surface-2);
+    color: var(--muted);
+    font-weight: 500;
+    border-right: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .input-group select {
+    border: none;
+    border-radius: 0;
+  }
+  .input-group:focus-within {
+    box-shadow: 0 0 0 3px var(--ring);
+    border-color: transparent;
+  }
+  .input-group:focus-within select {
+    box-shadow: none;
+  }
+
+  /* --- Toasts --- */
+  #toastHost {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    pointer-events: none;
+  }
+  #toastHost .toast {
+    pointer-events: auto;
+  }
+  .toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-1);
+    box-shadow: var(--shadow);
+    max-width: min(520px, 92vw);
+  }
+  .toast button {
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+
+
+  /* ===================================================================
+    8. PAGE-SPECIFIC STYLES
+    - Dashboard, Project Manager, Editor, Validator, etc.
+    =================================================================== */
+
+  /* --- Project Manager & Dashboard Cards --- */
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease-out;
+  }
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+  }
+  .project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--line);
+  }
+  .project-title-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .project-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .project-version {
+    font-size: 0.8rem;
+  }
+  .project-favorite-btn:hover {
+    background-color: var(--surface-3);
+  }
+  .project-card-content {
+    flex-grow: 1;
+    padding: var(--space-5) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .project-meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--muted);
+  }
+  .project-meta-item svg {
+    flex-shrink: 0;
+    stroke-width: 2px;
+    opacity: 0.8;
+  }
+  .project-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+  }
+  .project-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4) var(--space-6);
+    background-color: var(--surface-2);
+    border-top: 1px solid var(--line);
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+  }
+
+  /* Status dropdown styling to look like a pill */
+  .status-selector-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .status-selector-wrapper::after {
+    content: '▾';
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+    color: var(--muted);
+  }
+  .status-selector {
+    -webkit-appearance: none;
+    moz-appearance: none;
+    appearance: none;
+    background-color: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 32px 6px 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .status-selector:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring);
+    border-color: transparent;
+  }
+  .project-indicator, .project-selector-dropdown {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .project-indicator {
+    display: flex;
+    align-items: center;
+    padding: 4px 12px;
+    background-color: var(--surface-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .project-indicator:not(:empty) {
+    border-color: var(--brand-secondary);
+    color: var(--fg);
+  }
+
+  /* --- Workbench Container --- */
+  .workbench {
+    max-width: 1000px;
+    margin: 24px auto; /* 24px top/bottom, auto left/right for centering */
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* --- Editor --- */
+  #question-list .q-item {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-1);
+    cursor: grab;
+    transition: border-color .12s, background .12s, box-shadow .12s;
+    max-width: 100%;
+  }
+  #question-list .q-item + .q-item { margin-top: 8px; }
+  #question-list .q-item:hover { border-color: var(--accent-weak); }
+  #question-list .q-item.active {
+    background: var(--surface-3);
+    border-color: var(--accent-weak);
+    box-shadow: 0 0 0 1px var(--accent-weak) inset;
+  }
+  #question-list .q-item .text {
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #question-list .q-item .summary {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .editor-tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+    padding: 0 14px;
+    background: var(--surface-1);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+  .editor-tabs .tab {
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .editor-tabs .tab.active {
+    background: var(--surface-1);
+    border-color: var(--line);
+    color: var(--fg);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  #editor-panel:empty::before {
+    content: "Select a question from the left to edit it, or add a new one.";
+    color: var(--muted);
+    background: var(--surface-1);
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px;
+  }
+  .option-editor-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: nowrap;
+    margin-bottom: var(--space-2);
+  }
+  .option-editor-row input[placeholder="Label"] { flex: 1 1 auto; min-width: 0; }
+  .option-editor-row input[placeholder="Code"] { flex: 0 0 70px; }
+  .option-editor-row input { padding-top: 8px; padding-bottom: 8px; }
+
+  .advanced-options .stack {
+    background: var(--surface-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+  }
+
+  /* ===================================================================
+    9. LEGACY / FEATURE-SPECIFIC STYLES
+    - Preview and Banner Builder styles are complex and scoped here.
+    - They use some hardcoded colors and may not be fully theme-aware.
+    =================================================================== */
+
+  /* --- Preview Scaffolding (General) --- */
+  .pv-wrap { padding: 16px 20px 28px; }
+  .pv-header h2 { margin: 0; font-size: 20px; }
+  .pv-sub { color: #666; margin-top: 2px; }
+  .pv-sec { margin-top: 18px; }
+  .pv-sec > h3 { margin: 12px 0 8px; font-size: 16px; }
+  .pv-empty {
+    padding: 10px 12px;
+    color: #777;
+    background: #f7f7fb;
+    border: 1px solid #eee;
+    border-radius: 8px;
+  }
+  .pv-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px 14px;
+    padding: 10px 12px;
+    border: 1px solid #e5e8f1;
+    border-radius: 12px;
+    margin: 8px 0;
+    background: #fff;
+  }
+  .pv-qid { font-weight: 600; color: #212161; align-self: start; }
+  .pv-body { display: flex; flex-direction: column; gap: 6px; }
+  .pv-title { font-weight: 600; }
+  .pv-meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .pv-chip {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #E3EAF7;
+    color: #335899;
+    border: 1px solid #A7B5DB;
+  }
+  .pv-tabs { display: flex; gap: 6px; margin: 12px 0; padding-left: 6px; }
+  .pv-tab {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .pv-tab.active { color: var(--fg); box-shadow: 0 0 0 2px var(--ring); }
+  .pv-panel { display: none; }
+  .pv-panel.active { display: block; }
+  .pv-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .pv-table th, .pv-table td { border: 1px solid #e5e8f1; padding: 6px 8px; text-align: left; }
+
+  /* --- Banner Builder Grid --- */
+  .pv-banner-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pv-banner-grid {
+    --pv-col-min: 160px;
+    --pv-col-add: 60px;
+    --pv-surface-1: #fff;
+    --pv-border: #d9dbe0;
+    --pv-h1-bg: #f6f7fb;
+    --pv-stats-bg: #fafbfe;
+    --pv-accent: #222;
+    position: relative;
+    display: grid;
+    grid-auto-rows: auto;
+  }
+  .pv-banner-h1, .pv-banner-h2, .pv-banner-stats {
+    display: contents !important;
+  }
+  .pv-banner-block {
+    z-index: 0;
+    pointer-events: none;
+    background: var(--pv-surface-1);
+    border-top: 1px solid var(--pv-border);
+    border-bottom: 1px solid var(--pv-border);
+    border-radius: 8px;
+  }
+  .pv-banner-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    background: var(--pv-surface-1);
+    border: 1px solid var(--pv-border);
+    border-top: none;
+    z-index: 1;
+  }
+  .pv-banner-stats .pv-banner-cell {
+    background: var(--pv-stats-bg);
+    font-size: 12px;
+    color: #6b7280;
+    justify-content: center;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  .pv-banner-cell.pv-h1 {
+    background: var(--pv-h1-bg);
+    border-top: 1px solid var(--pv-border);
+    border-bottom: 2px solid var(--pv-accent);
+    font-weight: 600;
+    justify-content: space-between;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  .pv-banner-h1 .pv-banner-cell { border-bottom: 1px solid var(--line) !important; }
+  .pv-h1-text { padding-right: 8px; }
+  .pv-banner-cell.pv-h2 { min-height: 56px; }
+  .pv-h2-inner { display: flex; align-items: center; gap: 6px; width: 100%; }
+  .pv-menu {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    opacity: .6;
+    border-radius: 6px;
+  }
+  .pv-menu:hover { opacity: 1; background: rgba(0,0,0,.04); }
+  .pv-add-cell {
+    justify-content: center;
+    min-height: 56px;
+  }
+  .pv-add-cell.pv-add-per-h1 { grid-row: span 2; }
+  .pv-add-btn { border: none; background: transparent; cursor: pointer; }
+  .pv-add-pill {
+    border: 1px dashed var(--line);
+    background: var(--surface-1);
+    opacity: .95;
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+  .pv-add-pill:hover { opacity: 1; }
+  .pv-editable { cursor: text; border-radius: 6px; padding: 2px 4px; }
+  .pv-editable:focus-within { box-shadow: 0 0 0 2px var(--ring); outline: none; }
+  .pv-inline-input {
+    width: 100%;
+    font: inherit;
+    padding: 4px 6px;
+    border: 1px solid var(--pv-border);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .pv-cond-dot {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--pv-accent);
+    opacity: 0;
+  }
+  .pv-banner-cell.has-cond .pv-cond-dot { opacity: .9; }
+  .pv-cell-menu {
+    position: fixed;
+    z-index: 1001;
+    min-width: 220px;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 6px;
+  }
+  .pv-cell-menu .mitem {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+  .pv-cell-menu .mitem:hover { background: var(--surface-3); }
+  .pv-cell-menu .subhead {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px 10px 2px;
+  }
+
+
+  /* ===================================================================
+    10. ACCESSIBILITY & OVERRIDES
+    =================================================================== */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring);
+    border-radius: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
 
 
 </style>
 <body>
-  <header>
+<header>
     <div class="project-inputs">
       <button id="sidebar-toggle" title="Toggle Sidebar" class="icon-btn">☰</button>
-      <input id="projName" placeholder="Project Name" title="Project Name" />
-      <input id="projClient" placeholder="Client" title="Client" />
-      <input id="projVersion" placeholder="Version" title="Version" />
     </div>
-
-    <div class="logo">
-      <img src="icons/logo.png" alt="Your Company Name" height="48" />
-    </div>
-
+    
+    <a href="#/dashboard" id="logo-link" class="logo" title="Go to Dashboard">
+      <img src="icons/logo.png" alt="Your Company Name" height="48" style="display: block;" />
+    </a>
+    
     <div class="actions">
-      <label class="muted" for="themeSwitch">Theme</label>
-      <select id="themeSwitch" title="Theme">
-        <option value="cue-light">Cue Light</option>
-        <option value="cue-dark">Cue Dark</option>
-        <option value="cue-gold">Cue Gold</option>
-      </select>
-      <button id="importJson" class="cta">📥 Import</button>
-      <button id="downloadJson" class="cta">💾 Export</button>
-      <button id="generateDocx" class="cta">📝 QRE</button>
-      <button id="generateXlsx" class="cta">⚙️ Tab Plan</button>
+      <div id="project-name-indicator" class="project-indicator"></div>
+
       <div id="status" class="status-msg"></div>
+
+      <div class="more-menu">
+          <button id="settingsBtn" title="Settings" class="icon-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </button>
+          <div class="more-menu-content">
+            <div class="more-menu-item theme-switcher-item">
+                <label for="themeSwitch">Theme</label>
+                <select id="themeSwitch" title="Theme">
+                    <option value="cue-light">Cue Light</option>
+                    <option value="cue-dark">Cue Dark</option>
+                    <option value="cue-gold">Cue Gold</option>
+                </select>
+            </div>
+            <hr style="margin: 4px 0; border-color: var(--line);">
+            <button class="more-menu-item" onclick="goto('#/project/rules')">Project Rules</button>
+            <button class="more-menu-item" onclick="goto('#/project/library')">Question Library</button>
+            <button class="more-menu-item" onclick="renderPreview()">Preview</button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
   <!-- Slide-out navigation (hamburger) -->
   <div id="sideDrawer" class="side-drawer">
-    <button id="sdHandle" class="sd-handle" title="Open menu" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
     <div class="sd-panel" role="menu" aria-label="Main navigation">
       <div class="sd-title">Navigate</div>
-
+  
       <button class="sd-link pv-tab" data-route="#/dashboard">
-        <!-- Home icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"
-            class="icon">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Dashboard
       </button>
-
-      <button class="sd-link pv-tab" data-route="#/editor">
-        <!-- Edit icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"
-            class="icon">
-          <path d="M12 20h9"/>
-          <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/>
-        </svg>
-        Editor
+  
+      <button class="sd-link pv-tab" data-route="#/projects">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20"/><path d="M20 22V2a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 2.5v19z"/></svg>
+        Projects
       </button>
-
-      <button class="sd-link pv-tab" data-route="#/library">
-        <!-- Book icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"
-            class="icon">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20"/>
-          <path d="M20 22V2a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 2.5v19z"/>
-        </svg>
-        Library
-      </button>
-
-      <button class="sd-link pv-tab" data-route="#/rules">
-        <!-- List icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"
-            class="icon">
-          <line x1="8" y1="6" x2="21" y2="6"/>
-          <line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3" y2="6"/>
-          <line x1="3" y1="12" x2="3" y2="12"/>
-          <line x1="3" y1="18" x2="3" y2="18"/>
-        </svg>
-        Rules
-      </button>
-
-      <button class="sd-link pv-tab" data-route="#/validator">
-        <!-- Check-square icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"
-            class="icon">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-        Validator
-      </button>
-
-      <button class="sd-link pv-tab" data-route="#/versions">
-        <!-- Archive icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"
-            class="icon">
-          <rect x="3" y="4" width="18" height="4" rx="1"/>
-          <path d="M21 8v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/>
-          <line x1="12" y1="12" x2="12" y2="17"/>
-        </svg>
-        Versions
-      </button>
-
-
-      <hr />
-      <div class="sd-edv-head">
-        <div class="sd-title">Editor Views</div>
-        <select id="sdProjectSel" title="Active project">
-          <!-- options injected by JS -->
-        </select>
-      </div>
-
-      <button class="sd-link" data-goto="#/editor/pre">Pre-Field</button>
-      <button class="sd-link" data-goto="#/editor/field">Fielding</button>
-      <button class="sd-link" data-goto="#/editor/report">Reporting</button>
-      <button class="sd-link" data-goto="#/editor/post">Post-Survey</button>
     </div>
   </div>
 
@@ -1083,6 +1187,7 @@
       <button class="icon-btn" onclick="closeCreateProjectModal()" aria-label="Close">✕</button>
     </div>
 
+      
     <div class="modal-body">
       <label class="field">
         <span>Project Name</span>
@@ -1094,14 +1199,59 @@
         <input id="cp-client" type="text" placeholder="e.g., Kenvue / JJIV" />
       </label>
 
+      <div class="stack" style="gap: 12px; grid-template-columns: 1fr 1fr; display: grid;">
+        <label class="field">
+          <span>Status</span>
+          <select id="cp-status">
+            <option value="Draft" selected>Draft</option>
+            <option value="Pre-Field">Pre-Field</option>
+            <option value="Fielding">Fielding</option>
+            <option value="Reporting">Reporting</option>
+            <option value="Waiting for Approval">Waiting for Approval</option>
+            <option value="Approved">Approved</option>
+            <option value="Active">Active</option>
+            <option value="Closed">Closed</option>
+            <option value="Archived">Archived</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Project Type</span>
+          <select id="cp-project-type">
+            <option value="">Select a type...</option>
+            <option value="Brand Tracker">Brand Tracker</option>
+            <option value="Ad Hoc">Ad Hoc</option>
+            <option value="Concept Test">Concept Test</option>
+            <option value="Claims Test">Claims Test</option>
+            <option value="UX Research">UX Research</option>
+            <option value="__custom__">-- Add Custom Type --</option>
+          </select>
+          <input type="text" id="cp-project-type-custom" class="is-hidden" placeholder="Enter custom type" style="margin-top: 8px;" />
+        </label>
+      </div>
+      
+      <div class="field">
+        <span>Roles</span>
+        <div id="cp-roles-container" style="display: grid; gap: 8px; margin-top: 4px;">
+          </div>
+        <button id="add-role-btn" type="button" style="margin-top: 8px;">+ Add Role</button>
+      </div>
+    
+      <div class="field">
+        <span>Important Dates</span>
+        <div id="cp-dates-container" style="display: grid; gap: 12px; margin-top: 4px;">
+          </div>
+        <button id="add-date-btn" type="button" style="margin-top: 8px;">+ Add Date</button>
+      </div>
+    
       <label class="field">
-        <span>Important Dates (free text)</span>
-        <input id="cp-dates" type="text" placeholder="e.g., Field: Sep 12–16; Report: Sep 20" />
+        <span>Tags</span>
+        <input id="cp-tags" type="text" placeholder="e.g., pharma, skincare, Q3-2025" />
+        <small class="muted">Separate tags with commas.</small>
       </label>
-
+    
       <label class="field">
         <span>Notes</span>
-        <textarea id="cp-notes" rows="4" placeholder="Any context, constraints, deliverables…"></textarea>
+        <textarea id="cp-notes" rows="3" placeholder="Any context, constraints, deliverables…"></textarea>
       </label>
     </div>
 
@@ -1285,6 +1435,7 @@ const AUTOSAVE_KEY = "qgen_autosave_v3";
 const PROJECTS_KEY = "qgen_projects_v1"; // dashboard store
 const LIB_KEY = "qgen_library_v1";      // question library
 const SNAP_KEY = "qgen_snapshots_v1";   // versions per project (by id)
+const PEOPLE_KEY = "qgen_people_v1"; // Key for storing our people list
 
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
@@ -1347,7 +1498,7 @@ function saveCustomPreset(points, name, labels, description=""){
 
 
 const state = {
-  project: { id: "proj-" + Math.random().toString(16).slice(2,10), name:"", client:"", version:"0.1.0", created_at:new Date().toISOString(), updated_at:new Date().toISOString(), notes:"" },
+  project: { id: "proj-" + Math.random().toString(16).slice(2,10), name:"", client:"", version:"0.1.0", created_at:new Date().toISOString(), updated_at:new Date().toISOString(), notes:"", status: "Draft", project_type: null, roles: [], important_dates: [] },
   globals: {
     default_base_verbiage: "Total (qualified respondents)",
     default_base_definition: "",
@@ -1360,14 +1511,17 @@ const state = {
   },
   questions: []
 };
-const ui_state = { active_question_index: null, active_tab: 'main', route: location.hash || '#/dashboard', active_prefield_tab: 'screener' };
-ui_state.base_builders = ui_state.base_builders || {};
+const ui_state = { active_project_id: null, active_question_index: null, active_tab: 'main', route: location.hash || '#/dashboard', active_prefield_tab: 'screener' };ui_state.base_builders = ui_state.base_builders || {};
 state.globals.banners = state.globals.banners || [{
   id: "BNR_CORE",
   label: "Core Demo & Cohorts",
   mode: "concat",
   dimensions: []
 }]; 
+
+
+
+
 
 /* ===== STEP 1: Option/Question defaults + migration ===== */
 const OPTION_DEFAULTS = {
@@ -1443,8 +1597,9 @@ function mount(viewEl, html){
 }
 
 function highlightNav(){
-  const r = location.hash || '#/dashboard';
-  document.querySelectorAll('.nav-btn').forEach(btn => {
+  const r = normalizeHash(location.hash);
+  // Top-level sidebar nav
+  document.querySelectorAll('#sideDrawer .sd-link[data-route]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.route === r);
   });
 }
@@ -1600,6 +1755,14 @@ function syncNetsWithQuestion(q){
 // Handy global: sync every question at once (use before painting UI or exporting)
 function syncAllNets(){
   (state.questions||[]).forEach(syncNetsWithQuestion);
+}
+
+function closeProject() {
+  ui_state.active_project_id = null;
+  // Clear project-specific state if needed
+  state.project = {};
+  state.questions = [];
+  location.hash = '#/projects';
 }
 
 // (Optional) Safe constructors exposed for later UI
@@ -2936,8 +3099,23 @@ function getProjects() {
 function saveProjects(list) {
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(list));
 }
+function getPeople() {
+  try {
+    // Reads the list, parses it, and sorts it alphabetically
+    return JSON.parse(localStorage.getItem(PEOPLE_KEY) || '[]').sort();
+  } catch {
+    return [];
+  }
+}
+function savePeople(peopleList) {
+  // Use a Set to automatically remove any duplicates, then convert back to an array
+  const uniquePeople = Array.from(new Set(peopleList));
+  localStorage.setItem(PEOPLE_KEY, JSON.stringify(uniquePeople));
+}
+
 
 /** Ensure the current in-memory project is present in the Projects list + saved */
+// Find this function in your script
 function touchCurrentIntoProjects() {
   const list = getProjects();
   const idx  = list.findIndex(p => p.id === state.project.id);
@@ -2949,7 +3127,11 @@ function touchCurrentIntoProjects() {
     version: state.project.version || '0.1.0',
     updated_at: new Date().toISOString(),
     favorite: !!(list[idx]?.favorite),
-    status: list[idx]?.status || 'Draft'
+    status: state.project.status || 'Draft',
+    project_type: state.project.project_type || null, 
+    roles: state.project.roles || [],
+    important_dates: state.project.important_dates || [], // Use an array [] as the fallback
+    tags: state.project.tags || []
   };
 
   if (idx >= 0) list[idx] = entry;
@@ -2962,142 +3144,304 @@ function touchCurrentIntoProjects() {
   );
 }
 
-/* ----- Core render ----- */
-function renderDashboard(root){
-  const list = getProjects(); // always read fresh
+/* =======================================================
+   NEW DASHBOARD & PROJECT MANAGER FUNCTIONS
+   ======================================================= */
 
-  // --- status counts ---
-  const total    = list.length;
-  const draft    = list.filter(p => p.status === 'Draft').length;
-  const active   = list.filter(p => p.status === 'Active').length;
-  const archived = list.filter(p => p.status === 'Archived').length;
+/**
+ * Renders a simple, "at-a-glance" dashboard.
+ * This will be your new landing page.
+ */
+function renderSimpleDashboard(root) {
+  const allProjects = getProjects();
+  const favoritedProjects = allProjects.filter(p => p.favorite)
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));  // Sort by most recent updates
 
-  // --- client counts (normalized) ---
-  const clientCounts = {};
-  for (const p of list) {
-    const key = (p.client || '').trim() || 'Unspecified';
-    clientCounts[key] = (clientCounts[key] || 0) + 1;
-  }
-  // stable-ish order: alphabetical, with “Unspecified” last
-  const byClient = Object.entries(clientCounts)
-    .sort((a, b) => (a[0] === 'Unspecified') - (b[0] === 'Unspecified') || a[0].localeCompare(b[0]));
+  const stats = {
+    totalProjects: allProjects.length,
+    activeProjects: allProjects.filter(p => p.status === 'Active').length,
+    archivedProjects: allProjects.filter(p => p.status === 'Archived').length,
+    favoritedProjects: favoritedProjects.length,
+  };
 
   root.innerHTML = `
-    <section class="app-grid" style="grid-template-columns: 1fr;">
-      <div class="card">
-        <div class="card-header">
-          <div class="stack">
-            <strong>Projects</strong>
-            <input id="dashSearch" placeholder="Search by name/client..." style="width:240px"/>
-            <select id="dashFilter">
-              <option value="">All</option><option>Draft</option><option>Active</option><option>Archived</option>
-            </select>
-          </div>
-          <div class="stack">
-            <button id="dashNew" class="primary">+ New Project</button>
-            <button id="dashOpenCurrent">Open Current</button>
-          </div>
-        </div>
+    <div class="workbench" style="margin-top: 24px; max-width: 1000px;">
+      <h2>Dashboard</h2>
+      <p class="muted">Welcome back! Here are your quick actions and your favorited projects.</p>
 
-        <div class="stats-wrap">
-          <div class="stats-block">
-            <div class="stat-title">Overview</div>
-            <div class="stats-pills">
-              <span class="pill strong">Total: ${total}</span>
-              <span class="pill">Draft: ${draft}</span>
-              <span class="pill">Active: ${active}</span>
-              <span class="pill">Archived: ${archived}</span>
+      <hr style="margin: 24px 0;" />
+
+      <h3>Quick Actions</h3>
+      <div class="stack" style="gap: 12px;">
+        <button class="btn primary" style="padding: 12px 18px;" onclick="openCreateProjectModal()">+ New Project</button>
+        <button class="btn" style="padding: 12px 18px;" onclick="goto('#/projects')">📂 Go to Project Manager</button>
+      </div>
+
+      <hr style="margin: 24px 0;" />
+
+      <h3>Favorited Projects</h3>
+      ${favoritedProjects.length > 0 ? `
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+          ${favoritedProjects.map(p => `
+            <div class="card project-card" style="transition: transform 0.3s; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;">
+              <div class="card-content" style="padding: 16px;">
+                <div class="stack" style="justify-content:space-between; align-items:flex-start;">
+                  <strong>${escapeHTML(p.name)}</strong>
+                  <button class="pill" data-fav="${p.id}" style="background-color: var(--brand-primary); color: white;">${p.favorite ? '★ Unfavorite' : '☆ Favorite'}</button>
+                </div>
+                <div class="meta">${escapeHTML(p.client || '–')} • Last updated: ${new Date(p.updated_at).toLocaleDateString()}</div>
+                <div class="status" style="font-size: 14px; color: ${getStatusColor(p.status)};">${escapeHTML(p.status || '–')}</div>
+                <div class="stack" style="margin-top:10px;">
+                  <button data-open="${p.id}" class="primary" style="padding: 8px 16px; border-radius: 8px;">Open</button>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div class="client-stats">
-            <div class="stat-title">Client Projects Totals</div>
-            <ul>
-              ${byClient.length
-                ? byClient.map(([name, count]) => `
-                    <li>
-                      <span class="client-name">${escapeHTML(name)}</span>
-                      <span class="client-count">${count}</span>
-                    </li>
-                  `).join('')
-                : `<li><span class="muted">No projects yet.</span></li>`
-              }
-            </ul>
-          </div>
+          `).join('')}
         </div>
+      ` : `
+        <div class="pv-empty">You don't have any favorited projects yet. Mark some projects as favorites!</div>
+      `}
 
-        <div class="card-content">
-          <div class="grid" id="projGrid"></div>
+      <hr style="margin: 24px 0;" />
+
+      <h3>Dashboard Stats</h3>
+      <div class="stats-wrap" style="gap: 16px;">
+        <div class="stats-block">
+          <div class="stat-title">Total Projects</div>
+          <div class="stat">${stats.totalProjects}</div>
+        </div>
+        <div class="stats-block">
+          <div class="stat-title">Active Projects</div>
+          <div class="stat">${stats.activeProjects}</div>
+        </div>
+        <div class="stats-block">
+          <div class="stat-title">Archived Projects</div>
+          <div class="stat">${stats.archivedProjects}</div>
+        </div>
+        <div class="stats-block">
+          <div class="stat-title">Favorited Projects</div>
+          <div class="stat">${stats.favoritedProjects}</div>
         </div>
       </div>
-    </section>`;
 
-  const grid = $('#projGrid');
+      <hr style="margin: 24px 0;" />
 
-  const draw = (rows)=>{
-    grid.innerHTML = rows.map(p=>`
-      <div class="card project-card">
-        <div class="card-content">
-          <div class="stack" style="justify-content:space-between;">
-            <div><strong>${escapeHTML(p.name)}</strong></div>
-            <button class="pill" data-fav="${p.id}">⭐ ${p.favorite? 'Fav' : 'Star'}</button>
+      <h3>Notifications</h3>
+      <div class="notification">
+        <p>No upcoming deadlines! Keep it up.</p>
+      </div>
+    </div>
+  `;
+
+  // Wire up the "Open" buttons and Favorite button toggle
+  root.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openProjectById(b.dataset.open));
+  root.querySelectorAll('[data-fav]').forEach(b => b.onclick = () => toggleFavorite(b.dataset.fav));
+
+  // Add a hover effect to project cards for better interactivity
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.onmouseover = () => card.style.transform = 'scale(1.05)';
+    card.onmouseout = () => card.style.transform = 'scale(1)';
+  });
+}
+
+// Helper function to get status color dynamically
+function getStatusColor(status) {
+  switch(status) {
+    case 'Active': return 'green';
+    case 'Draft': return 'gray';
+    case 'Archived': return 'red';
+    case 'Waiting for Approval': return 'orange';
+    default: return 'black';
+  }
+}
+
+
+/**
+ * Renders the full-featured project management page with a redesigned UI.
+ */
+ function renderProjectsManager(root) {
+  if (ui_state.projects_view_mode === undefined) {
+    ui_state.projects_view_mode = 'grid'; // Default to grid view
+  }
+
+  const list = getProjects();
+  const total = list.length;
+  // Note: The filter logic below assumes you want counts of specific statuses.
+  // We can simplify this if you just want to show the filter options.
+  const draft = list.filter(p => p.status === 'Draft').length;
+  const active = list.filter(p => p.status === 'Active').length;
+  const archived = list.filter(p => p.status === 'Archived').length;
+
+  root.innerHTML = `
+  <section class="app-grid" style="grid-template-columns: 1fr;">
+    <div class="card">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <h2 style="margin: 0;">Project Manager</h2>
+        <div class="stack" style="gap: 12px;">
+          <input id="dashSearch" placeholder="Search by name/client..." style="width:240px"/>
+          <select id="dashFilter">
+            <option value="">All Statuses</option>
+            <option>Draft</option>
+            <option>Pre-Field</option>
+            <option>Fielding</option>
+            <option>Reporting</option>
+            <option>Active</option>
+            <option>Closed</option>
+            <option>Archived</option>
+          </select>
+          <div class="btn-group">
+              <button id="view-mode-grid" class="btn ${ui_state.projects_view_mode === 'grid' ? 'primary' : ''}">Grid</button>
+              <button id="view-mode-list" class="btn ${ui_state.projects_view_mode === 'list' ? 'primary' : ''}">List</button>
           </div>
-          <div class="meta">${escapeHTML(p.client||'–')} • v${escapeHTML(p.version||'')} • ${new Date(p.updated_at).toLocaleString()}</div>
-          <div class="stack" style="margin-top:10px; flex-wrap:wrap;">
-            <button data-open="${p.id}">Open</button>
-            <button data-dup="${p.id}">Duplicate</button>
-            <button data-exp="${p.id}">Export JSON</button>
-            <button data-genq="${p.id}">📝 QRE</button>
-            <button data-genx="${p.id}">⚙️ Tab</button>
-            <button data-del="${p.id}" class="danger">🗑️ Delete</button>
-            <select data-status="${p.id}">
-              <option ${p.status==='Draft'?'selected':''}>Draft</option>
-              <option ${p.status==='Active'?'selected':''}>Active</option>
-              <option ${p.status==='Archived'?'selected':''}>Archived</option>
-            </select>
+          <button class="primary" onclick="openCreateProjectModal()">+ New Project</button>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <div id="projContainer"></div>
+      </div>
+    </div>
+  </section>`;
+
+  const container = root.querySelector('#projContainer');
+
+  const draw = (rows) => {
+    if (rows.length === 0) {
+      container.innerHTML = `<div class="pv-empty">No projects match your search criteria.</div>`;
+      return;
+    }
+    
+    // List view remains largely the same for data density
+    if (ui_state.projects_view_mode === 'list') {
+      container.innerHTML = `
+        <table class="pv-table" style="width: 100%;">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Client</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(p => `
+              <tr>
+                <td><strong>${escapeHTML(p.name)}</strong><br><small class="muted">v${escapeHTML(p.version || '0.1.0')}</small></td>
+                <td>${escapeHTML(p.client || '–')}</td>
+                <td><span class="pill">${escapeHTML(p.status)}</span></td>
+                <td>${new Date(p.updated_at).toLocaleDateString()}</td>
+                <td>
+                  <div class="stack" style="gap: 6px;">
+                    <button data-open="${p.id}" class="primary">Open</button>
+                    <button data-edit="${p.id}" class="btn">Edit</button>
+                    <button data-del="${p.id}" class="danger">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      // New Grid View
+      container.className = 'grid';
+      container.innerHTML = rows.map(p => {
+        // Find start and end dates from the important_dates array
+        const startDate = (p.important_dates || []).find(d => d.what === 'Start Date')?.when || null;
+        const endDate = (p.important_dates || []).find(d => d.what === 'Due')?.when || null;
+
+        return `
+        <div class="card project-card">
+          <div class="card-header project-card-header">
+            <div class="project-title-group">
+              <strong class="project-name">${escapeHTML(p.name)}</strong>
+              <span class="project-version muted">v${escapeHTML(p.version || '0.1.0')}</span>
+            </div>
+            <button class="icon-btn project-favorite-btn" data-fav="${p.id}" title="${p.favorite ? 'Unfavorite' : 'Favorite'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="${p.favorite ? 'var(--brand-secondary)' : 'none'}" stroke="${p.favorite ? 'var(--brand-secondary)' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </button>
+          </div>
+          
+          <div class="card-content project-card-content">
+              <div class="project-meta-item">
+                <span>${escapeHTML(p.client || 'No Client')}</span>
+              </div>
+
+              ${p.project_type ? `
+              <div class="project-meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                <span>${escapeHTML(p.project_type)}</span>
+              </div>
+              ` : ''}
+
+              <div class="project-meta-item">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>${startDate ? new Date(startDate).toLocaleDateString() : '...'} to ${endDate ? new Date(endDate).toLocaleDateString() : '...'}</span>
+              </div>
+              ${(p.tags && p.tags.length > 0) ? `
+                <div class="project-tags-container">
+                  ${p.tags.map(tag => `<span class="pill">${escapeHTML(tag)}</span>`).join('')}
+                </div>
+              ` : ''}
+          </div>
+
+          <div class="card-footer project-card-footer">
+            <div class="stack">
+              <button data-open="${p.id}" class="primary">Open</button>
+              <button data-edit="${p.id}" class="btn">Edit</button>
+              <button data-del="${p.id}" class="danger">Delete</button>
+            </div>
+            <div class="status-selector-wrapper">
+              <select data-status-id="${p.id}" class="status-selector">
+                <option ${p.status === 'Draft' ? 'selected' : ''}>Draft</option>
+                <option ${p.status === 'Pre-Field' ? 'selected' : ''}>Pre-Field</option>
+                <option ${p.status === 'Fielding' ? 'selected' : ''}>Fielding</option>
+                <option ${p.status === 'Reporting' ? 'selected' : ''}>Reporting</option>
+                <option ${p.status === 'Active' ? 'selected' : ''}>Active</option>
+                <option ${p.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                <option ${p.status === 'Archived' ? 'selected' : ''}>Archived</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>`).join('');
-
-    $$('[data-open]').forEach(b=> b.onclick = ()=> openProjectById(b.dataset.open));
-    $$('[data-dup]').forEach(b=> b.onclick = ()=> duplicateProjectById(b.dataset.dup));
-    $$('[data-exp]').forEach(b=> b.onclick = ()=> exportProjectById(b.dataset.exp));
-    $$('[data-genq]').forEach(b=> b.onclick = ()=> openAndGen(b.dataset.genq, 'qre'));
-    $$('[data-genx]').forEach(b=> b.onclick = ()=> openAndGen(b.dataset.genx, 'tab'));
-    $$('[data-fav]').forEach(b=> b.onclick = ()=> toggleFav(b.dataset.fav));
-    $$('[data-status]').forEach(sel=> sel.onchange = ()=> setStatusFor(sel.dataset.status, sel.value));
-
-    // delete → redraw everything (cards + stats + client list)
-    $$('[data-del]').forEach(b => b.onclick = () => {
-      const id = b.dataset.del;
-      const projName = getProjects().find(p => p.id === id)?.name || 'this project';
-      if (!confirm(`Are you sure you want to permanently delete "${projName}"? This cannot be undone.`)) return;
-
-      localStorage.removeItem(`proj:${id}`);
-      const updated = getProjects().filter(p => p.id !== id);
-      saveProjects(updated);
-      // re-render the entire dashboard so stats & client list refresh
-      renderDashboard(root);
-    });
+      `}).join('');
+    }
+    
+    wireProjectActions(root);
   };
 
-  // initial draw of cards
-  draw(list);
-
-  // controls
-  $('#dashNew').onclick = openCreateProjectModal;
-  $('#dashOpenCurrent').onclick = ()=>{ location.hash = '#/editor'; };
-
-  $('#dashSearch').oninput = (e)=>{
-    const q = e.target.value.toLowerCase();
-    const f = $('#dashFilter').value;
-    const rows = list.filter(p =>
-      (!f || p.status === f) &&
-      (p.name.toLowerCase().includes(q) || (p.client||'').toLowerCase().includes(q))
+  const filterAndDraw = () => {
+    const query = root.querySelector('#dashSearch').value.toLowerCase();
+    const statusFilter = root.querySelector('#dashFilter').value;
+    const filteredRows = list.filter(p =>
+      (!statusFilter || p.status === statusFilter) &&
+      (p.name.toLowerCase().includes(query) || (p.client || '').toLowerCase().includes(query))
     );
-    draw(rows);
+    draw(filteredRows);
   };
-  $('#dashFilter').onchange = ()=> $('#dashSearch').oninput({target:$('#dashSearch')});
+
+  // Wire up controls
+  root.querySelector('#dashSearch').oninput = filterAndDraw;
+  root.querySelector('#dashFilter').onchange = filterAndDraw;
+
+  root.querySelector('#view-mode-grid').onclick = () => {
+    ui_state.projects_view_mode = 'grid';
+    renderProjectsManager(root);
+  };
+
+  root.querySelector('#view-mode-list').onclick = () => {
+    ui_state.projects_view_mode = 'list';
+    renderProjectsManager(root);
+  };
+
+  draw(list); // Initial draw
+}
+
+function filterByStatus(status) {
+  const filter = document.querySelector('#dashFilter');
+  filter.value = status;
+  renderProjectsManager(document.querySelector('#root')); // Re-render with filtered status
 }
 
 /* ----- Project helpers ----- */
@@ -3122,8 +3466,8 @@ function openProjectById(id){
 
   // persist + render
   autosaveNow?.();
-  location.hash = '#/editor';
-  renderRoute?.();
+  ui_state.active_project_id = id;
+  location.hash = '#/project/overview'; // New default view for a project  renderRoute?.();
   setStatus?.("Project loaded.", true);
 }
 
@@ -3204,68 +3548,431 @@ function newProject() {
   touchCurrentIntoProjects();
 }
 
+
+/**
+ * Helper function to attach event listeners to project actions.
+ * Centralizes the logic for handling open, delete, favorite, and status changes.
+ */
+function wireProjectActions(root) {
+    root.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openProjectById(b.dataset.open));
+    
+    // --- NEW: Wires up the Edit button ---
+    root.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEditProjectModal(b.dataset.edit));
+
+    root.querySelectorAll('[data-fav]').forEach(b => b.onclick = () => {
+        toggleFav(b.dataset.fav);
+        renderProjectsManager(root);
+    });
+
+    root.querySelectorAll('[data-status]').forEach(sel => sel.onchange = () => {
+        setStatusFor(sel.dataset.status, sel.value);
+    });
+
+    root.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+        const id = b.dataset.del;
+        const projName = getProjects().find(p => p.id === id)?.name || 'this project';
+        if (confirm(`Are you sure you want to permanently delete "${projName}"? This cannot be undone.`)) {
+            localStorage.removeItem(`proj:${id}`);
+            const updated = getProjects().filter(p => p.id !== id);
+            saveProjects(updated);
+            renderProjectsManager(root);
+        }
+    });
+}
+
 /* ========================================================
    Modal Control + Create handler
    ======================================================== */
 function openCreateProjectModal() {
-  // clear fields
+  // Clear standard text fields
   const f = (id) => document.getElementById(id);
   f('cp-name').value   = '';
   f('cp-client').value = '';
-  f('cp-dates').value  = '';
   f('cp-notes').value  = '';
+  f('cp-tags').value   = '';
+
+  // Clear any existing dynamic role rows
+  const rolesContainer = document.getElementById('cp-roles-container');
+  if (rolesContainer) {
+    rolesContainer.innerHTML = '';
+  }
 
   const modal = document.getElementById('createProjectModal');
   if (!modal) return;
 
-  // allow Enter to submit (no Shift)
-  modal.onkeydown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      createProjectFromModal();
+  // --- Logic for Custom Project Type ---
+  const projectTypeSelect = document.getElementById('cp-project-type');
+  const customTypeInput = document.getElementById('cp-project-type-custom');
+  projectTypeSelect.onchange = function() {
+    customTypeInput.classList.toggle('is-hidden', this.value !== '__custom__');
+    if (this.value === '__custom__') {
+      customTypeInput.focus();
     }
   };
+  // Reset custom input state when modal opens
+  projectTypeSelect.value = '';
+  customTypeInput.classList.add('is-hidden');
+  customTypeInput.value = '';
+  
+  // --- Setup for Dynamic Roles ---
+  const addRoleBtn = document.getElementById('add-role-btn');
+  addRoleBtn.onclick = function(e) {
+    e.preventDefault();
+    const container = document.getElementById('cp-roles-container');
+    const roleRow = document.createElement('div');
+    roleRow.className = 'stack role-row';
 
+    const people = getPeople();
+    const peopleOptions = people.map(person => `<option value="${escapeHTML(person)}">${escapeHTML(person)}</option>`).join('');
+
+    roleRow.innerHTML = `
+      <select class="role-input" style="flex: 1;">
+        <option value="Project Lead">Project Lead</option>
+        <option value="Project Manager" selected>Project Manager</option>
+        <option value="Project Director">Project Director</option>
+        <option value="Communications">Communications</option>
+        <option value="QC">QC</option>
+      </select>
+      <div class="person-selector" style="flex: 2; display: flex; gap: 8px;">
+        <select class="person-input" style="flex: 1;">
+          <option value="">Select person...</option>
+          ${peopleOptions}
+          <option value="__new__">-- Add New Person --</option>
+        </select>
+        <input type="text" class="new-person-input is-hidden" placeholder="New Person's Name" style="flex: 1;" />
+      </div>
+      <button type="button" class="danger remove-role-btn">✕</button>
+    `;
+    container.appendChild(roleRow);
+
+    const personSelect = roleRow.querySelector('.person-input');
+    const newPersonInput = roleRow.querySelector('.new-person-input');
+    personSelect.onchange = function() {
+      newPersonInput.classList.toggle('is-hidden', this.value !== '__new__');
+    };
+  };
+
+  // --- Setup for Dynamic Dates ---
+  const datesContainer = document.getElementById('cp-dates-container');
+  datesContainer.innerHTML = ''; // Clear any previous date rows
+  document.getElementById('add-date-btn').onclick = function() {
+      addDateRow(datesContainer);
+  };
+
+  document.querySelector('header')?.classList.add('content-blur');
+  document.getElementById('view-root')?.classList.add('content-blur');
+
+  // Show the modal and focus the first field
   modal.classList.remove('is-hidden');
   f('cp-name').focus();
 }
 
+/** Called by the footer button in the modal for both Create and Edit */
+function createProjectFromModal() {
+  const modal = document.getElementById('createProjectModal');
+  const editingProjectId = modal.dataset.editingProjectId;
+
+  // --- Step 1: Read all data from the modal (this is the same for create and edit) ---
+  const name = (document.getElementById('cp-name')?.value || '').trim();
+  const client = (document.getElementById('cp-client')?.value || '').trim();
+  const notes = (document.getElementById('cp-notes')?.value || '').trim();
+  const status = (document.getElementById('cp-status')?.value || 'Draft');
+  
+  const projectTypeSelect = document.getElementById('cp-project-type');
+  let projectTypeName = '';
+  if (projectTypeSelect.value === '__custom__') {
+    projectTypeName = (document.getElementById('cp-project-type-custom')?.value || '').trim();
+  } else {
+    projectTypeName = (projectTypeSelect?.value || '').trim();
+  }
+
+// --- Read data from dynamic date rows ---
+  const important_dates = [];
+  document.querySelectorAll('#cp-dates-container .date-row').forEach(row => {
+    const whatSelect = row.querySelector('.date-what-select');
+    let whatValue = whatSelect.value;
+    if (whatValue === '__custom__') {
+      whatValue = row.querySelector('.date-what-custom').value.trim();
+    }
+    
+    // --- FIX: Reuse existing ID if it exists, otherwise create a new one ---
+    const existingId = row.dataset.dateId;
+    const dateId = existingId || 'date-' + Math.random().toString(16).slice(2, 8);
+
+    const dateEntry = {
+      id: dateId,
+      what: whatValue,
+      when: row.querySelector('.date-when-input').value || null,
+      who: row.querySelector('.date-who-select').value || null,
+      status: row.querySelector('.date-status-select').value || 'Not Started'
+    };
+    if (dateEntry.what && dateEntry.when) {
+        important_dates.push(dateEntry);
+    }
+  });
+
+  const tagsInput = (document.getElementById('cp-tags')?.value || '').trim();
+  const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+
+  const roles = [];
+  const existingPeople = getPeople(); 
+  const peopleToAdd = []; 
+  document.querySelectorAll('#cp-roles-container .role-row').forEach(row => {
+    const role = row.querySelector('.role-input').value;
+    const personSelect = row.querySelector('.person-input');
+    const newPersonInput = row.querySelector('.new-person-input');
+    
+    let person = '';
+    if (personSelect.value === '__new__' && newPersonInput.value.trim() !== '') {
+      person = newPersonInput.value.trim();
+      if (!existingPeople.includes(person)) peopleToAdd.push(person);
+    } else if (personSelect.value && personSelect.value !== '__new__') {
+      person = personSelect.value;
+    }
+    if (role && person) roles.push({ role, person });
+  });
+
+  if (peopleToAdd.length > 0) {
+    const updatedPeopleList = [...existingPeople, ...peopleToAdd];
+    savePeople(updatedPeopleList);
+  }
+
+  // --- Step 2: Check if we are editing or creating a new project ---
+  if (editingProjectId) {
+    // --- UPDATE an existing project ---
+    const rawData = localStorage.getItem(`proj:${editingProjectId}`);
+    const fullProjectStash = JSON.parse(rawData);
+
+    fullProjectStash.project.name = name || 'Untitled';
+    fullProjectStash.project.client = client;
+    fullProjectStash.project.notes = notes;
+    fullProjectStash.project.status = status;
+    fullProjectStash.project.project_type = projectTypeName;
+    fullProjectStash.project.important_dates = important_dates;
+    fullProjectStash.project.tags = tags;
+    fullProjectStash.project.roles = roles;
+    fullProjectStash.project.updated_at = new Date().toISOString();
+    
+    state.project = fullProjectStash.project;
+    state.globals = fullProjectStash.globals;
+    state.questions = fullProjectStash.questions;
+  } else {
+    // --- CREATE a new project (your original logic) ---
+    state.project = {
+      id: 'proj-' + Math.random().toString(16).slice(2, 10),
+      name: name || 'Untitled',
+      client: client,
+      version: '0.1.0',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      notes: notes,
+      status: status,
+      project_type: projectTypeName,
+      roles: roles,
+      important_dates: important_dates,
+      tags: tags
+    };
+    state.questions = []; // New projects start with no questions
+    ui_state.active_question_index = null;
+  }
+
+  // --- Step 3: Persist and navigate ---
+  autosaveNow();
+  touchCurrentIntoProjects();
+
+  closeCreateProjectModal();
+  renderRoute(); // Refresh the current view to show changes
+}
+
+/** BONUS: Updated closeCreateProjectModal to reset edit state */
 function closeCreateProjectModal() {
   const modal = document.getElementById('createProjectModal');
   if (modal) {
     modal.onkeydown = null;
     modal.classList.add('is-hidden');
+    
+    // --- NEW: Remove blur effect from background content ---
+    document.querySelector('header')?.classList.remove('content-blur');
+    document.getElementById('view-root')?.classList.remove('content-blur');
+
+    // --- NEW: Clean up edit mode state for next time ---
+    delete modal.dataset.editingProjectId;
+    document.getElementById('cp-title').textContent = 'Create Project';
+    modal.querySelector('.btn.primary').textContent = 'Create Project';
   }
 }
 
-/** Called by the footer button in the modal */
-function createProjectFromModal() {
-  const name   = (document.getElementById('cp-name')?.value || '').trim();
-  const client = (document.getElementById('cp-client')?.value || '').trim();
-  const dates  = (document.getElementById('cp-dates')?.value || '').trim();
-  const notes  = (document.getElementById('cp-notes')?.value || '').trim();
+// Change the function signature to accept data
+function addDateRow(container, dateData = {}) {
+  const dateRow = document.createElement('div');
+  dateRow.className = 'stack date-row'; // Adds the necessary classes
+  dateRow.style.cssText = 'gap: 8px; align-items: flex-end;'; // Fixes the alignment
+  
+  const people = getPeople();
+  const peopleOptions = people.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
 
-  // new project object
-  state.project = {
-    id: 'proj-' + Math.random().toString(16).slice(2,10),
-    name: name || 'Untitled',
-    client,
-    version: '0.1.0',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    notes
+  // --- Check if the 'what' value is a custom one ---
+  const standardWhats = ["Questionnaire", "Tab Sheet", "Banners", "Reporting", "Data Processing", "QCing", "Approved By", "Due"];
+  const isCustomWhat = dateData.what && !standardWhats.includes(dateData.what);
+
+  // --- Store the existing date ID on the element itself ---
+  if (dateData.id) {
+    dateRow.dataset.dateId = dateData.id;
+  }
+
+  dateRow.innerHTML = `
+    <label class="field" style="flex: 2;">
+      <span style="font-size: 12px; color: var(--muted);">What</span>
+      <select class="date-what-select">
+        <option value="">Select task...</option>
+        <option value="Questionnaire">Questionnaire</option>
+        <option value="Tab Sheet">Tab Sheet</option>
+        <option value="Banners">Banners</option>
+        <option value="Reporting">Reporting</option>
+        <option value="Data Processing">Data Processing</option>
+        <option value="QCing">QCing</option>
+        <option value="Approved By">Approved By</option>
+        <option value="Due">Due</option>
+        <option value="__custom__">Custom...</option>
+      </select>
+      <input type="text" class="date-what-custom ${isCustomWhat ? '' : 'is-hidden'}" placeholder="Custom task name" style="margin-top: 4px;" />
+    </label>
+    <label class="field" style="flex: 1.5;">
+      <span style="font-size: 12px; color: var(--muted);">When</span>
+      <input type="date" class="date-when-input" value="${dateData.when || ''}" />
+    </label>
+    <label class="field" style="flex: 1.5;">
+      <span style="font-size: 12px; color: var(--muted);">Who</span>
+      <select class="date-who-select">
+        <option value="">Assign to...</option>
+        ${peopleOptions}
+      </select>
+    </label>
+    <label class="field" style="flex: 1.5;">
+      <span style="font-size: 12px; color: var(--muted);">Status</span>
+      <select class="date-status-select">
+        <option value="Not Started">Not Started</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Draft">Draft</option>
+        <option value="Approved">Approved</option>
+        <option value="Done">Done</option>
+      </select>
+    </label>
+    <button type="button" class="danger remove-date-btn">✕</button>
+  `;
+  container.appendChild(dateRow);
+
+  // --- NEW: Pre-fill the dropdowns and inputs with dateData ---
+  const whatSelect = dateRow.querySelector('.date-what-select');
+  const customWhatInput = dateRow.querySelector('.date-what-custom');
+  if (isCustomWhat) {
+    whatSelect.value = '__custom__';
+    customWhatInput.value = dateData.what;
+  } else {
+    whatSelect.value = dateData.what || '';
+  }
+  
+  dateRow.querySelector('.date-who-select').value = dateData.who || '';
+  dateRow.querySelector('.date-status-select').value = dateData.status || 'Not Started';
+
+  // Add logic to show the custom 'what' input
+  whatSelect.onchange = function() {
+    customWhatInput.classList.toggle('is-hidden', this.value !== '__custom__');
   };
-  if (dates) state.project.important_dates = dates;
+}
 
-  // reset questions and persist
-  state.questions = [];
-  ui_state.active_question_index = null;
-  autosaveNow();
-  touchCurrentIntoProjects();
+function openEditProjectModal(projectId) {
+  // --- Step 1: Call the base modal function FIRST ---
+  // This clears old data from previous uses and sets up listeners.
+  openCreateProjectModal();
 
-  // close modal + go to editor
-  closeCreateProjectModal();
-  location.hash = '#/editor';
+  // --- Step 2: Get the full project data from localStorage ---
+  const rawData = localStorage.getItem(`proj:${projectId}`);
+  if (!rawData) {
+    alert("Error: Could not find project data to edit.");
+    return;
+  }
+  const projectData = JSON.parse(rawData).project;
+
+  // --- Step 3: Get references to all modal elements ---
+  const f = (id) => document.getElementById(id);
+  const modal = f('createProjectModal');
+  const nameInput = f('cp-name');
+  const clientInput = f('cp-client');
+  const statusSelect = f('cp-status');
+  const projectTypeSelect = f('cp-project-type');
+  const customTypeInput = f('cp-project-type-custom');
+  const tagsInput = f('cp-tags');
+  const notesTextarea = f('cp-notes');
+  const rolesContainer = f('cp-roles-container');
+  const datesContainer = f('cp-dates-container');
+
+  // --- Step 4: Populate the fields with project data ---
+  modal.dataset.editingProjectId = projectId; // Store the ID for the save function
+  nameInput.value = projectData.name || '';
+  clientInput.value = projectData.client || '';
+  statusSelect.value = projectData.status || 'Draft';
+  notesTextarea.value = projectData.notes || '';
+  tagsInput.value = (projectData.tags || []).join(', ');
+
+  // Handle Project Type (standard or custom)
+  const standardTypes = Array.from(projectTypeSelect.options).map(opt => opt.value);
+  if (standardTypes.includes(projectData.project_type)) {
+    projectTypeSelect.value = projectData.project_type;
+    customTypeInput.classList.add('is-hidden');
+  } else {
+    projectTypeSelect.value = '__custom__';
+    customTypeInput.value = projectData.project_type || '';
+    customTypeInput.classList.remove('is-hidden');
+  }
+  
+  // Populate Roles
+  rolesContainer.innerHTML = ''; // Ensure it's clear before adding
+  (projectData.roles || []).forEach(roleData => {
+    const people = getPeople();
+    const peopleOptions = people.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+    
+    const roleRow = document.createElement('div');
+    roleRow.className = 'stack role-row';
+    roleRow.innerHTML = `
+      <select class="role-input" style="flex: 1;">
+        <option value="Project Lead">Project Lead</option>
+        <option value="Project Manager">Project Manager</option>
+        <option value="Project Director">Project Director</option>
+        <option value="Communications">Communications</option>
+        <option value="QC">QC</option>
+      </select>
+      <div class="person-selector" style="flex: 2; display: flex; gap: 8px;">
+        <select class="person-input" style="flex: 1;"><option value="">Select person...</option>${peopleOptions}<option value="__new__">-- Add New Person --</option></select>
+        <input type="text" class="new-person-input is-hidden" placeholder="New Person's Name" style="flex: 1;" />
+      </div>
+      <button type="button" class="danger remove-role-btn">✕</button>`;
+    
+    rolesContainer.appendChild(roleRow);
+    
+    // Set the selected values *after* appending
+    roleRow.querySelector('.role-input').value = roleData.role;
+    roleRow.querySelector('.person-input').value = roleData.person;
+
+    // Add listener for the new person input
+    const personSelect = roleRow.querySelector('.person-input');
+    const newPersonInput = roleRow.querySelector('.new-person-input');
+    personSelect.onchange = function() {
+      newPersonInput.classList.toggle('is-hidden', this.value !== '__new__');
+    };
+  });
+
+  // Populate Dates
+  datesContainer.innerHTML = ''; // Ensure it's clear before adding
+  (projectData.important_dates || []).forEach(dateData => {
+    addDateRow(datesContainer, dateData);
+  });
+  
+  // --- Step 5: Update modal title and button text for "Edit Mode" ---
+  f('cp-title').textContent = 'Edit Project';
+  modal.querySelector('.btn.primary').textContent = 'Save Changes';
+
+  // Modal is already visible from the call in Step 1, so no need to show it again.
 }
 
 /************* EDITOR *************/
@@ -3294,7 +4001,6 @@ function renderEditor(root){
   // - For single-panel tabs, #prefield-content-host is where Tab/Banner previews render
   const rightPanelContentHTML = `
     <div class="right-panel-content">
-      <!-- Hidden pills row (used by sidebar logic; CSS hides in sidebar-mode) -->
       <div class="pv-tabs">
         <button class="pv-tab ${tab==='screener'?'active':''}" data-pvtab="scr">Screener</button>
         <button class="pv-tab ${tab==='main'?'active':''}"     data-pvtab="main">Main Survey</button>
@@ -3302,7 +4008,6 @@ function renderEditor(root){
         <button class="pv-tab ${tab==='banner'?'active':''}"   data-pvtab="ban">Banner</button>
       </div>
 
-      <!-- Panels the sidebar toggles -->
       <section id="pv-scr"  class="pv-panel ${tab==='screener'?'active':''}"></section>
       <section id="pv-main" class="pv-panel ${tab==='main'?'active':''}"></section>
       <section id="pv-tab"  class="pv-panel ${tab==='tabplan'?'active':''}"></section>
@@ -3347,7 +4052,6 @@ function renderEditor(root){
     if (tab === 'tabplan') renderPreviewTabSheet(host);
   }
 
-  renderProjectHeader();
   wireEditorShortcuts();
 
   // ---- Wire tertiary tab clicks (Screener/Main/Tab/Banner) ----
@@ -3383,14 +4087,172 @@ function renderEditor(root){
   });
 }
 
-function renderProjectHeader(){
-  $("#projName").value = state.project.name || "";
-  $("#projClient").value = state.project.client || "";
-  $("#projVersion").value = state.project.version || "0.1.0";
+
+function renderOverview(host) {
+  const p = state.project || {};
+  const totalQuestions = state.questions?.length || 0;
+
+  // Helper to give date statuses a color pill
+// Helper to give date statuses a color pill
+  const getStatusPill = (status) => {
+    const styles = {
+      // ✅ Green for "Done" states
+      'Done': 'background: #dcfce7; color: #166534; border-color: #bbf7d0;',
+      'Approved': 'background: #dcfce7; color: #166534; border-color: #bbf7d0;',
+
+      // 🔵 Blue for "Active" states
+      'In Progress': 'background: #dbeafe; color: #1e40af; border-color: #bfdbfe;',
+
+      // 🟡 Yellow for "Pending" states
+      'Draft': 'background: #fef9c3; color: #854d0e; border-color: #fde68a;',
+      'Waiting for Approval': 'background: #fef9c3; color: #854d0e; border-color: #fde68a;',
+      
+      // 🔴 Red for "Problem" states (optional, for future use)
+      'Blocked': 'background: #fee2e2; color: #991b1b; border-color: #fecaca;',
+      'Overdue': 'background: #fee2e2; color: #991b1b; border-color: #fecaca;',
+
+      // ⚫ Gray for "Inactive" states
+      'Not Started': 'background: var(--surface-3); color: var(--muted); border-color: var(--line);',
+    };
+    return `<span class="pill" style="display: inline-flex; align-items: center; font-weight: 600; ${styles[status] || ''}">${escapeHTML(status)}</span>`;
+  };
+
+  // --- PREPARE DYNAMIC CONTENT ---
+
+  const tagsHTML = (p.tags && p.tags.length > 0) ?
+    p.tags.map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('') : '';
+
+  const timelineHTML = (p.important_dates && p.important_dates.length > 0) ?
+    p.important_dates.map(date => `
+      <div class="stack timeline-item" style="justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line);">
+        <div>
+          <strong>${escapeHTML(date.what)}</strong>
+          <div class="muted" style="margin-top: 2px;">
+            Due: ${date.when || 'N/A'} • Assigned: ${escapeHTML(date.who) || 'N/A'}
+          </div>
+        </div>
+        ${getStatusPill(date.status)}
+      </div>
+    `).join('') :
+    '<div class="pv-empty">No key dates have been set.</div>';
+
+  const notesHTML = p.notes ?
+    `<blockquote style="margin: 0; padding: 0 .8em; border-left: 3px solid var(--line); color: var(--muted); white-space: pre-wrap;">${escapeHTML(p.notes)}</blockquote>` :
+    '<div class="pv-empty">No notes for this project.</div>';
+
+  const teamHTML = (p.roles && p.roles.length > 0) ?
+    p.roles.map(role => `
+      <div class="stack team-item" style="justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line);">
+          <span>${escapeHTML(role.person)}</span>
+          <span class="tag">${escapeHTML(role.role)}</span>
+      </div>
+    `).join('') :
+    '<div class="pv-empty">No roles assigned.</div>';
+
+  // --- FINAL ASSEMBLY ---
+
+  host.innerHTML = `
+    <style>
+      .timeline-item:last-child, .team-item:last-child { border-bottom: none !important; }
+      .section-heading { margin-top: 0; margin-bottom: 16px; color: var(--muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+      .metadata-value { font-size: 1.2rem; display: block; color: var(--brand-primary); font-weight: 600; }
+      .content-section + .content-section { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+    </style>
+    <div class="workbench" style="max-width: 1200px; margin-top: 24px;">
+      <div class="card" style="display: grid; grid-template-columns: 2fr 1fr; overflow: hidden;">
+        
+        <div class="left-column" style="padding: 32px 40px;">
+          <div class="content-section" style="padding-top:0; border-top:none;">
+            <h2 style="margin-top:0; margin-bottom: 4px;">${escapeHTML(p.name || 'Untitled Project')}</h2>
+            <p class="muted" style="font-size: 1.1rem; margin-top: 0;">${escapeHTML(p.client || 'No Client')}</p>
+            ${tagsHTML ? `<div class="stack" style="gap: 6px; margin-top: 12px;">${tagsHTML}</div>` : ''}
+          </div>
+
+          <div class="content-section">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px;">
+              <div><div class="muted">Status</div><strong class="metadata-value">${escapeHTML(p.status)}</strong></div>
+              <div><div class="muted">Project Type</div><strong class="metadata-value">${escapeHTML(p.project_type) || 'N/A'}</strong></div>
+              <div><div class="muted">Last Updated</div><strong class="metadata-value">${new Date(p.updated_at).toLocaleDateString()}</strong></div>
+              <div><div class="muted">Total Questions</div><strong class="metadata-value">${totalQuestions}</strong></div>
+            </div>
+          </div>
+          
+          <div class="content-section">
+            <h3 class="section-heading">Project Timeline</h3>
+            <div class="timeline-list">${timelineHTML}</div>
+          </div>
+
+          <div class="content-section">
+            <h3 class="section-heading">Notes</h3>
+            ${notesHTML}
+          </div>
+        </div>
+
+        <div class="right-column" style="padding: 32px 40px; border-left: 1px solid var(--line); background-color: var(--surface-3);">
+          <div class="content-section" style="padding-top:0; border-top:none;">
+            <h3 class="section-heading" style="margin-top:0;">Team</h3>
+            <div class="team-list">${teamHTML}</div>
+          </div>
+
+          <div class="content-section">
+            <h3 class="section-heading">Actions & Exports</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button id="overviewImportJson">Import Project</button>
+                <button id="overviewExportJson">Export Project</button>
+                <button id="overviewGenerateQre">Export QRE</button>
+                <button id="overviewGenerateTab">Export Tab Plan</button>
+            </div>
+            <button class="primary" onclick="openEditProjectModal('${p.id}')" style="width: 100%; padding: 12px; margin-top: 10px;">Edit Project Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // --- Re-wire Action Button Handlers ---
+  const hostQuery = (sel) => host.querySelector(sel);
+  hostQuery('#overviewExportJson').onclick = downloadJSON;
+  hostQuery('#overviewImportJson').onclick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const data = JSON.parse(await file.text());
+        state.project = data.project || {}; state.globals = data.globals || {}; state.questions = data.questions || [];
+        migrateProjectModel?.(); autosaveNow?.(); setStatus?.("Project imported.", true); renderRoute();
+      } catch (err) {
+        alert("Error importing file. Please ensure it is a valid JSON project file."); console.error("Import Error:", err);
+      }
+    };
+    input.click();
+  };
+  hostQuery('#overviewGenerateQre').onclick = () => {
+    postAndDownload("/generate/questionnaire", `${(state.project.name || 'project').replace(/[^\w\-]+/g, '_')}_questionnaire.docx`);
+  };
+  hostQuery('#overviewGenerateTab').onclick = () => {
+    postAndDownload("/generate/tab-plan", `${(state.project.name || 'project').replace(/[^\w\-]+/g, '_')}_tab_plan.xlsx`);
+  };
 }
-$("#projName").addEventListener("input", e=>{ state.project.name=e.target.value; queueAutosave(); });
-$("#projClient").addEventListener("input", e=>{ state.project.client=e.target.value; queueAutosave(); });
-$("#projVersion").addEventListener("input", e=>{ state.project.version=e.target.value; queueAutosave(); });
+
+
+function renderFielding(host) {
+  host.innerHTML = `
+    <div class="workbench" style="margin-top: 16px;">
+      <h2>Fielding</h2>
+      <div class="pv-empty">Fielding dashboard and tools will be available here.</div>
+    </div>`;
+}
+
+function renderReporting(host) {
+  host.innerHTML = `
+    <div class="workbench" style="margin-top: 16px;">
+      <h2>Reporting</h2>
+      <div class="pv-empty">Banner builder, data exports, and reporting tools will be available here.</div>
+    </div>`;
+}
 
 // ---------- SUMMARIES (numeric, table, open end)
 function numericSummary(q){
@@ -3585,468 +4447,363 @@ function updateNumeric(i, key, value){
 }
 
 /* -------- EDITOR PANEL (Type UI removed entirely) -------- */
-function renderEditorPanel(){
-  const panel = $("#editor-panel");
-  if (!panel) return;
+function renderEditorPanel() {
+    const panel = $("#editor-panel");
+    if (!panel) return;
 
-  const i = ui_state.active_question_index;
-  if (i === null || !state.questions[i]) { panel.innerHTML = ""; return; }
+    const i = ui_state.active_question_index;
+    if (i !== null && ui_state.base_builders) {
+        delete ui_state.base_builders[i]; 
+    }    
+    
+    if (i === null || !state.questions[i]) {
+        panel.innerHTML = ""; // Clear panel if no question is selected
+        return;
+    }
 
-  const q = state.questions[i];
-
-  ensureTabBucket(q); 
-  syncNetsWithQuestion(q);
-
-  // Keep type consistent with chosen mode & sync grid facets
-  harmonizeTypeFromMode(q);
-  syncTableFacets(q);
-
-  // Ensure numeric sub-obj exists early so we can render without guards
-  const N = ensureNumeric(i);
-
-  const priorQs = state.questions
-    .filter((_, j) => j < i)
-    .map(qq => `<option value="${qq.id}">${qq.id}</option>`)
-    .join("");
-
-  const mode = ensureMode(q);
-
-  // Always overwrite table helpers so stale functions can’t survive reloads
-  window._tb_addRow = (ii) => { state.questions[ii].grid.rows.push(''); renderEditorPanel(); queueAutosave(); };
-  window._tb_delRow = (ii, idx) => { state.questions[ii].grid.rows.splice(idx,1); renderEditorPanel(); queueAutosave(); };
-  window._tb_updRow = (ii, idx, val) => { state.questions[ii].grid.rows[idx] = val; queueAutosave(); };
-
-  window._tb_addCol = (ii) => { state.questions[ii].grid.cols.push(''); renderEditorPanel(); queueAutosave(); };
-  window._tb_delCol = (ii, idx) => { state.questions[ii].grid.cols.splice(idx,1); renderEditorPanel(); queueAutosave(); };
-  window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
-
-  // Create your own Preset 
-  window.openPresetMaker = function(i){  const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position:fixed; inset:0; background:rgba(0,0,0,.35);
-    display:flex; align-items:center; justify-content:center; z-index:1000;`;
-  overlay.innerHTML = `
-    <div class="card" style="width:640px; max-width:92vw;">
-      <div class="card-header">
-        <strong>Create a custom scale</strong>
-        <div class="stack"><button id="pmClose">Close</button></div>
-      </div>
-      <div class="card-content">
-        <div class="row"><div class="k">Name</div>
-          <input id="pmName" placeholder="e.g., Usage intensity"/>
-        </div>
-        <div class="row"><div class="k">Description</div>
-          <input id="pmDesc" placeholder="(optional)"/>
-        </div>
-        <div class="row"><div class="k">Labels</div>
-          <textarea id="pmLabels" placeholder="One label per line, left → right"></textarea>
-        </div>
-        <div class="stack" style="justify-content:space-between;">
-          <div class="muted">Tip: keep 3–10 labels. You can still edit after inserting.</div>
-          <div class="stack">
-            <button id="pmInsert">Insert only</button>
-            <button id="pmSaveApply" class="primary">Save to presets & Insert</button>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-
-  const close = ()=> overlay.remove();
-  overlay.querySelector('#pmClose').onclick = close;
-
-  function parseLabels(){
-    const raw = overlay.querySelector('#pmLabels').value;
-    return raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  }
-  function apply(labels){
     const q = state.questions[i];
-    q.mode = 'table';
-    q.grid ||= { rows: q.statements||[], cols: [] };
-    q.grid.cols  = [...labels];
-    q.scale    ||= {};
-    q.scale.labels = [...labels];
-    q.scale.points = labels.length;
-    renderEditorPanel(); queueAutosave();
-  }
 
-  overlay.querySelector('#pmInsert').onclick = ()=>{
-    const labels = parseLabels();
-    if(labels.length < 2){ alert("Please provide at least 2 labels."); return; }
-    apply(labels); close();
-  };
+    // --- Pre-computation & Data Sync ---
+    ensureTabBucket(q);
+    syncNetsWithQuestion(q);
+    harmonizeTypeFromMode(q);
+    syncTableFacets(q);
+    const N = ensureNumeric(i);
+    const mode = ensureMode(q);
+    const tp = (q.exports && q.exports.tab_plan) ? q.exports.tab_plan : {};
 
-  overlay.querySelector('#pmSaveApply').onclick = ()=>{
-    const name   = overlay.querySelector('#pmName').value.trim();
-    const desc   = overlay.querySelector('#pmDesc').value.trim();
-    const labels = parseLabels();
-    if(!name){ alert("Please provide a name."); return; }
-    if(labels.length < 2){ alert("Please provide at least 2 labels."); return; }
-    saveCustomPreset(labels.length, name, labels, desc);
-    apply(labels); close();
-  };
+    // --- Global Helpers for table editing ---
+    window._tb_addRow = (ii) => { state.questions[ii].grid.rows.push(''); renderEditorPanel(); queueAutosave(); };
+    window._tb_delRow = (ii, idx) => { state.questions[ii].grid.rows.splice(idx,1); renderEditorPanel(); queueAutosave(); };
+    window._tb_updRow = (ii, idx, val) => { state.questions[ii].grid.rows[idx] = val; queueAutosave(); };
+    window._tb_addCol = (ii) => { state.questions[ii].grid.cols.push(''); renderEditorPanel(); queueAutosave(); };
+    window._tb_delCol = (ii, idx) => { state.questions[ii].grid.cols.splice(idx,1); renderEditorPanel(); queueAutosave(); };
+    window._tb_updCol = (ii, idx, val) => { state.questions[ii].grid.cols[idx] = val; queueAutosave(); };
 
-  // Render the initial list of net previews
-  renderNetPreviews(i);
+    // --- HTML Templates for each mode ---
+    // I've added inline styles to center-align rows with buttons and removed the Likert UI.
+    const modeSpecificHTML = {
+        'list': `
+            <div class="row" style="align-items: center;">
+                <div class="k" style="padding-top: 0;">Options</div>
+                <div>
+                    ${(q.options||[]).map((o,j)=> `
+                        <div class="option-row">
+                            <div class="option-editor-row">
+                                <input placeholder="Code" value="${o.code ?? ""}" oninput="updateOpt(${i},${j},'code',event.target.value,true)"/>
+                                <input placeholder="Label" value="${escapeHTML(o.label || '')}" oninput="updateOpt(${i},${j},'label',event.target.value)"/>
+                                <button class="icon-btn" title="Advanced Settings" data-action="toggle-advanced" data-target="adv-opt-${i}-${j}">⚙️</button>
+                                <button class="icon-btn danger" title="Delete Option" onclick="delOpt(${i},${j})">🗑️</button>
+                            </div>
+                            <div class="advanced-options is-hidden" id="adv-opt-${i}-${j}">
+                                <div class="stack">
+                                    <div class="input-group">
+                                        <label for="anchor-sel-${i}-${j}">Anchor</label>
+                                        <select id="anchor-sel-${i}-${j}" onchange="updateOpt(${i},${j},'anchor', this.value || null)">
+                                            <option value="" ${!o.anchor?'selected':''}>Default</option>
+                                            <option value="top" ${o.anchor==='top'?'selected':''}>Top</option>
+                                            <option value="bottom" ${o.anchor==='bottom'?'selected':''}>Bottom</option>
+                                        </select>
+                                    </div>
 
-  // Wire up the "Add Net" button
-  const addBtn = document.getElementById(`addNetBtn-${i}`);
-  if (addBtn) {
-    addBtn.onclick = () => {
-      if (isNumericQuestion(q)) {
-        openRangeNetEditor(i);
-      } else {
-        openCodesNetEditor(i);
-      }
+                                    <div class="btn-group">
+                                        <input type="checkbox" id="exclusive-chk-${i}-${j}" ${o.exclusive?'checked':''} onchange="updateOpt(${i},${j},'exclusive',this.checked)">
+                                        <label for="exclusive-chk-${i}-${j}">Exclusive</label>
+                                    </div>
+                                    <div class="btn-group">
+                                        <input type="checkbox" id="terminate-chk-${i}-${j}" ${o.terminate?'checked':''} onchange="updateOpt(${i},${j},'terminate',this.checked)">
+                                        <label for="terminate-chk-${i}-${j}">Terminate</label>
+                                    </div>
+                                    <div class="btn-group">
+                                        <input type="checkbox" id="lock-chk-${i}-${j}" ${o.lock_randomize?'checked':''} onchange="updateOpt(${i},${j},'lock_randomize',this.checked)">
+                                        <label for="lock-chk-${i}-${j}">Lock Position</label>
+                                    </div>
+                                    
+                                    <input style="flex:1 1 140px;" placeholder="Custom code (export)" value="${o.custom_code||''}" oninput="updateOpt(${i},${j},'custom_code',this.value)"/>
+                                    <input style="flex:1 1 220px;" placeholder="Custom label (export)" value="${o.custom_label||''}" oninput="updateOpt(${i},${j},'custom_label',this.value)"/>
+                                </div>
+                            </div>
+                        </div>`).join('')}
+                    <div class="stack" style="margin-top: 10px;">
+                        <button onclick="addOpt(${i})">+ Add Option</button>
+                        <button onclick="bulkAddOptions(${i})">📋 Bulk Add</button>
+                        
+                        <div class="more-menu">
+                            <button>Presets ▾</button>
+                            <div class="more-menu-content">
+                                <button class="more-menu-item" onclick="addPresetOption(${i}, 'pna')">Add "Prefer not to say"</button>
+                                <button class="more-menu-item" onclick="addPresetOption(${i}, 'other')">Add "Other (please specify)"</button>
+                                <button class="more-menu-item" onclick="addPresetOption(${i}, 'na')">Add "N/A"</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="align-items: center;">
+                <div class="k" style="padding-top: 0;">Statements</div>
+                <div>
+                    ${(q.statements||[]).map((s,j)=> `<div class="stack" style="flex-wrap:nowrap; margin-bottom: 4px;"><input value="${escapeHTML(s)}" oninput="updateStmt(${i},${j},event.target.value)"/><button class="icon-btn danger" onclick="delStmt(${i},${j})">🗑️</button></div>`).join('')}
+                    <div class="stack" style="margin-top: 10px;">
+                        <button onclick="addStmt(${i})">+ Add Statement</button>
+                        <button onclick="bulkAddStatements(${i})">📋 Bulk Add</button>
+                    </div>
+                </div>
+            </div>`,
+        'numeric': `
+            <div class="row" style="align-items: center;">
+                <div class="k" style="padding-top: 0;">Numeric Type</div>
+                <div style="display: flex;">
+                    <div class="btn-group">
+                        <input type="radio" id="num-open-${i}" name="numType-${i}" ${q.type === 'numeric_open' ? 'checked' : ''} onchange="updateQ(${i}, 'type', 'numeric_open'); renderEditorPanel();"/>
+                        <label for="num-open-${i}">Open Numeric</label>
+                        <input type="radio" id="num-count-${i}" name="numType-${i}" ${q.type === 'numeric_count' ? 'checked' : ''} onchange="updateQ(${i}, 'type', 'numeric_count'); renderEditorPanel();"/>
+                        <label for="num-count-${i}">Count</label>
+                        <input type="radio" id="num-time-${i}" name="numType-${i}" ${q.type === 'numeric_time' ? 'checked' : ''} onchange="updateQ(${i}, 'type', 'numeric_time'); renderEditorPanel();"/>
+                        <label for="num-time-${i}">Time</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="k">Settings</div>
+                <div>
+                    <div class="stack" style="flex-wrap:wrap; gap:10px;">
+                        <input style="width:120px" placeholder="Min" value="${N.min ?? ''}" oninput="updateNumeric(${i}, 'min', this.value)"/>
+                        <input style="width:120px" placeholder="Max" value="${N.max ?? ''}" oninput="updateNumeric(${i}, 'max', this.value)"/>
+                        ${q.type === 'numeric_time' ? `<select style="width:160px" onchange="updateNumeric(${i}, 'time_unit', this.value)"><option value="">(pick time unit)</option>${['seconds','minutes','hours','days','weeks','months','years'].map(u=>`<option value="${u}" ${N.time_unit===u?'selected':''}>${u}</option>`).join('')}</select>` : `<input style="width:160px" placeholder="Unit (e.g., years)" value="${N.unit || ''}" oninput="updateNumeric(${i}, 'unit', this.value)"/>`}
+                        <input style="width:200px" placeholder="Placeholder" value="${N.placeholder || ''}" oninput="updateNumeric(${i}, 'placeholder', this.value)"/>
+                        <label class="chk"><input type="checkbox" ${N.integer_only ? 'checked' : ''} onchange="updateNumeric(${i}, 'integer_only', this.checked)"/> Integer only</label>
+                        <label class="stack" style="gap:4px;"><span class="muted">Pad</span><input style="width:60px" placeholder="0 or 2" value="${N.zero_pad ?? 0}" oninput="updateNumeric(${i}, 'zero_pad', this.value)"/></label>
+                    </div>
+                </div>
+            </div>`,
+        'open': `
+            <div class="row" style="align-items: center;">
+                <div class="k" style="padding-top: 0;">Encouragement</div>
+                <div>
+                    <label class="form-check">
+                        <input type="checkbox" ${q.open?.encourage ? 'checked' : ''} onchange="(state.questions[${i}].open||={}), state.questions[${i}].open.encourage=this.checked; queueAutosave();"/>
+                        <span>Enable gentle prompts for short responses</span>
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="k">Length Limits</div>
+                <div class="stack" style="align-items: stretch; gap: var(--space-2);">
+                    <div class="input-group">
+                        <label>Limit By</label>
+                        <select onchange="(state.questions[${i}].open||={}), state.questions[${i}].open.limit_kind=this.value||null; queueAutosave(); renderEditorPanel();">
+                            <option value="" ${!q.open?.limit_kind ? 'selected' : ''}>None</option>
+                            ${['words','characters','sentences'].map(k=>`<option value="${k}" ${q.open?.limit_kind===k?'selected':''}>${k.charAt(0).toUpperCase() + k.slice(1)}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="open-min-${i}">Min</label>
+                        <input type="number" id="open-min-${i}" placeholder="e.g., 10" style="width:120px" value="${q.open?.min ?? ''}" oninput="(state.questions[${i}].open||={}), state.questions[${i}].open.min = this.value===''?null:+this.value; queueAutosave();" ${!q.open?.limit_kind ? 'disabled' : ''} />
+                    </div>
+                    <div class="input-group">
+                        <label for="open-max-${i}">Max</label>
+                        <input type="number" id="open-max-${i}" placeholder="e.g., 500" style="width:120px" value="${q.open?.max ?? ''}" oninput="(state.questions[${i}].open||={}), state.questions[${i}].open.max = this.value===''?null:+this.value; queueAutosave();" ${!q.open?.limit_kind ? 'disabled' : ''} />
+                    </div>
+                </div>
+            </div>`,
+        'table': `
+            <div class="row" style="align-items: center;">
+                <div class="k" style="padding-top: 0;">Selection</div>
+                <div class="btn-group">
+                    <input type="radio" id="tbl-single-${i}" name="tableSel-${i}" ${q.type === 'grid_single' ? 'checked' : ''} onchange="updateQ(${i}, 'type', 'grid_single')"/>
+                    <label for="tbl-single-${i}">Single</label>
+                    <input type="radio" id="tbl-multi-${i}" name="tableSel-${i}" ${q.type === 'grid_multi' ? 'checked' : ''} onchange="updateQ(${i}, 'type', 'grid_multi')"/>
+                    <label for="tbl-multi-${i}">Multi</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="k" style="padding-top: 0;">Table Editor</div>
+                <div>
+                    <div class="stack preset-wrap">
+                        <button id="presetBtn-${i}" onclick="openPresetPicker(${i})">📊 Presets</button>
+                        <div id="presetHost-${i}" class="preset-panel"></div>
+                    </div>
+
+                    <div class="table-editor-wrapper">
+                        <table class="config-table">
+                            <thead>
+                                <tr>
+                                    <th>Statements (rows)</th>
+                                    ${((q.grid || {}).cols || []).map((c, ci) => `
+                                        <th>
+                                            <div class="stack" style="flex-wrap:nowrap;">
+                                                <input value="${escapeHTML(c)}" placeholder="Column ${ci + 1}" oninput="_tb_updCol(${i}, ${ci}, this.value)" />
+                                                <button class="icon-btn danger" title="Delete Column" onclick="_tb_delCol(${i}, ${ci})">🗑️</button>
+                                            </div>
+                                        </th>
+                                    `).join('')}
+                                    <th class="add-col-cell">
+                                        <button class="icon-btn" title="Add Column" onclick="_tb_addCol(${i})">➕</button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${((q.grid || {}).rows || []).map((r, ri) => `
+                                    <tr>
+                                        <td>
+                                            <div class="stack" style="flex-wrap:nowrap;">
+                                                <input value="${escapeHTML(r)}" placeholder="Row ${ri + 1}" oninput="_tb_updRow(${i}, ${ri}, this.value)" />
+                                                <button class="icon-btn danger" title="Delete Row" onclick="_tb_delRow(${i}, ${ri})">🗑️</button>
+                                            </div>
+                                        </td>
+                                        ${((q.grid || {}).cols || []).map(() => '<td style="text-align:center; color:var(--muted);">•</td>').join('')}
+                                        <td></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="${((q.grid || {}).cols || []).length + 2}">
+                                        <button class="add-row-btn" onclick="_tb_addRow(${i})">+ Add Row</button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>`
     };
-  }
-}
 
-// safe tab-plan object so inputs don't error if not yet created
-const tp = (q.exports && q.exports.tab_plan) ? q.exports.tab_plan : {};
-
-panel.innerHTML = `
-  <div class="card" style="flex-grow:1;">
-    <div class="card-header">
-      <span>Editing: <strong>${q.id}</strong></span>
-      <div class="stack">
-        <button onclick="saveQuestionToLibrary(${i})">💾 Save to Library</button>
-        <button onclick="dupQ(${i})">Duplicate</button>
-        <button class="danger" onclick="delQ(${i})">Delete</button>
-      </div>
-    </div>
-
-    <div class="editor-tabs">
-      <div class="tab-btn tab ${ui_state.active_tab==='main'?'active':''}"   data-tab="main">Main</div>
-      <div class="tab-btn tab ${ui_state.active_tab==='logic'?'active':''}"  data-tab="logic">Logic & Base</div>
-      <div class="tab-btn tab ${ui_state.active_tab==='tabplan'?'active':''}" data-tab="tabplan">Tab Plan</div>
-    </div>
-
-    <div class="card-content">
-      <!-- ===== MAIN TAB ===== -->
-      <div class="tab-content ${ui_state.active_tab==='main'?'active':''}">
-        <div class="row"><div class="k">Question ID</div>
-          <input value="${q.id}" oninput="updateQ(${i}, 'id', event.target.value)"/>
-        </div>
-
-        <div class="row"><div class="k">Mode</div>
-          <div class="stack mode-row">
-            <label class="mode-btn">
-              <input type="radio" name="mode-${i}" value="list"   ${mode==='list'?'checked':''}
-                onchange="state.questions[${i}].mode='list';   harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/>
-              <span>Item or list</span>
-            </label>
-            <label class="mode-btn">
-              <input type="radio" name="mode-${i}" value="numeric" ${mode==='numeric'?'checked':''}
-                onchange="state.questions[${i}].mode='numeric';harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/>
-              <span>Numeric</span>
-            </label>
-            <label class="mode-btn">
-              <input type="radio" name="mode-${i}" value="table"  ${mode==='table'?'checked':''}
-                onchange="state.questions[${i}].mode='table'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/>
-              <span>Table</span>
-            </label>
-            <label class="mode-btn">
-              <input type="radio" name="mode-${i}" value="open"   ${mode==='open'?'checked':''}
-                onchange="state.questions[${i}].mode='open';  harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/>
-              <span>Open End</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- NEW: Question-level randomization controls -->
-        ${mode==='list' ? `
-        <div class="row"><div class="k">Randomization</div>
-          <div class="stack">
-            <label>
-              <input type="radio" name="rand-${i}" value="none"
-                ${(q.randomization?.mode||'none')!=='shuffle'?'checked':''}
-                onchange="updateQ(${i},'randomization',{...(state.questions[${i}].randomization||{}),mode:'none'}); queueAutosave();"/>
-              None
-            </label>
-            <label>
-              <input type="radio" name="rand-${i}" value="shuffle"
-                ${q.randomization?.mode==='shuffle'?'checked':''}
-                onchange="updateQ(${i},'randomization',{...(state.questions[${i}].randomization||{}),mode:'shuffle'}); queueAutosave();"/>
-              Shuffle options
-            </label>
-          </div>
-        </div>
-        ` : ''}
-
-        <div class="row"><div class="k">Question Text</div>
-          <textarea oninput="updateQ(${i}, 'text', event.target.value)">${q.text || ""}</textarea>
-        </div>
-
-        ${mode==='list' ? `
-          <div class="row"><div class="k">Selection</div>
-            <div class="stack select-row">
-              <label class="select-btn">
-                <input type="radio" name="listSel-${i}" value="single" ${getListSelection(q)==='single'?'checked':''}
-                  onchange="setListSelection(state.questions[${i}], 'single'); queueAutosave(); renderQuestionList();"/>
-                <span>Single</span>
-              </label>
-              <label class="select-btn">
-                <input type="radio" name="listSel-${i}" value="multi" ${getListSelection(q)==='multi'?'checked':''}
-                  onchange="setListSelection(state.questions[${i}], 'multi'); queueAutosave(); renderQuestionList();"/>
-                <span>Multi</span>
-              </label>
+    // --- Final Assembly ---
+    panel.innerHTML = `
+        <div class="card" style="flex-grow:1;">
+            <div class="card-header">
+                <span>Editing: <strong>${q.id}</strong></span>
+                <div class="stack">
+                    <button onclick="saveQuestionToLibrary(${i})">💾 Save to Library</button>
+                    <button onclick="dupQ(${i})">Duplicate</button>
+                    <button class="danger" onclick="delQ(${i})">Delete</button>
+                </div>
             </div>
-          </div>
-
-          <div class="row"><div class="k">Options</div>
-            <div>
-              ${(q.options||[]).map((o,j)=> `
-                <div class="row option-row">
-                  <div class="k">Option ${j+1}</div>
-                  <div class="stack" style="flex-wrap:wrap; gap:10px; align-items:flex-start;">
-                    <input style="flex:0 0 80px;" placeholder="Code" value="${o.code ?? ""}"
-                           oninput="updateOpt(${i},${j},'code',event.target.value,true)"/>
-                    <input placeholder="Label" value="${escapeHTML(o.label || '')}"
-                           oninput="updateOpt(${i},${j},'label',event.target.value)"/>
-
-                    <label class="chk">
-                      <input type="checkbox" ${o.exclusive?'checked':''}
-                             onchange="updateOpt(${i},${j},'exclusive',this.checked)"/> exclusive
-                    </label>
-                    <label class="chk">
-                      <input type="checkbox" ${o.terminate?'checked':''}
-                             onchange="updateOpt(${i},${j},'terminate',this.checked)"/> terminate
-                    </label>
-
-                    <!-- NEW: Anchor + Lock -->
-                    <label>Anchor
-                      <select onchange="updateOpt(${i},${j},'anchor', this.value || null)">
-                        <option value="" ${!o.anchor?'selected':''}>—</option>
-                        <option value="top" ${o.anchor==='top'?'selected':''}>Top</option>
-                        <option value="bottom" ${o.anchor==='bottom'?'selected':''}>Bottom</option>
-                      </select>
-                    </label>
-                    <label class="chk" title="Keep this option's position even if randomized">
-                      <input type="checkbox" ${o.lock_randomize?'checked':''}
-                             onchange="updateOpt(${i},${j},'lock_randomize',this.checked)"/> lock position
-                    </label>
-
-                    <!-- NEW: Export overrides -->
-                    <input style="flex:0 0 140px;" placeholder="Custom code (export)"
-                           value="${o.custom_code||''}"
-                           oninput="updateOpt(${i},${j},'custom_code',this.value)"/>
-                    <input style="flex:1 1 220px;" placeholder="Custom label (export)"
-                           value="${o.custom_label||''}"
-                           oninput="updateOpt(${i},${j},'custom_label',this.value)"/>
-
-                    <button onclick="delOpt(${i},${j})">🗑️</button>
-                  </div>
-                </div>`).join('')}
-
-              <div class="stack">
-                <button onclick="addOpt(${i})">+ Add Option</button>
-                <button onclick="bulkAddOptions(${i})">📋 Bulk Add</button>
-              </div>
+            <div class="editor-tabs">
+                <div class="tab-btn tab ${ui_state.active_tab==='main'?'active':''}" data-tab="main">Main</div>
+                <div class="tab-btn tab ${ui_state.active_tab==='tabplan'?'active':''}" data-tab="tabplan">Tab Plan</div>
             </div>
-          </div>
+            <div class="card-content">
+                <div class="tab-content ${ui_state.active_tab==='main'?'active':''}">
+                    <div class="editor-header-grid">
+                        <div class="row">
+                            <div class="k">Question Text</div>
+                            <textarea oninput="updateQ(${i}, 'text', event.target.value)" style="min-height: 86px;">${q.text || ""}</textarea>
+                        </div>
+                        <div class="meta-stack">
+                            <div class="row">
+                                <div class="k">Question ID</div>
+                                <input value="${q.id}" oninput="updateQ(${i}, 'id', event.target.value)"/>
+                            </div>
+                            <div class="row" style="align-items: center;">
+                                <div class="k" style="padding-top: 0;">Mode</div>
+                                <div class="btn-group">
+                                    ${['list', 'numeric', 'table', 'open'].map(m => `
+                                        <input type="radio" id="mode-${m}-${i}" name="mode-${i}" value="${m}" ${mode === m ? 'checked' : ''}
+                                            onchange="state.questions[${i}].mode='${m}'; harmonizeTypeFromMode(state.questions[${i}]); renderEditorPanel();"/>
+                                        <label for="mode-${m}-${i}">${{list:'Item or list', numeric:'Numeric', table:'Table', open:'Open End'}[m]}</label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="row"><div class="k">Statements</div>
-            <div>
-              ${(q.statements||[]).map((s,j)=> `
-                <div class="row">
-                  <div class="k">Statement ${j+1}</div>
-                  <div class="stack" style="flex-wrap:nowrap;">
-                    <input value="${escapeHTML(s)}" oninput="updateStmt(${i},${j},event.target.value)"/>
-                    <button onclick="delStmt(${i},${j})">🗑️</button>
-                  </div>
-                </div>`).join('')}
-              <div class="stack">
-                <button onclick="addStmt(${i})">+ Add Statement</button>
-                <button onclick="bulkAddStatements(${i})">📋 Bulk Add</button>
-              </div>
+                    <div class="editor-accordion">
+                        <details open>
+                            <summary>Options & Content</summary>
+                            <div class="details-content">
+                                ${modeSpecificHTML[mode] || '<div class="muted">Select a mode to see options.</div>'}
+                            </div>
+                        </details>
+                        ${mode==='list' ? `
+                        <details>
+                            <summary>Display & Randomization</summary>
+                            <div class="details-content">
+                                <div class="row" style="align-items: center;">
+                                    <div class="k" style="padding-top: 0;">Selection</div>
+                                    <div class="btn-group">
+                                        <input type="radio" id="sel-single-${i}" name="listSel-${i}" value="single" ${getListSelection(q)==='single'?'checked':''} onchange="setListSelection(state.questions[${i}], 'single'); queueAutosave(); renderQuestionList();"/>
+                                        <label for="sel-single-${i}">Single</label>
+                                        <input type="radio" id="sel-multi-${i}" name="listSel-${i}" value="multi" ${getListSelection(q)==='multi'?'checked':''} onchange="setListSelection(state.questions[${i}], 'multi'); queueAutosave(); renderQuestionList();"/>
+                                        <label for="sel-multi-${i}">Multi</label>
+                                    </div>
+                                </div>
+                                <div class="row" style="align-items: center;">
+                                    <div class="k" style="padding-top: 0;">Randomization</div>
+                                    <div class="btn-group">
+                                        <input type="radio" id="rand-none-${i}" name="rand-${i}" value="none" ${(q.randomization?.mode||'none')!=='shuffle'?'checked':''} onchange="updateQ(${i},'randomization',{...(state.questions[${i}].randomization||{}),mode:'none'}); queueAutosave();"/>
+                                        <label for="rand-none-${i}">None</label>
+                                        <input type="radio" id="rand-shuffle-${i}" name="rand-${i}" value="shuffle" ${q.randomization?.mode==='shuffle'?'checked':''} onchange="updateQ(${i},'randomization',{...(state.questions[${i}].randomization||{}),mode:'shuffle'}); queueAutosave();"/>
+                                        <label for="rand-shuffle-${i}">Shuffle</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+                        ` : ''}
+                        <details>
+                            <summary>Logic & Conditions</summary>
+                            <div class="details-content">
+                                <div class="row">
+                                    <div class="k">Base Verbiage</div>
+                                    <input value="${q.base?.verbiage ?? ''}" oninput="updateBase(${i},'verbiage',event.target.value)" placeholder="Default: ${state.globals.default_base_verbiage}"/>
+                                </div>
+                                <div class="row">
+                                    <div class="k">Base Definition</div>
+                                    <div>
+                                        <input id="baseDef-${i}" value="${q.base?.definition || ''}" oninput="updateBase(${i},'definition',event.target.value)" placeholder="e.g., S1 in [2]"/>
+                                        <div class="muted" style="margin-top:8px;">
+                                            <small>Helper:</small>
+                                            <div id="bbHost-${i}" class="stack" style="flex-direction:column; gap:8px; width:100%;"></div>
+                                            <div class="stack" style="gap:8px; margin-top: 4px;">
+                                                <button class="primary" style="padding:4px 8px;" onclick="bbApply(${i})">Apply</button>
+                                                <span class="muted" id="bbPrev-${i}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+                        <details>
+                            <summary>Notes</summary>
+                            <div class="details-content">
+                                <div class="row">
+                                    <div class="k">Notes</div>
+                                    <input value="${q.notes || ''}" oninput="updateQ(${i}, 'notes', event.target.value)" placeholder="e.g., Hidden, Red herring, etc."/>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                <div class="tab-content ${ui_state.active_tab==='tabplan'?'active':''}">
+                    <div class="row" style="align-items: center;">
+                        <div class="k" style="padding-top: 0;">Nets</div>
+                        <div>
+                            <div id="netsPreviewHost-${i}" class="stack" style="flex-direction:column; align-items:flex-start; gap:6px; margin-bottom:8px;"></div>
+                            <button id="addNetBtn-${i}" class="btn primary">+ Add Net</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="k">Instructions</div>
+                        <textarea oninput="updateTabPlan(${i},'additional_instructions',event.target.value)" placeholder="Add any specific instructions for the tabulation team.">${tp.additional_instructions || ''}</textarea>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div class="row"><div class="k">Likert scale</div>
-            <div class="grid2">
-              <select onchange="updateScalePoints(${i}, this.value)">
-                <option value="">(none)</option>
-                ${[5,7,10].map(n=>`<option value="${n}" ${q.scale?.points==n?'selected':''}>${n}</option>`).join('')}
-              </select>
-              <input placeholder="Labels (pipe-separated: Strongly Disagree|...|Strongly Agree)"
-                     value="${(q.scale?.labels||[]).join('|')}"
-                     oninput="updateScaleLabels(${i}, this.value)" />
-            </div>
-            <small class="muted">If points + ≥3 statements ⇒ treated as Likert multi by the generator.</small>
-          </div>
-        ` : ''}
-
-        ${mode==='numeric' ? `
-          <div class="row"><div class="k">Numeric settings</div>
-            <div>
-              <div class="stack" style="flex-wrap:wrap; gap:10px;">
-                <input style="width:120px" placeholder="Min (optional)" value="${N.min ?? ''}" oninput="updateNumeric(${i}, 'min', this.value)"/>
-                <input style="width:120px" placeholder="Max (optional)" value="${N.max ?? ''}" oninput="updateNumeric(${i}, 'max', this.value)"/>
-
-                ${q.type === 'numeric_time' ? `
-                  <select style="width:160px" onchange="updateNumeric(${i}, 'time_unit', this.value)">
-                    <option value="">(pick time unit)</option>
-                    ${['seconds','minutes','hours','days','weeks','months','years'].map(u=>`<option value="${u}" ${N.time_unit===u?'selected':''}>${u}</option>`).join('')}
-                  </select>
-                ` : `
-                  <input style="width:160px" placeholder="Unit (e.g., years)" value="${N.unit || ''}" oninput="updateNumeric(${i}, 'unit', this.value)"/>
-                `}
-
-                <input style="width:200px" placeholder="Placeholder (e.g., ____ years)" value="${N.placeholder || ''}" oninput="updateNumeric(${i}, 'placeholder', this.value)"/>
-
-                <label class="stack" style="gap:6px;">
-                  <span class="muted">Zero-pad</span>
-                  <input style="width:80px" placeholder="0 or 2" value="${N.zero_pad ?? 0}" oninput="updateNumeric(${i}, 'zero_pad', this.value)"/>
-                </label>
-
-                <label class="stack" style="gap:6px;">
-                  <input type="checkbox" ${N.integer_only ? 'checked' : ''} onchange="updateNumeric(${i}, 'integer_only', this.checked)"/>
-                  <span class="muted">Integer only</span>
-                </label>
-              </div>
-              <small class="muted">Tip: Leave min/max blank to allow any value. Use zero-pad=2 for inputs like 01–24.</small>
-            </div>
-          </div>
-        ` : ''}
-
-        ${mode==='open' ? `
-          <div class="row"><div class="k">Use encouragement tool</div>
-            <label class="stack">
-              <input type="checkbox"
-                ${q.open?.encourage ? 'checked' : ''}
-                onchange="(state.questions[${i}].open ||= {}), state.questions[${i}].open.encourage = this.checked; queueAutosave();"/>
-              <span class="muted">Enable gentle prompts if the response is empty/very short</span>
-            </label>
-          </div>
-
-          <div class="row"><div class="k">Min / Max</div>
-            <div class="stack" style="flex-wrap:wrap;">
-              <select
-                onchange="(state.questions[${i}].open ||= {}), state.questions[${i}].open.limit_kind = this.value || null; queueAutosave();">
-                <option value="" ${!q.open?.limit_kind ? 'selected' : ''} disabled hidden>-- choose --</option>
-                ${['words','characters','sentences'].map(k=>`<option value="${k}" ${q.open?.limit_kind===k?'selected':''}>${k}</option>`).join('')}
-              </select>
-              <input type="number" placeholder="Min (optional)" style="width:140px"
-                value="${q.open?.min ?? ''}"
-                oninput="(state.questions[${i}].open ||= {}), state.questions[${i}].open.min = this.value===''?null:+this.value; queueAutosave();"/>
-              <input type="number" placeholder="Max (optional)" style="width:140px"
-                value="${q.open?.max ?? ''}"
-                oninput="(state.questions[${i}].open ||= {}), state.questions[${i}].open.max = this.value===''?null:+this.value; queueAutosave();"/>
-            </div>
-          </div>
-        ` : ``}
-
-        ${mode==='table' ? (() => {
-          if (!q.grid) q.grid = { rows: (q.statements || []).slice(), cols: (q.scale?.labels || []).slice() };
-          const G = q.grid;
-          return `
-            <div class="stack preset-wrap" style="margin-bottom:6px;">
-              <button onclick="_tb_addRow(${i})">+ Row</button>
-              <button onclick="_tb_addCol(${i})">+ Column</button>
-              <button id="presetBtn-${i}" onclick="openPresetPicker(${i})">📊 Presets</button>
-              <div id="presetHost-${i}" class="preset-panel"></div>
-            </div>
-            <div style="overflow:auto; border:1px solid var(--line); border-radius:8px;">
-              <table style="width:100%; border-collapse:collapse; min-width:520px;">
-                <thead>
-                  <tr>
-                    <th style="text-align:left; padding:6px; border-bottom:1px solid var(--line); width:42%;">Statements (rows)</th>
-                    ${G.cols.map((c,ci)=>(`
-                      <th style="text-align:left; padding:6px; border-bottom:1px solid var(--line);">
-                        <input value="${escapeHTML(c)}" oninput="_tb_updCol(${i},${ci}, this.value)" />
-                        <button onclick="_tb_delCol(${i},${ci})">🗑️</button>
-                      </th>
-                    `)).join('')}
-                  </tr>
-                </thead>
-                <tbody>
-                  ${G.rows.map((r,ri)=>(`
-                    <tr>
-                      <td style="padding:6px; border-bottom:1px solid var(--line);">
-                        <input value="${escapeHTML(r)}" oninput="_tb_updRow(${i},${ri}, this.value)" />
-                        <button onclick="_tb_delRow(${i},${ri})">🗑️</button>
-                      </td>
-                      ${G.cols.map(()=>'<td style="padding:6px; border-bottom:1px solid var(--line); color:var(--muted);">•</td>').join('')}
-                    </tr>
-                  `)).join('')}
-                </tbody>
-              </table>
-            </div>
-            <small class="muted">Rows = statements, Columns = scale/options. This will export as a grid/likert table; nets follow your rules.</small>
-          `;
-        })() : ''}
-
-      </div>
-
-      <!-- ===== LOGIC TAB ===== -->
-      <div class="tab-content ${ui_state.active_tab==='logic'?'active':''}">
-        <div class="row"><div class="k">Base Verbiage</div>
-          <input value="${q.base && q.base.verbiage != null ? q.base.verbiage : ''}"
-                oninput="updateBase(${i}, 'verbiage', event.target.value)"
-                placeholder="Default: ${state.globals.default_base_verbiage}" />
         </div>
+    `;
 
-        <div class="row"><div class="k">Base Definition</div>
-          <div>
-            <input id="baseDef-${i}"
-                  value="${q.base && q.base.definition ? q.base.definition : ''}"
-                  oninput="updateBase(${i}, 'definition', event.target.value)"
-                  placeholder="e.g., S1 in [2]" />
+    // --- Post-render wiring ---
+    drawBaseBuilder(i);
+    renderNetPreviews(i);
 
-            <div class="stack muted" style="margin-top:8px; align-items:flex-start; flex-direction:column; gap:6px;">
-              <small>Helper:</small>
-              <div id="bbHost-${i}" class="stack" style="flex-direction:column; gap:8px; width:100%;"></div>
-              <div class="stack" style="gap:8px;">
-                <button class="primary" style="padding:4px 8px;" onclick="bbApply(${i})">Apply</button>
-                <span class="muted" id="bbPrev-${i}"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row"><div class="k">Notes</div>
-          <input value="${q.notes || ''}" oninput="updateQ(${i}, 'notes', event.target.value)" placeholder="e.g., Hidden, Red herring, etc." />
-        </div>
-      </div>
-
-      <!-- ===== TAB PLAN TAB ===== -->
-      <div class="tab-content ${ui_state.active_tab==='tabplan'?'active':''}">
-        <div class="row">
-          <div class="k">Nets</div>
-          <div>
-            <div id="netsPreviewHost-${i}" class="stack" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 8px;"></div>
-            <button id="addNetBtn-${i}" class="btn primary">+ Add Net</button>
-          </div>
-        </div>
-        <div class="row"><div class="k">Instructions</div>
-          <textarea oninput="updateTabPlan(${i}, 'additional_instructions', this.value)"
-                    placeholder="Add any specific instructions for the tabulation team.">${tp.additional_instructions || ''}</textarea>
-        </div>
-      </div>
-    </div> `;
-
-  drawBaseBuilder(i);
-  renderNetPreviews(i);
-
-  const addBtn = document.getElementById(`addNetBtn-${i}`);
-  if (addBtn) {
-    addBtn.onclick = () => {
-      if (isNumericQuestion(q)) {
-        openRangeNetEditor(i);
-      } else {
-        openCodesNetEditor(i);
-      }
-    };
-  }
-
-  function updateTabPlan(i, key, value){
-    if (!state.questions[i]) return;
-    if (!state.questions[i].exports) state.questions[i].exports = {};
-    if (!state.questions[i].exports.tab_plan) state.questions[i].exports.tab_plan = {};
-    state.questions[i].exports.tab_plan[key] = value;
-    queueAutosave();
-  }
+    const addBtn = document.getElementById(`addNetBtn-${i}`);
+    if (addBtn) {
+        addBtn.onclick = () => {
+            if (isNumericQuestion(q)) { openRangeNetEditor(i); }
+            else { openCodesNetEditor(i); }
+        };
+    }
 }
 
 function onOptionClick(q, opt){
@@ -4129,6 +4886,45 @@ function updateOpt(i, j, k, v, num){
   } else {
     state.questions[i].options[j][k] = v;
   }
+  queueAutosave();
+}
+
+/**
+ * Adds a preset option (e.g., "Other", "N/A") to a question.
+ * @param {number} i The index of the question in state.questions.
+ * @param {string} presetType The type of preset to add ('pna', 'other', 'na').
+ */
+function addPresetOption(i, presetType) {
+  if (!state.questions[i]) return;
+  if (!state.questions[i].options) state.questions[i].options = [];
+
+  const q = state.questions[i];
+  let newOption = {};
+
+  // Find the next available numeric code, starting from a high number
+  // to avoid conflicts with manually entered codes.
+  let nextCode = 97;
+  const existingCodes = new Set(q.options.map(o => parseInt(o.code, 10)).filter(c => !isNaN(c)));
+  while (existingCodes.has(nextCode)) {
+    nextCode++;
+  }
+
+  switch (presetType) {
+    case 'pna':
+      newOption = { code: nextCode, label: "Prefer not to say", exclusive: true };
+      break;
+    case 'other':
+      newOption = { code: nextCode, label: "Other (please specify)", anchor: 'bottom' };
+      break;
+    case 'na':
+      newOption = { code: nextCode, label: "N/A", exclusive: true };
+      break;
+    default:
+      return; // Do nothing if preset is unknown
+  }
+
+  q.options.push(newOption);
+  renderEditorPanel(); // Re-render the UI to show the new option
   queueAutosave();
 }
 
@@ -4662,13 +5458,16 @@ function bbRemoveClause(i, idx){
   drawBaseBuilder(i);
 }
 
-function bbSet(i, idx, field, value){
-  var clauses = bbEnsure(i);
-  if (!clauses[idx]) return;
-  if (field === 'op')   clauses[idx].op  = value;
-  if (field === 'qid') { clauses[idx].qid = value; clauses[idx].opt = ""; }
-  if (field === 'opt')  clauses[idx].opt = value;
-  drawBaseBuilder(i);
+function bbEnsure(i){
+  ui_state.base_builders = ui_state.base_builders || {};
+  
+  // FIX: Only parse from the main state if the temporary builder state doesn't exist yet for this question.
+  if (!ui_state.base_builders[i]) {
+      const currentDefinition = state.questions[i]?.base?.definition || '';
+      ui_state.base_builders[i] = bbParseDefinition(currentDefinition);
+  }
+  
+  return ui_state.base_builders[i];
 }
 
 function bbApply(i){
@@ -4734,7 +5533,6 @@ function drawBaseBuilder(i){
   host.innerHTML = html;
   if (prev) prev.textContent = bbBuildExpr(i) ? ('Preview: ' + bbBuildExpr(i)) : '';
 }
-
 
 /* =========================================================
    LIBRARY
@@ -5025,6 +5823,36 @@ function renderValidator(root){
 }
 
 /* =========================================================
+   Preview
+   ========================================================= */
+function renderPreview() {
+  // You can customize this part based on how you want the preview rendered
+  const previewContainer = document.getElementById("view-root");
+
+  // Clear any existing content in the preview container
+  previewContainer.innerHTML = "";
+
+  // Example content for the preview (you can replace this with your actual preview content)
+  const previewContent = `
+    <div class="pv-wrap">
+      <h2 class="pv-header">Project Preview</h2>
+      <div class="pv-sub">This is a preview of the current project</div>
+      <div class="pv-sec">
+        <h3>Preview Section 1</h3>
+        <p>Details about the first section of your project.</p>
+      </div>
+      <div class="pv-sec">
+        <h3>Preview Section 2</h3>
+        <p>Details about the second section of your project.</p>
+      </div>
+    </div>
+  `;
+  
+  previewContainer.innerHTML = previewContent;
+}
+
+
+/* =========================================================
    VERSIONS / SNAPSHOTS
    ========================================================= */
 function getSnapshotsMap(){ try{ return JSON.parse(localStorage.getItem(SNAP_KEY)||'{}'); } catch{ return {}; } }
@@ -5122,6 +5950,41 @@ function prettyJsonDiff(a,b){
 /* =========================================================
    IMPORT / EXPORT / GENERATE
    ========================================================= */
+function postAndDownload(url, filename) {
+  const data = {
+    project: state.project,
+    globals: state.globals,
+    questions: state.questions
+  };
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.blob();
+  })
+  .then(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  })
+  .catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
+    alert('An error occurred while exporting the file. Please check the console for more details.');
+  });
+}
+
 function downloadJSON(){
   state.project.updated_at = new Date().toISOString();
   const data = JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions }, null, 2);
@@ -5132,61 +5995,6 @@ function downloadJSON(){
   a.click();
   URL.revokeObjectURL(a.href);
 }
-$('#downloadJson').onclick = downloadJSON;
-
-$('#importJson').onclick = ()=>{
-  const inp = document.createElement("input");
-  inp.type = "file"; 
-  inp.accept = "application/json";
-
-  inp.onchange = async (e)=>{
-    const file = e.target.files[0]; 
-    if(!file) return;
-
-    const data = JSON.parse(await file.text());
-
-    state.project   = data.project   || state.project || {};
-    state.globals   = data.globals   || state.globals || {};
-    state.questions = Array.isArray(data.questions) ? data.questions : [];
-
-    // <<< NEW: upgrade imported project >>>
-    migrateProjectModel?.();
-
-    ui_state.active_question_index = state.questions.length ? 0 : null;
-
-    renderRoute?.(); 
-    autosaveNow?.(); 
-    setStatus?.("Loaded JSON.", true);
-    touchCurrentIntoProjects?.();
-  };
-  inp.click();
-};
-
-async function postAndDownload(url, filename){
-  $("#serverError").style.display="none";
-  setStatus("Generating...", false);
-  try{
-    const res = await fetch(url, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ project: state.project, globals: state.globals, questions: state.questions })
-    });
-    if(!res.ok){ throw new Error(await res.text() || `HTTP ${res.status}`); }
-    const blob = await res.blob();
-    const a    = document.createElement("a");
-    a.href     = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(a.href);
-    setStatus("Download complete.", true);
-  }catch(err){
-    $("#serverError").textContent = "Server error:\n\n" + err.message;
-    $("#serverError").style.display="block";
-    setStatus("Generation failed.", false);
-  }
-}
-$('#generateXlsx').onclick = ()=> postAndDownload("/generate/tab-plan",      `${(state.project.name||'project').replace(/[^\w\-]+/g,'_')}_tab_plan.xlsx`);
-$('#generateDocx').onclick = ()=> postAndDownload("/generate/questionnaire", `${(state.project.name||'project').replace(/[^\w\-]+/g,'_')}_questionnaire.docx`);
 
 /* =========================================================
    AUTOSAVE
@@ -5219,9 +6027,10 @@ function loadAutosave(){
 // ---------------- ROUTING TABLE + RENDERER (hardened) ----------------
 
 // 1) Register pages
+// Change it to this:
 routes.clear?.(); // clean slate if a previous bundle populated it
-routes.set('#/dashboard', renderDashboard);
-routes.set('#/editor',    renderEditor);
+routes.set('#/dashboard', renderSimpleDashboard);
+routes.set('#/projects', renderProjectsManager);
 
 // simple stubs (wire later)
 routes.set('#/library',   renderLibrary);
@@ -5230,10 +6039,16 @@ routes.set('#/validator', renderValidator);
 routes.set('#/versions',  renderVersions);
 
 // 2) Helpers
+// Replace your entire normalizeHash function with this one
 function normalizeHash(h) {
   const hash = h || location.hash || '#/dashboard';
-  // collapse editor subtabs to #/editor (keep subtab separately)
-  if (hash.startsWith('#/editor/')) return '#/editor';
+
+  // These checks for project-specific routes are fine
+  if (hash.startsWith('#/project/')) return hash;
+  if (hash.startsWith('#/editor')) return '#/editor';
+
+  // The old logic was breaking simple routes. 
+  // This correctly returns the full hash for pages like '#/projects'.
   return hash;
 }
 function getSubtabFromHash(h) {
@@ -5275,23 +6090,137 @@ function updateSubtabsVisibilityAndState() {
   }
 }
 
+function renderProjectShell(root) {
+  const currentHash = location.hash || '#/project/overview';
+  const activeTab = currentHash.split('/')[2] || 'overview'; // e.g., 'overview', 'pre-field'
+
+  const moreMenuItems = [
+    { label: 'Preview', hash: '#/project/preview' },
+    { label: 'Validator', hash: '#/project/validator' },
+    { label: 'Library', hash: '#/project/library' },
+    { label: 'Versions', hash: '#/project/versions' },
+    { label: 'Post-Survey', hash: '#/project/post-survey' },
+    { label: 'Rules (Settings)', hash: '#/project/rules' },
+  ];
+
+  const isMoreActive = moreMenuItems.some(item => item.hash === currentHash);
+
+  root.innerHTML = `
+    <nav class="project-shell-nav">
+      <div class="project-shell-nav-inner">
+        <button class="shell-tab ${activeTab === 'overview' ? 'active' : ''}" onclick="goto('#/project/overview')">Overview</button>
+        <button class="shell-tab ${activeTab === 'pre-field' ? 'active' : ''}" onclick="goto('#/project/pre-field')">Pre-Field</button>
+        <button class="shell-tab ${activeTab === 'fielding' ? 'active' : ''}" onclick="goto('#/project/fielding')">Fielding</button>
+        <button class="shell-tab ${activeTab === 'reporting' ? 'active' : ''}" onclick="goto('#/project/reporting')">Reporting</button>
+
+        <div class="more-menu" style="margin-left: auto;">
+          <button class="shell-tab ${isMoreActive ? 'active' : ''}">More ▾</button>
+          <div class="more-menu-content">
+            ${moreMenuItems.map(item => `
+              <button class="more-menu-item" onclick="goto('${item.hash}')">${item.label}</button>
+            `).join('')}
+          </div>
+        </div>
+        <button class="shell-tab" onclick="closeProject()">Close Project</button>
+      </div>
+    </nav>
+    <div id="project-content-host" style="padding: 0 16px;"></div>
+  `;
+
+  const host = document.getElementById('project-content-host');
+
+  // Route to the correct sub-view renderer
+  switch(activeTab) {
+    case 'overview':
+      renderOverview(host);
+      break;
+    case 'pre-field':
+      // Your existing editor now lives here
+      renderEditor(host);
+      break;
+    case 'fielding':
+      renderFielding(host);
+      break;
+    case 'reporting':
+      renderReporting(host);
+      break;
+    // The "More" menu items just need to map to your existing render functions
+    case 'validator':
+      renderValidator(host);
+      break;
+    case 'library':
+      renderLibrary(host);
+      break;
+    case 'versions':
+      renderVersions(host);
+      break;
+    case 'rules':
+      renderRules(host);
+      break;
+    case 'preview':
+      renderPreview(host);
+      break;
+    case 'post-survey':
+      renderPostSurvey(host);
+      break;
+    // Add cases for preview, post-survey etc. as you build them
+    default:
+      renderOverview(host); // Fallback to overview
+  }
+}
 
 // 4) Main router
+// Find your existing renderRoute function
+// Replace your entire renderRoute function with this one
 function renderRoute() {
   const root = document.getElementById('view-root');
   const err  = document.getElementById('serverError');
   if (!root) return;
 
+  const projectNameIndicator = document.getElementById('project-name-indicator');
+  // We clear the inner content to ensure the correct element (div or select) is shown
+  if (projectNameIndicator) projectNameIndicator.innerHTML = '';
+
+
   try {
-    const key  = normalizeHash(location.hash);
-    const view = routes.get(key) || renderDashboard;
-
-    // This handles the L2 subtabs (Pre-field, Fielding, etc.)
-    updateSubtabsVisibilityAndState();
-
     if (err) { err.style.display = 'none'; err.textContent = ''; }
-    // The view function (e.g., renderEditor) is now responsible for populating `root`.
-    view(root);
+
+    if (ui_state.active_project_id) {
+      // --- A project IS active ---
+      if (projectNameIndicator) {
+        // Display the project name as plain text
+        projectNameIndicator.textContent = state.project?.name || 'Project Loaded';
+        projectNameIndicator.className = 'project-indicator'; // Use the static div style
+      }
+      renderProjectShell(root);
+
+    } else {
+      // --- NO project is active ---
+      if (projectNameIndicator) {
+        // Build and insert the project selection dropdown
+        const projects = getProjects();
+        const options = projects.map(p => `<option value="${p.id}">${escapeHTML(p.name)}</option>`).join('');
+        
+        projectNameIndicator.innerHTML = `
+          <select id="header-project-selector" class="project-selector-dropdown">
+            <option value="" disabled selected>Select a Project...</option>
+            ${options}
+          </select>
+        `;
+
+        // Add an event listener to the new dropdown
+        document.getElementById('header-project-selector').addEventListener('change', (e) => {
+          if (e.target.value) {
+            openProjectById(e.target.value);
+          }
+        });
+      }
+      
+      const key  = normalizeHash(location.hash) || '#/dashboard';
+      const view = routes.get(key) || renderSimpleDashboard;
+      view(root);
+    }
+
     refreshSidebarProjects();
     highlightNav?.();
   } catch (e) {
@@ -5300,11 +6229,18 @@ function renderRoute() {
       err.style.display = 'block';
       err.textContent = (e && e.stack) ? e.stack : String(e);
     }
-    try { renderDashboard(root); } catch(_) {}
+    try { renderSimpleDashboard(root); } catch(_) {}
   }
 }
 
 // 5) Bootstrap (safe; don’t blow up if ensureRules was nuked)
+// Make the header logo navigate to the dashboard correctly
+document.getElementById('logo-link')?.addEventListener('click', (e) => {
+  e.preventDefault(); // Stop the link from navigating immediately
+  ui_state.active_project_id = null; // <-- This is the crucial step
+  location.hash = '#/dashboard'; // Manually trigger the navigation
+});
+
 (function bootstrap(){
   if (typeof ensureRules === 'function') ensureRules();
   const s = localStorage.getItem(AUTOSAVE_KEY);
@@ -5318,75 +6254,75 @@ function renderRoute() {
 window.addEventListener('hashchange', renderRoute);
 window.addEventListener('DOMContentLoaded', renderRoute);
 
-// optional: editor inner tabs fallback
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.editor-tabs [data-tab]');
-  if (!btn) return;
-  if (typeof setActiveTab === 'function') {
-    setActiveTab(btn.dataset.tab);
-  } else {
-    // minimal fallback if helper isn’t defined
-    ui_state.active_tab = btn.dataset.tab;
-    renderEditorPanel?.();
+// Side Drawer → Preview panel switching
+(function() {
+  console.log("Starting project data migration...");
+
+  const PROJECTS_KEY = "qgen_projects_v1";
+  const projectsJSON = localStorage.getItem(PROJECTS_KEY);
+
+  if (!projectsJSON) {
+    console.log("No projects found to migrate. All good!");
+    return;
+  }
+
+  try {
+    let projects = JSON.parse(projectsJSON);
+    let fixedCount = 0;
+
+    // Loop through each project to find and fix the error
+    projects.forEach(p => {
+      // The bug is when important_dates is an object but NOT an array.
+      if (p && typeof p.important_dates === 'object' && !Array.isArray(p.important_dates)) {
+        p.important_dates = []; // Fix it by replacing the object with an empty array.
+        fixedCount++;
+      }
+    });
+
+    if (fixedCount > 0) {
+      // Save the corrected data back to localStorage
+      localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+      console.log(`✅ Success! Repaired ${fixedCount} project(s). Your data is safe.`);
+    } else {
+      console.log("✅ No issues found. Your project data is already in the correct format.");
+    }
+
+  } catch (e) {
+    console.error("❌ Failed to migrate project data. Error:", e);
+  }
+
+  console.log("Migration script finished.");
+})();
+
+// GLOBAL CLICK LISTENER
+document.addEventListener('click', function(e) {
+
+  if (e.target.classList.contains('remove-role-btn')) {
+    e.preventDefault();
+    e.target.closest('.role-row').remove();
+  }
+  
+  // --- Logic for Editor Tabs ---
+  const tabBtn = e.target.closest('.editor-tabs [data-tab]');
+  if (tabBtn) {
+    if (typeof setActiveTab === 'function') {
+      setActiveTab(tabBtn.dataset.tab);
+    } else {
+      // Minimal fallback if helper isn’t defined
+      ui_state.active_tab = tabBtn.dataset.tab;
+      renderEditorPanel?.();
+    }
+  }
+
+  const settingsBtn = e.target.closest('[data-action="toggle-advanced"]');
+  if (settingsBtn) {
+    const targetId = settingsBtn.dataset.target;
+    const advancedPanel = document.getElementById(targetId);
+    if (advancedPanel) {
+      advancedPanel.classList.toggle('is-hidden');
+    }
   }
 });
-</script>
-<div id="toastHost" aria-live="polite" style="position:fixed; inset:auto 16px 16px auto; z-index:1100;"></div>
-<script>
-// Side Drawer → Preview panel switching
-// Side Drawer → Preview panel switching
-(function(){
-  const drawer = document.getElementById('sideDrawer');
-
-  // NEW, CORRECTED click handler for drawer links
-  drawer?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.sd-link');
-    if (!btn) return;
-
-    // route jumps (Editor / Rules / Validator etc.)
-    const goto = btn.getAttribute('data-goto');
-    if (goto){
-      location.hash = goto;
-      return;
-    }
-
-    // preview tab switching
-    const id = btn.getAttribute('data-pvtab'); // "scr" | "main" | "tab" | "ban"
-    if (!id) return;
-
-    // --- THIS IS THE FIX ---
-    // 1. Map the short ID to the state variable's value
-    const map = { scr: 'screener', main: 'main', tab: 'tabplan', ban: 'banner' };
-    const nextTab = map[id];
-
-    if (nextTab && window.ui_state) {
-      // 2. Update the application's state
-      ui_state.active_prefield_tab = nextTab;
-
-      // 3. Trigger a full re-render of the editor view
-      // This ensures the layout changes correctly (e.g., from 2-panel to 1-panel)
-      if (typeof renderEditor === 'function' && isEditorRoute()) {
-        const root = document.getElementById('view-root');
-        if (root) renderEditor(root);
-      }
-    }
-
-    // Highlight the drawer selection
-    drawer.querySelectorAll('.sd-link[data-pvtab]').forEach(d => {
-      d.classList.toggle('active', d.dataset.pvtab === id);
-    });
-  });
-
-  // If user clicks the old top pills, mirror state into drawer
-  document.addEventListener('click', (e)=>{
-    const t = e.target.closest('.pv-tab');
-    if (!t) return;
-    const id = t.dataset.pvtab;
-    drawer?.querySelectorAll('.sd-link[data-pvtab]').forEach(d => {
-      d.classList.toggle('active', d.dataset.pvtab === id);
-    });
-  });
-})();
 </script>
 </body>
 </html>
