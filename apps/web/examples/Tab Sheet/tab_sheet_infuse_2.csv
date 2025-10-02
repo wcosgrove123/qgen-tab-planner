@@ -1,0 +1,53 @@
+﻿CUE INSIGHTS,,,TAB PLAN,CONFIDENTIAL
+,,,,
+INFUSE: Claims Test,,,,
+Professional Tab Plan & Analytical Framework,,,,
+,,,,
+Client: JJIV,Total Questions: 18,Generated: 9/30/2025,,
+,,,,
+ANALYTICAL REQUIREMENTS & SPECIFICATIONS,,,,
+Provide banner-by-banner cross-tabulation tables with statistical significance testing,,,,
+"Include means, medians, and descriptive statistics for all numeric variables",,,,
+"Deliver Excel outputs: percentages only, zero decimals with % formatting",,,,
+Supply SPSS data file with complete variable labels and value definitions,,,,
+,,,,
+,,,,
+Q#,Base Verbiage,Base Definition,Nets (English & code #s),Additional Table Instructions
+Screener,,,,
+S1,Total (qualified respondents),,,
+S2,Total (qualified respondents),,,
+S3,Total (qualified respondents),,,Provide means and medians. Include statistical significance testing
+S4,Total (qualified respondents),,,
+S5,Total (qualified respondents),,,
+S6,Total (qualified respondents),,,
+S7,Total (qualified respondents),,,
+S8,Total (qualified respondents),,,
+S9,Total (qualified respondents),,,
+Main Survey,,,,
+Q1,Total (qualified respondents),,,Provide means and medians. Include statistical significance testing
+Q2,Total (qualified respondents),,"Net: T2B, B2B",
+Q3,Total (qualified respondents),,,
+Q3_TB Summary,Total (qualified respondents),,,Show table for each statement with TB ratings data shown.
+Q3_T2B Summary,Total (qualified respondents),,,Show table for each statement with T2B ratings data shown.
+Q3_B2B Summary,Total (qualified respondents),,,Show table for each statement with B2B ratings data shown.
+Q3_BB Summary,Total (qualified respondents),,,Show table for each statement with BB ratings data shown.
+Q3_Mean Summary,Total (qualified respondents),,,Show table for each statement with mean data shown.
+Q4,Total (qualified respondents),,"Net: T2B, B2B",
+Q5,Total (qualified respondents),,,
+Q6,Total (qualified respondents),,"Net: T2B, B2B",
+Q6_TB Summary,Total (qualified respondents),,,Show table for each statement with TB ratings data shown.
+Q6_T2B Summary,Total (qualified respondents),,,Show table for each statement with T2B ratings data shown.
+Q6_B2B Summary,Total (qualified respondents),,,Show table for each statement with B2B ratings data shown.
+Q6_BB Summary,Total (qualified respondents),,,Show table for each statement with BB ratings data shown.
+Q6_Mean Summary,Total (qualified respondents),,,Show table for each statement with mean data shown.
+Q7,Total (qualified respondents),,"Net: T2B, B2B",
+Q7_TB Summary,Total (qualified respondents),,,Show table for each statement with TB ratings data shown.
+Q7_T2B Summary,Total (qualified respondents),,,Show table for each statement with T2B ratings data shown.
+Q7_B2B Summary,Total (qualified respondents),,,Show table for each statement with B2B ratings data shown.
+Q7_BB Summary,Total (qualified respondents),,,Show table for each statement with BB ratings data shown.
+Q7_Mean Summary,Total (qualified respondents),,,Show table for each statement with mean data shown.
+Q8,Total (qualified respondents),,"Net: T2B, B2B",
+Q9,Total (qualified respondents),,"Net: T2B, B2B",
+,,,,
+,,,,
+Cue Insights | Professional Market Research,,,,"Generated: 9/30/2025, 11:40:45 AM"

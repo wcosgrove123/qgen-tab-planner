@@ -1,0 +1,199 @@
+ 
+
+GLP-1 Patient Opportunity Assessment Screener/Survey
+
+Sample
+•	3-min online survey
+•	N200, US only
+•	Ages 18+ who currently use a GLP-1 medication
+•	Balance survey invitations to Census data to be representative of the general population
+o	Completes to fall naturally with no quotas set on demographics among completes
+
+
+SCREENER
+
+S1. What is your age?  
+SELECT FROM DROP DOWN
+TERMINATE IF <18
+
+
+S2. What is your gender? (Select one)
+1.	Male 			
+2.	Female		
+3.	Other 		
+4.	Prefer not to respond	
+TERMINATE IF CODES 1 OR 2 NOT SELECTED
+
+
+S3. Are you currently using any prescription medication to treat any of the following conditions? (Select all that apply)
+Randomize list
+1.	Weight loss
+2.	Diabetes
+3.	Blood pressure
+4.	Cholesterol
+5.	Sleep disorders
+6.	None of the above Exclusive, and anchor to bottom 
+TERMINATE IF CODE 1 OR 2 NOT SELECTED
+
+	
+S4. Which of the following prescription medications (if any) are you currently using? (Select all that apply)
+Alphabetize
+1.	Ozempic
+2.	Wegovy
+3.	Rybelsus
+4.	Victoza
+5.	Saxenda
+6.	Tirzepatide
+7.	Mounjaro 
+8.	Zepbound
+9.	Trulicity
+10.	Bydureon BCise
+11.	Byetta
+12.	Semaglutide
+13.	Liraglutide
+14.	Adlyxin
+15.	Januvia
+16.	Onglyza
+17.	Axpinet
+18.	Glucophage
+19.	Avandia
+20.	Actos
+21.	Amaryl
+22.	Glucotrol
+23.	Micronase
+24.	Glynase
+25.	None of the above Exclusive, and anchor to bottom 
+
+Terminate if two or more options are selected between 1-14 unless the respondent selects the generic and brand versions of the SAME GLP-1 medication. If this is the case, we’ll let the respondent continue with the survey, and we’ll use/pipe in the brand name version of the GLP-1 medication they selected throughout the survey. 
+
+Semaglutide is an ok response with one of the following: Ozempic, Wegovy, or Rybelsus
+Tirzepatide is an ok response with one of the following: Mounjaro or Zepbound
+Liraglutide is an ok response with one of the following: Victoza or Saxenda
+(Semaglutide, tirzepatide, and liraglutide are the generic names. The others are brand names.)
+
+Flag if four or more options are selected between 15-24.
+
+
+Hidden variable
+USE1. Does respondent use GLP-1 medication currently?  
+1.	Yes (If S4=1-14)
+2.	No (if S4 not equal to 1-14)
+IF USE1=2, TERMINATE 
+
+S5. How long have you been using <Pipe in S4 1-14 response> for? If you have been using for less than 1 year, enter “0”. If unsure, please provide best estimate.
+Drop down box for each of years ___ years [min 0 max 20]  
+
+
+S6. Which of the following is the primary reason for you taking <pipe in S4 1-14 response>? (Select one) 
+Randomize list
+1.	Weight loss
+2.	Diabetes
+
+
+S7. Have you experienced any of the following side effects from using <pipe in S4 1-14 response>? (Select all that apply)
+Randomize list
+1.	Nausea
+2.	Diarrhea
+3.	Abdominal (stomach) pain
+4.	Vomiting
+5.	Hair thinning/hair loss
+6.	Bad breath/oral issues
+7.	Constipation
+8.	Gas/burping
+9.	Dizziness
+10.	Fatigue
+11.	Dehydration
+12.	Sagging skin/wrinkles
+13.	Loss of muscle
+14.	Loss of collagen
+15.	Other
+16.	No side effects Exclusive, and anchor to bottom 
+
+
+QC1. To continue, please answer the following question: Which of these is not found on the head? (Select one)
+1.	Eye
+2.	Ear
+3.	Finger
+4.	Nose
+[Red herring - TERMINATE IF CODE 3 NOT SELECTED]
+
+
+MAIN SURVEY
+
+For the remainder of this survey, we will use the term “GLP-1” to refer to your <pipe in S4 1-14 response> medication.
+
+
+Q1. Which of the following healthcare providers are you seeing/talking to related to your usage of GLP-1 medication, including any related side effects? Think about who you talk to regarding managing your prescription, questions you might have about GLP-1s, discussing any side effects or management of symptoms from GLP-1 usage, etc. (Select all that apply)
+RANDOMIZE LIST
+1.	Pharmacist
+2.	Primary Care Physician (MD/DO)
+3.	Endocrinologist
+4.	Cardiologist
+5.	Gastroenterologist
+6.	Dermatologist 
+7.	Nephrologist
+8.	Dietician
+9.	Other healthcare professional Anchor to bottom 
+
+
+Q1a. How often are you seeing/talking to each of the following healthcare providers regarding your usage of GLP-1 medication, including any related side effects? 
+
+Only show HCP Selections from Q1 (exclude ‘other’)	Once a week or more	2-3 times a month	Once a month	Once every few months	Less often
+HCP 1					
+HCP 2 					
+HCP 3					
+Etc.					
+
+
+Q2. When discussing your GLP-1 medication with healthcare providers, what are the topics you discuss with each type of provider? (Select all that apply for each provider)
+Show HCP selections from Q1 (exclude ‘other’)
+RANDOMIZE LIST	Insert HCP selection from Q1	Insert HCP selection from Q1	Etc.
+1.	Writes GLP-1 scripts for me			
+2.	Generally manages follow ups with me after initial GLP-1 script is given			
+3.	Answers my questions regarding GLP-1 medication, including questions about side effects			
+4.	Discusses management of GLP-1 side effects/symptoms with me			
+5.	Recommends treatment options to me for side effect management of GLP-1s			
+6.	None of the above ANCHOR, EXCLUSIVE			
+
+
+Q3. Now think only about using over-the-counter medications for management or treatment of side effects and symptoms from taking your GLP-1 medication.  Which of the following healthcare providers do you discuss each topic with? (Select all that apply for each provider)
+Show HCP selections from Q1 (exclude ‘other’)
+RANDOMIZE LIST	Insert HCP selection from Q1	Insert HCP selection from Q1	Etc.
+1.	Recommends OTC medications for side effect management of GLP-1s			
+2.	Provides samples of OTC medications for side effect management of GLP-1s			
+3.	Recommends specific brands of OTC medication for side effect management of GLP-1s			
+4.	None of the above ANCHOR, EXCLUSIVE			
+
+
+If S7=13 or 14:
+Q4. You mentioned that you experienced <pipe in S7_13 and S7_14 based on what was selected> as a side effect from using <pipe in S4 1-14 response>. Where did you notice <pipe in S7_13 and S7_14 based on what was selected>, and how did you know it was related to using <pipe in S4 1-14 response>?
+	Provide Text Box - OPEN END
+
+
+Q5TEXT. The survey is nearly done! Finally, we just would like to understand a little more about you.
+
+
+Q5. Which of the following best describes you? SR
+1.	Hispanic, Latino, Latinx
+2.	Not Hispanic, Latino, Latinx
+
+
+Q6. Which of the following best describes your race? SR
+1.	American Indian or Alaska Native
+2.	Asian
+3.	Black or African American
+4.	Native Hawaiian or Other Pacific Islander
+5.	White
+6.	Some other race
+7.	Prefer not to answer
+
+
+Q7. What is your approximate annual household income (before taxes)? SR
+1.	Under $25,000
+2.	$25,000 - $49,999
+3.	$50,000 - $74,999
+4.	$75,000 - $99,999
+5.	$100,000 - $149,999
+6.	$150,000 or higher
+7.	Prefer not to say
+

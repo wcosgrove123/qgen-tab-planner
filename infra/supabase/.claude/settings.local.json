@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//w/local-ai-dev/apps/qgen-tab-planner/apps/web/src/lib/**)",
+      "Read(//w/local-ai-dev/apps/qgen-tab-planner/apps/web/src/**)",
+      "Read(//w/local-ai-dev/apps/qgen-tab-planner/apps/web/examples/**)",
+      "Read(//w/local-ai-dev/apps/qgen-tab-planner/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

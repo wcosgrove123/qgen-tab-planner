@@ -1,0 +1,356 @@
+/* Tab Plan Preview Styles - Matching Python tabplan_writer.py format */
+
+.tab-plan-preview {
+  font-family: 'Aptos', system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  background: var(--surface-1);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+/* Header Section */
+.tab-plan-header {
+  background: linear-gradient(135deg, #FFE47A 0%, #F2B800 100%);
+  padding: 16px 20px;
+  border-bottom: 2px solid #212161;
+}
+
+.tab-plan-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #212161;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.tab-plan-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #212161;
+}
+
+.meta-item {
+  font-weight: 500;
+}
+
+.tab-plan-notes {
+  font-size: 11px;
+  color: #212161;
+  line-height: 1.3;
+}
+
+.tab-plan-notes p {
+  margin: 2px 0;
+}
+
+/* Table Structure - Restore working CSS table approach */
+.tab-plan-table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tab-plan-header-row {
+  display: table-row;
+  background: #212161;
+}
+
+.tab-plan-header-cell.single-column {
+  display: table-cell;
+  padding: 0;
+  font-weight: 700;
+  color: #F2B800;
+  background: #212161;
+  border: 1px solid #8197D0;
+  width: 100%;
+}
+
+/* Grid structure inside single column - make header and data use identical grid */
+.column-grid {
+  display: grid;
+  grid-template-columns: 80px 250px 180px 160px 1fr; /* Q#, Base Verbiage, Base Definition, Nets, Instructions */
+  gap: 0;
+  width: 100%;
+}
+
+.grid-header-cell {
+  padding: 8px 12px;
+  font-weight: 700;
+  color: #F2B800;
+  background: #212161;
+  border-right: 1px solid #8197D0;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 11px;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-header-cell:last-child {
+  border-right: none;
+}
+
+/* Section Headers - Properly integrated with table structure */
+.tab-plan-section-header {
+  display: table-row;
+  background: #A7B5DB;
+}
+
+.section-title.single-column {
+  display: table-cell;
+  padding: 0;
+  background: #A7B5DB;
+  border: 2px solid #8197D0;
+  width: 100%;
+}
+
+.section-title-text {
+  padding: 10px 16px;
+  background: #A7B5DB;
+  color: white;
+  font-weight: 700;
+  text-align: center;
+  font-size: 12px;
+  width: 100%;
+}
+
+/* Question Rows - Simplified single column approach */
+.tab-plan-row {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #8197D0;
+}
+
+.tab-plan-row:hover {
+  background: var(--surface-3);
+}
+
+.tab-plan-row.zebra {
+  background: #EEF2FB;
+}
+
+.tab-plan-row.zebra:hover {
+  background: #E3EAF7;
+}
+
+.tab-plan-cell.single-column {
+  padding: 0;
+  background: var(--surface-1);
+  width: 100%;
+}
+
+.grid-cell {
+  padding: 6px 8px;
+  border-right: 1px solid #8197D0;
+  font-size: 11px;
+  line-height: 1.3;
+  word-wrap: break-word;
+  background: var(--surface-1);
+  display: flex;
+  align-items: flex-start;
+}
+
+.grid-cell:last-child {
+  border-right: none;
+}
+
+/* Grid cell-specific styling */
+.grid-cell.qid-cell {
+  text-align: center;
+  font-weight: 600;
+  color: #212161;
+  justify-content: center;
+}
+
+.grid-cell.base-verb-cell {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.grid-cell.base-def-cell {
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  background: #FFFDF3;
+  color: #2d3748;
+}
+
+.grid-cell.nets-cell {
+  font-weight: 500;
+  color: #2b6cb0;
+}
+
+.grid-cell.instructions-cell {
+  color: #4a5568;
+}
+
+/* Legacy class selectors for compatibility */
+.qid-cell { text-align: center; font-weight: 600; color: #212161; }
+.verbiage-cell { font-weight: 500; }
+.base-verb-cell { color: #4a5568; }
+.base-def-cell {
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  background: #FFFDF3;
+  color: #2d3748;
+}
+.nets-cell { font-weight: 500; color: #2b6cb0; }
+.instructions-cell { color: #4a5568; }
+
+/* Zebra striping for cells */
+.tab-plan-row.zebra .tab-plan-cell {
+  background: #EEF2FB;
+}
+
+.tab-plan-row.zebra .base-def-cell {
+  background: #F7F5E8; /* Slightly darker cream for zebra */
+}
+
+/* Footer */
+.tab-plan-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Error State */
+.tab-plan-error {
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--surface-2);
+  color: var(--danger);
+  border-radius: 8px;
+  margin: 20px;
+}
+
+.tab-plan-error h3 {
+  margin: 0 0 10px 0;
+  color: var(--danger);
+}
+
+.tab-plan-error pre {
+  background: var(--surface-3);
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  text-align: left;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+/* Loading State */
+.tab-plan-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .tab-plan-table {
+    min-width: 1000px;
+  }
+
+  .tab-plan-preview {
+    overflow-x: auto;
+  }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .tab-plan-preview {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .tab-plan-header {
+  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+}
+
+[data-theme="dark"] .tab-plan-title,
+[data-theme="dark"] .tab-plan-meta,
+[data-theme="dark"] .tab-plan-notes {
+  color: var(--fg);
+}
+
+[data-theme="dark"] .tab-plan-header-cell {
+  background: #2a2a2a;
+  color: var(--cta);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .section-title {
+  background: #3a3a3a;
+  color: var(--fg);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .section-title::after {
+  background: #3a3a3a;
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .tab-plan-row.zebra {
+  background: var(--surface-3);
+}
+
+[data-theme="dark"] .tab-plan-row.zebra:hover {
+  background: var(--surface-1);
+}
+
+[data-theme="dark"] .tab-plan-cell {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--fg);
+}
+
+[data-theme="dark"] .tab-plan-row.zebra .tab-plan-cell {
+  background: var(--surface-3);
+}
+
+[data-theme="dark"] .base-def-cell {
+  background: var(--surface-1);
+}
+
+[data-theme="dark"] .tab-plan-row.zebra .base-def-cell {
+  background: var(--surface-2);
+}
+
+[data-theme="dark"] .qid-cell {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .nets-cell {
+  color: var(--cta);
+}
+
+[data-theme="dark"] .tab-plan-footer {
+  background: var(--surface-3);
+  border-color: var(--line);
+}

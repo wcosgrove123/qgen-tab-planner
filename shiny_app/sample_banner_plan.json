@@ -1,0 +1,71 @@
+{
+  "name": "INFUSE Claims Test Banner",
+  "description": "Brand comparison with demographic splits",
+  "groups": [
+    {
+      "name": "Brand Worn",
+      "columns": [
+        {
+          "id": "acuvue",
+          "name": "Current ACUVUE",
+          "equation": "S7=2"
+        },
+        {
+          "id": "bl_infuse",
+          "name": "Current B&L Infuse",
+          "equation": "S7=10"
+        }
+      ]
+    },
+    {
+      "name": "ACUVUE Subgroups",
+      "columns": [
+        {
+          "id": "acuvue_1-9h",
+          "name": "1-9 hours/day, ACUVUE",
+          "equation": "Q1=1-9 & S7=2"
+        },
+        {
+          "id": "acuvue_10h",
+          "name": "10+ hours/day, ACUVUE",
+          "equation": "Q1>=10 & S7=2"
+        },
+        {
+          "id": "acuvue_female",
+          "name": "Female, ACUVUE",
+          "equation": "S1=1 & S7=2"
+        },
+        {
+          "id": "acuvue_male",
+          "name": "Male, ACUVUE",
+          "equation": "S1=2 & S7=2"
+        }
+      ]
+    },
+    {
+      "name": "B&L Infuse Subgroups",
+      "columns": [
+        {
+          "id": "infuse_1-9h",
+          "name": "1-9 hours/day, B&L Infuse",
+          "equation": "Q1=1-9 & S7=10"
+        },
+        {
+          "id": "infuse_10h",
+          "name": "10+ hours/day, B&L Infuse",
+          "equation": "Q1>=10 & S7=10"
+        },
+        {
+          "id": "infuse_female",
+          "name": "Female, B&L Infuse",
+          "equation": "S1=1 & S7=10"
+        },
+        {
+          "id": "infuse_male",
+          "name": "Male, B&L Infuse",
+          "equation": "S1=2 & S7=10"
+        }
+      ]
+    }
+  ]
+}

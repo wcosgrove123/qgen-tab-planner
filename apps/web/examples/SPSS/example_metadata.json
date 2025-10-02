@@ -1,0 +1,113 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-09-30T10:30:00.000Z",
+  "projectId": "ad0c9cf5-d464-40b9-9c03-8348ce7a1eac",
+  "questions": {
+    "S7": {
+      "id": "126e13d2-cf9a-4b72-ad13-92880d64c7fa",
+      "text": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "mode": "multi",
+      "type": "multi",
+      "options": [
+        { "code": "1", "label": "Day Acuvue Moist", "orderIndex": 0 },
+        { "code": "2", "label": "Acuvue Oasys 1-Day", "orderIndex": 1 },
+        { "code": "3", "label": "Acuvue Oasys 1 MAX 1-Day", "orderIndex": 2 },
+        { "code": "4", "label": "Cooper MyDay", "orderIndex": 3 },
+        { "code": "5", "label": "Cooper Clariti 1-Day", "orderIndex": 4 },
+        { "code": "6", "label": "Alcon Dailies Total1", "orderIndex": 5 },
+        { "code": "7", "label": "Alcon Dailies Aqua Comfort Plus", "orderIndex": 6 },
+        { "code": "8", "label": "Alcon Precision 1", "orderIndex": 7 },
+        { "code": "9", "label": "B&L BioTrue ONEday", "orderIndex": 8 },
+        { "code": "10", "label": "Bausch & Lomb Infuse", "orderIndex": 9 },
+        { "code": "97", "label": "Other (Please Specify)", "orderIndex": 10 },
+        { "code": "98", "label": "Don't know / Can't remember", "orderIndex": 11 }
+      ]
+    }
+  },
+  "columnMappings": {
+    "S7r1": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "1",
+      "optionLabel": "Day Acuvue Moist",
+      "questionMode": "multi"
+    },
+    "S7r2": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "2",
+      "optionLabel": "Acuvue Oasys 1-Day",
+      "questionMode": "multi"
+    },
+    "S7r3": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "3",
+      "optionLabel": "Acuvue Oasys 1 MAX 1-Day",
+      "questionMode": "multi"
+    },
+    "S7r4": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "4",
+      "optionLabel": "Cooper MyDay",
+      "questionMode": "multi"
+    },
+    "S7r5": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "5",
+      "optionLabel": "Cooper Clariti 1-Day",
+      "questionMode": "multi"
+    },
+    "S7r6": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "6",
+      "optionLabel": "Alcon Dailies Total1",
+      "questionMode": "multi"
+    },
+    "S7r7": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "7",
+      "optionLabel": "Alcon Dailies Aqua Comfort Plus",
+      "questionMode": "multi"
+    },
+    "S7r8": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "8",
+      "optionLabel": "Alcon Precision 1",
+      "questionMode": "multi"
+    },
+    "S7r9": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "9",
+      "optionLabel": "B&L BioTrue ONEday",
+      "questionMode": "multi"
+    },
+    "S7r10": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "10",
+      "optionLabel": "Bausch & Lomb Infuse",
+      "questionMode": "multi"
+    },
+    "S7r97": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "97",
+      "optionLabel": "Other (Please Specify)",
+      "questionMode": "multi"
+    },
+    "S7r98": {
+      "questionId": "S7",
+      "questionText": "Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often?",
+      "optionCode": "98",
+      "optionLabel": "Don't know / Can't remember",
+      "questionMode": "multi"
+    }
+  }
+}

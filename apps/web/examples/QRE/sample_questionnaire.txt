@@ -1,0 +1,48 @@
+Sample Healthcare Questionnaire
+
+This is a sample questionnaire showing the format for importing.
+
+S1. Are you currently a healthcare professional?
+1. Yes
+2. No
+
+S2. Which of the following best describes your role?
+1. General Practitioner
+2. Specialist Physician
+3. Nurse Practitioner
+4. Pharmacist
+5. Other healthcare role
+
+Q1. How often do you prescribe medication for diabetes patients?
+1. Daily
+2. Weekly
+3. Monthly
+4. Rarely
+5. Never
+
+Q2. Please rate your satisfaction with current diabetes treatment options.
+1. Very satisfied
+2. Somewhat satisfied
+3. Neutral
+4. Somewhat dissatisfied
+5. Very dissatisfied
+
+Q3. What is your primary concern when prescribing diabetes medication?
+1. Efficacy
+2. Side effects
+3. Patient compliance
+4. Cost
+5. Drug interactions
+
+Q4. How likely are you to recommend GLP-1 treatments to eligible patients?
+1. Very likely
+2. Somewhat likely
+3. Neutral
+4. Somewhat unlikely
+5. Very unlikely
+
+Q5. Please specify any additional comments about diabetes treatment.
+[Open text response]
+
+Q6. What is your age?
+[Numeric response]

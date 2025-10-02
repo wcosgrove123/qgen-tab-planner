@@ -1,0 +1,202 @@
+/**
+ * Termination Logic Builder Styles
+ *
+ * Professional, clean, and modern styling for termination conditions
+ */
+
+/* Main Builder Container */
+.termination-builder,
+.must-select-builder {
+    font-family: inherit;
+}
+
+/* Operator Toggle Buttons */
+.operator-toggle {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.operator-btn {
+    transition: all 0.15s ease;
+}
+
+.operator-btn:hover {
+    opacity: 0.9;
+}
+
+/* Option Chips in Simple Mode */
+.option-chip {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.option-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.option-chip.selected {
+    box-shadow: 0 2px 8px rgba(var(--cue-primary-rgb, 255, 87, 51), 0.3);
+}
+
+.option-chip .chip-checkbox {
+    transition: all 0.15s ease;
+}
+
+/* Advanced Mode Condition Rows */
+.termination-condition-row {
+    transition: all 0.2s ease;
+}
+
+.termination-condition-row:hover {
+    border-color: var(--cue-primary);
+    background: var(--surface-2);
+}
+
+/* Type Toggle Button (IS/NOT) */
+.type-toggle {
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.type-toggle:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.type-toggle.exclude {
+    box-shadow: 0 1px 3px rgba(255, 68, 68, 0.3);
+}
+
+.type-toggle.include {
+    box-shadow: 0 1px 3px rgba(var(--cue-primary-rgb, 255, 87, 51), 0.3);
+}
+
+/* Condition Option Tags */
+.condition-option-tag {
+    transition: all 0.15s ease;
+}
+
+.condition-option-tag button {
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.condition-option-tag:hover button {
+    opacity: 1;
+    color: var(--danger);
+}
+
+/* Operator Badges */
+.multi-operator,
+.condition-operator {
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.multi-operator:hover,
+.condition-operator:hover {
+    background: var(--cue-primary);
+    color: white;
+}
+
+/* Equation Display */
+.termination-header code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    letter-spacing: -0.02em;
+}
+
+/* Empty State */
+.termination-disabled,
+.must-select-disabled {
+    transition: all 0.2s ease;
+}
+
+.termination-disabled:hover,
+.must-select-disabled:hover {
+    background: var(--surface-1);
+}
+
+/* Button Styles */
+.termination-builder .btn.ghost.mini,
+.termination-builder .btn.ghost.small {
+    transition: all 0.15s ease;
+}
+
+.termination-builder .btn.ghost.mini:hover {
+    background: var(--surface-2);
+    transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.termination-condition-row {
+    animation: fadeIn 0.2s ease;
+}
+
+.option-chip {
+    animation: fadeIn 0.15s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .termination-options-grid {
+        gap: 4px;
+    }
+
+    .option-chip {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .termination-condition-row {
+        flex-wrap: wrap;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .termination-builder .btn,
+    .must-select-builder .btn {
+        display: none;
+    }
+
+    .termination-header code {
+        border: none;
+        background: transparent;
+        color: black;
+    }
+}
+
+/* Accessibility */
+.option-chip:focus-visible,
+.operator-btn:focus-visible,
+.type-toggle:focus-visible {
+    outline: 2px solid var(--cue-primary);
+    outline-offset: 2px;
+}
+
+/* Dark Mode Support (if you have it) */
+@media (prefers-color-scheme: dark) {
+    .termination-header code {
+        background: rgba(255, 87, 51, 0.15);
+        border-color: rgba(255, 87, 51, 0.4);
+    }
+
+    .option-chip {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .option-chip.selected {
+        box-shadow: 0 2px 8px rgba(255, 87, 51, 0.4);
+    }
+}

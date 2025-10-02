@@ -1,0 +1,37 @@
+services:
+  supabase:
+    image: supabase/local:latest
+    env_file: ../env/dev.supabase.env
+    ports:
+      - "54321:54321"    # postgres+api
+      - "54322:54322"    # studio
+    volumes:
+      - supabase-data:/data
+
+  api:
+    build:
+      context: ../../services/api
+      dockerfile: Dockerfile
+    env_file: ../env/dev.api.env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../../services/api:/app
+    ports:
+      - "8010:8000"
+    depends_on: [supabase]
+
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    env_file: ../env/dev.web.env
+    command: ["npm","run","dev","--","--host","0.0.0.0","--port","5173"]
+    volumes:
+      - ../../apps/web:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on: [api]
+
+volumes:
+  supabase-data:

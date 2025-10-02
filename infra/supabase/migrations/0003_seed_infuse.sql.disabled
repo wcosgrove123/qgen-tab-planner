@@ -1,0 +1,19 @@
+-- 0003_seed_infuse.sql
+DO $$
+DECLARE v_project_id UUID;
+BEGIN
+  v_project_id := qgen_ingest_questionnaire(
+    -- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    -- PASTE THE FULL JSON FROM INFUSE.json BETWEEN $$...$$ BELOW
+    $${
+      "project": { /* ... paste INFUSE.json content here ... */ },
+      "globals": { /* ... */ },
+      "questions": [ /* ... */ ]
+    }$$::jsonb
+    -- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  );
+
+  -- optional: bump status->Reporting if present in JSON
+  UPDATE projects SET status = 'Reporting', updated_at = NOW()
+  WHERE id = v_project_id AND (SELECT (qgen_ingest_questionnaire($$ {} $$)::uuid) IS NULL); -- no-op, keeps DO block having 2 SQL stmts
+END $$;

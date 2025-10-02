@@ -1,36 +1,47 @@
-# Python artifacts
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Virtual Environment
-venv/
-env/
-.venv/
+# Environment variables
 .env
+.env.local
+.env.*.local
+*.env
 
-# Build and distribution artifacts
-build/
+# Node modules
+node_modules/
+
+# Build outputs
 dist/
-*.spec
-*.egg-info/
+build/
+.vite/
 
-# OS-generated files
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
 .DS_Store
 Thumbs.db
 
-# IDE configuration files
-.idea/
-.vscode/
+# Local development
+*.local
 
-# Temporary files from UI development
-ui/temp.index.html
-ui/backups/
+# Logs
+*.log
+npm-debug.log*
 
-# Output files (optional, but good practice)
-/output/
-*.docx
-*.xlsx
-*.csv
-*.json
+# Database
+*.db
+*.sqlite
+*.sav
+
+# Credentials
+*credentials*
+*secret*
+*private*
+
+# Supabase local
+.supabase/
+
+# Testing
+coverage/
+.nyc_output/

@@ -1,0 +1,210 @@
+ 
+INFUSE Claims Test
+Questionnaire Draft 
+
+Text in blue will not be shown to respondent.
+
+Sample
+
+Total N270 respondents
+•	N135 ACUVUE® OASYS 1DAY Sphere, wearing lenses daily for at least 6 months
+•	N135 BAUSCH & LOMB INFUSE® sphere, wearing lenses daily for at least 6 months
+
+
+Screener
+
+[PN: SHOW LOGO DISCLAIMER ON EVERY PAGE WITH IMAGES/LOGOS SHOWN “Trademarks and logos within this survey are all the intellectual property of their respective owners.”]
+
+[PN: FOR ALL GRIDS, ADD IN STRAIGHTLINER FLAG AND COUNT TOWARDS QC FLAG TOTAL]
+
+
+
+0. INFORMED CONSENT (US)
+
+In this survey we would like to ask some questions that may be perceived as sensitive, including health/medical data. Providing information in response to these questions is entirely voluntary and you may withdraw your consent at any time. The answers that you provide will be used only for market research analysis purposes. 
+  
+  Do you consent to the collection of this information?  
+  
+1.	Yes, I consent
+2.	No, I do not consent [TERM] 
+ 
+ For more information on how your information will be processed and protected, please review Cue Insights’ privacy policy here: Cue Insights, LLC Privacy Notice | Cue Insights Market Research
+
+
+S1.	What is your gender? (Please select one answer.)
+	
+1	Female
+2	Male 
+3	Other
+4	Prefer not to answer
+	[AIM FOR A MIX]
+
+
+S2.	Do you, or any members of your family, work in the following occupations or companies? (Please select all that apply.)
+	[RANDOMIZE]
+1	An advertising agency or department TERMINATE
+2	A marketing agency TERMINATE
+3	A broadcast or print media company or department TERMINATE
+4	A public relations firm TERMINATE
+5	A marketing research company or department TERMINATE
+6	An optometrist or ophthalmologist office TERMINATE
+7	A management position in a company that manufacturers, processor or sells eyecare products TERMINATE
+8	A pharmacy, drug store, or a pharmacy section of another store TERMINATE
+9	None of the Above [ANCHOR, EXCLUSIVE] 
+
+
+S3.	Please enter your age:
+	____ years old 	[ALLOW 0-99]
+TERMINATE IF <18
+
+
+S4. 	Which of the following items do you wear or use regularly?  (Please select all that apply.)
+[RANDOMIZE]
+1	Sunglasses 
+2	Prescription eyeglasses
+3	Non-Prescription eyeglasses (i.e. reading glasses or glare protection glasses)
+4	Soft contact lenses with a corrective prescription
+5	None of the Above [ANCHOR, EXCLUSIVE]
+[MUST SELECT 4 TO CONTINUE]
+
+
+S5.	Which of the following best describes your current vision condition? (Please select all that apply.)
+[RANDOMIZE]
+1	Nearsighted (meaning you have trouble seeing things in the distance)
+2	Farsighted (meaning you have trouble seeing things close to you)
+3	Astigmatism (meaning you have blurry or distorted vision because your cornea is an irregular or oval shape) [TERMINATE – POSSIBLE TO REINVITE IF INCIDENCE REQUIRES]
+4	Presbyopia (meaning you've experienced a change in your vision due to aging, and now have more difficulty seeing things up close, or in low light, compared to when you were younger) [TERMINATE]
+5	None of the above [ANCHOR, EXCLUSIVE, TERMINATE]
+6	Do not know [ANCHOR, EXCLUSIVE, TERMINATE]
+
+
+S6.	Please think only about soft contact lenses with a corrective prescription. What type(s) of soft contact lenses do you wear regularly? (Please select one.)
+	
+1	Daily disposable – intended to be thrown out after 1 day of wear
+2	Two-week reusable – intended to be thrown out after 2 weeks of wear
+3	Monthly reusable – intended to be thrown out after 1 month of wear
+4	Other (Please Specify)____________________  
+[MUST SELECT 1 TO CONTINUE]
+
+
+S7.	Which brand of daily disposable soft contact lenses with a corrective prescription do you currently wear most often? Please select the brand that most closely matches what you currently wear most often. (Please select one.)
+[RANDOMIZE ORDER OF ROWS]
+
+1.		1-Day Acuvue Moist 	 
+2.		Acuvue Oasys 1-Day 	 
+3.		Acuvue Oasys 1 MAX 1-Day	 
+4.		Cooper MyDay 	 
+5.		Cooper Clariti 1-Day 	  
+6.		Alcon Dailies Total1	 
+7.		Alcon Dailies Aqua Comfort Plus 	 
+8.		Alcon Precision 1 	 
+9.		B&L BioTrue ONEday 	 
+10.		Bausch & Lomb Infuse	               
+11.		Other, please specify	
+12.		I don’t know	[TERMINATE]
+[MUST SELECT 2 - Acuvue Oasys 1-Day OR 10 - Bausch & Lomb Infuse TO CONTINUE]
+[CHECK QUOTAS]
+
+
+S8.	How long ago did you first start wearing [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] contact lenses? (Please select one.)		
+1	Less than 3 months ago TERMINATE
+2	3 to 6 months ago TERMINATE
+3	7 to 12 months ago
+4	1 to 2 years ago
+5	More than 2 years ago
+
+
+S9. In the past, have you ever worn any of these other brands of daily disposable soft contact lens with a corrective prescription? [MULTI CODE POSSIBLE, RANDOMIZE ORDER OF ROWS]
+
+[SAME LIST AS S7, EXCLUDING BRAND SELECTED AT S7, AND ALSO EXCLUDING OTHER AND DON’T KNOW]
+1.	None of the above [EXCLUSIVE]
+[PROGRAMMER: COUNT SWITCHERS FROM INFUSE TO AO1D (MENTIONED INFUSE AT THIS QUESTION, AND Acuvue Oasys 1-Day AT S7)]
+
+
+Many thanks. You have qualified for the full survey, which should take no more than 5 minutes to complete.
+
+
+Main Questionnaire
+
+
+Q1. How many hours per day do you wear your contact lenses on average? Please write in a number.
+_____ hour(s) [ACCEPT 01 TO 24]
+
+
+Q2. To what extent do you agree with the following statement? I am able to wear my contact lenses comfortably all day long. [SINGLE CODE]
+1.	Strongly agree
+2.	Agree
+3.	Neither agree nor disagree
+4.	Disagree
+5.	Strongly disagree
+
+
+Q3. Please state your level of agreement with the following statements regarding the contact lenses you wear. These [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] contact lenses… 
+[SINGLE CODE PER ROW; RANDOMIZE ORDER OF ROWS]
+
+	Strongly agree	Agree	Neither agree nor disagree	Disagree	Strongly disagree
+Deliver exceptional vision and clarity 					
+Deliver exceptional all-day comfort					
+Keep my eyes comfortable from morning until night. 					
+Feel fresh from morning until night					
+Are so comfortable, I forget I am wearing them					
+Help keep my eyes from feeling dry					
+Provide exceptional comfort, vision and handling					
+
+
+Q4. How satisfied are you with the [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] contact lenses you wear? [SINGLE CODE]
+1.	Strongly satisfied
+2.	Satisfied
+3.	Neither satisfied nor dissatisfied
+4.	Dissatisfied
+5.	Strongly dissatisfied
+
+
+Q5. What are the reasons why you said you were [INSERT ANSWER FROM Q3] Q4]with the [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] contact lenses you wear? Please tell us in your own words, using as much detail as possible.
+[OPEN END; USE ENCOURAGEMENT TOOL]
+
+
+Q6. Please state your level of agreement with the following statements regarding the [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] contact lenses you wear. 
+[SINGLE CODE PER ROW; RANDOMIZE ORDER OF ROWS]
+
+	Strongly agree	Agree	Neither agree nor disagree	Disagree	Strongly disagree
+I intend to continue wearing these lenses					
+I intend to return to the same eye doctor who prescribed me these lenses					
+I would recommend these contact lenses to my friends and family					
+I would recommend the eye doctor who prescribed me these lenses to my friends and family					
+This is a quality check, please select “strongly disagree” for this question					
+I am open to switching lenses if my doctor recommended it					
+I’m more inclined to purchase an annual supply					
+ 
+[PN: IF RESPONDENT DOES NOT SELECT “STRONGLY DISAGREE” FOR Q6c5 FLAG AS QC AND COUNT TOWARDS QC FLAG TOTAL]
+
+Q7. Please tell us which of the following applies to the [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] contact lenses you wear.
+[SINGLE CODE PER ROW; RANDOMIZE ORDER OF ROWS]
+	Applies	Does not Apply
+Can be worn for 16+ hours and still feel comfortable		
+Can be worn as long as I want to		
+Avoids the need for use of wetting drops
+No need for use of wetting drops		
+Easy to insert and remove		
+Easy to remove at the end of the day		
+
+
+Q8. To what extent do you agree with the statement: I am satisfied with the price of my [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] lenses? [SINGLE CODE]
+1.	Strongly agree
+2.	Agree
+3.	Neither agree nor disagree
+4.	Disagree
+5.	Strongly disagree
+
+
+Q9. To what extent do you agree with the statement: I am satisfied with the quality of my [BASED ON QUOTA AT S7: ACUVUE® OASYS 1-Day / BAUSCH & LOMB INFUSE®] lenses? [SINGLE CODE]
+1.	Strongly agree
+2.	Agree
+3.	Neither agree nor disagree
+4.	Disagree
+5.	Strongly disagree
+
+
+These are all the questions we have for you today. Thank you very much for your time!
+
+ 
